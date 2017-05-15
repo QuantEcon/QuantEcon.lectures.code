@@ -6,26 +6,19 @@ LastModified: 29/08/2013
 
 Dowloads data from the World Bank site on GDP per capita and plots result for
 a subset of countries.
-
-NOTE: This is not dually compatible with Python 3.  Python 2 and Python
-3 call the urllib package differently.
 """
-import sys
 import matplotlib.pyplot as plt
-from pandas.io.excel import ExcelFile
-
-if sys.version_info[0] == 2:
-    from urllib import urlretrieve
-elif sys.version_info[0] == 3:
-    from urllib.request import urlretrieve
+import requests
+import pandas as pd
 
 # == Get data and read into file gd.xls == #
 wb_data_query = "http://api.worldbank.org/v2/en/indicator/gc.dod.totl.gd.zs?downloadformat=excel"
-urlretrieve(wb_data_query, "gd.xls")
+r = requests.get(wb_data_query)
+with open('gd.xls', 'wb') as output:
+    output.write(r.content)
 
 # == Parse data into a DataFrame == #
-gov_debt_xls = ExcelFile('gd.xls')
-govt_debt = gov_debt_xls.parse('Data', index_col=1, na_values=['NA'], skiprows=3)
+govt_debt = pd.read_excel('gd.xls', sheetname='Data', skiprows=3, index_col=1)
 
 # == Take desired values and plot == #
 govt_debt = govt_debt.transpose()

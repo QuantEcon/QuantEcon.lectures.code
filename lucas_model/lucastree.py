@@ -193,6 +193,7 @@ def compute_lt_price(tree, error_tol=1e-6, max_iter=500, verbose=0):
                 max_iter, 
                 verbose, 
                 10,
+                'iteration',
                 tree, 
                 Tf=Tf)
 
