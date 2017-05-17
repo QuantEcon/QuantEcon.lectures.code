@@ -1,6 +1,4 @@
 
-ode:: julia
-
 #=
 
 Plots reservation wage against the job separation rate

@@ -301,7 +301,7 @@ class LQFilter:
             # Transform the optimal sequence back if beta is given
             #--------------------------------------------
             if self.beta != 1:
-                y_hist * (self.beta**(- np.arange(-self.m, N + 1)/2)).reshape(N + 1 + self.m, 1) 
+                y_hist = y_hist * (self.beta**(- np.arange(-self.m, N + 1)/2)).reshape(N + 1 + self.m, 1) 
         
         
             return y_hist, L, U, y_bar
