@@ -1,11 +1,3 @@
-
-#=
-Rate dynamics in the lake model
-=#
-
-using Plots
-pyplot()
-
 lm = LakeModel()
 e_0 = 0.92     # Initial employment rate
 u_0 = 1 - e_0  # Initial unemployment rate

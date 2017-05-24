@@ -1,5 +1,3 @@
-
-
 def compute_reservation_wage(mcm, return_values=False):
     """
     Computes the reservation wage of an instance of the McCall model
@@ -35,8 +33,4 @@ def compute_reservation_wage(mcm, return_values=False):
         return w_bar
     else:
         return w_bar, V, U
-
-
-
-
 

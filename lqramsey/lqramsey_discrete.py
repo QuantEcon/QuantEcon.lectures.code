@@ -6,7 +6,7 @@ LQ Ramsey model with discrete exogenous process.
 
 """
 from numpy import array
-import lqramsey
+#import lqramsey
 
 # == Parameters == #
 beta = 1 / 1.05

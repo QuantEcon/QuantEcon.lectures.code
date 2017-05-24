@@ -1,9 +1,4 @@
 
-#=
-Compute and plot welfare, employment, unemployment, and tax revenue as a
-function of the unemployment compensation rate in the lake model.
-=#
-
 using Distributions
 using Roots
 

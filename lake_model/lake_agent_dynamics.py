@@ -1,14 +1,4 @@
-"""
-Agent dynamics the a lake model.
-
-"""
-
-import numpy as np
-import matplotlib.pyplot as plt
-from lake_model import LakeModel
 from quantecon import MarkovChain
-import matplotlib
-matplotlib.style.use('ggplot')
 
 lm = LakeModel(d=0, b=0)
 T = 5000  # Simulation length

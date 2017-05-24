@@ -275,7 +275,7 @@ class Planners_Allocation_Bellman:
         cf,nf,xprimef = self.policies
         
         if sHist == None:
-            sHist = self.mc.simulate(s_0,T)
+            sHist = self.mc.simulate(T, s_0)
         
         cHist,nHist,Bhist,TauHist,muHist = np.zeros((5,T))
         RHist = np.zeros(T-1)

@@ -1,22 +1,6 @@
-"""
-Compute and plot welfare, employment, unemployment, and tax revenue as a
-function of the unemployment compensation rate in the lake model.
 
-"""
-
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import norm
 from scipy.optimize import brentq
-
-# Make sure you have local copies of these files in your pwd
-from mccall_bellman_iteration import McCallModel  
-from compute_reservation_wage import compute_reservation_wage 
-
-# Use ggplot style
-import matplotlib
-matplotlib.style.use('ggplot')
-
 
 # Some global variables that will stay constant
 alpha  = 0.013               

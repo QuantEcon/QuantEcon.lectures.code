@@ -339,7 +339,7 @@ class AMF_LSS_VAR:
             ax[0, 0].plot(trange, tpath[0, :], label=r"$t_t$", color="r")
         ax[0, 0].axhline(horline, color="k", linestyle = "-.")
         ax[0, 0].set_title("One Path of All Variables")
-        ax[0, 0].legend(loc="top left")
+        ax[0, 0].legend(loc="upper left")
 
         # Plot Martingale Component
         ax[0, 1].plot(trange, mpath[0, :], "m")

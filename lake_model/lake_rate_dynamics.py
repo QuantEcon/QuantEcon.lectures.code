@@ -1,13 +1,3 @@
-"""
-Stock dynamics the a lake model.
-"""
-
-import numpy as np
-import matplotlib.pyplot as plt
-from lake_model import LakeModel
-import matplotlib
-matplotlib.style.use('ggplot')
-
 lm = LakeModel()
 e_0 = 0.92     # Initial employment rate
 u_0 = 1 - e_0  # Initial unemployment rate
