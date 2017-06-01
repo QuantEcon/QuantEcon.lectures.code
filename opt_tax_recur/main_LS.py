@@ -6,17 +6,13 @@ Created on Fri Feb 20 14:07:56 2015
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import lucas_stokey as LS
-from calibrations.BGP import M1
-from calibrations.CES import M2
-from calibrations.CES import M_time_example
 
 
 '''
 Time Varying Example
 '''
 
-PP_seq_time = LS.Planners_Allocation_Sequential(M_time_example) #solve sequential problem
+PP_seq_time = Planners_Allocation_Sequential(M_time_example_CES) #solve sequential problem
 
 sHist_h = np.array([0,1,2,3,5,5,5])
 sHist_l = np.array([0,1,2,4,5,5,5])
@@ -43,12 +39,12 @@ plt.plot(sim_seq_l[3],'-ok')
 plt.plot(sim_seq_h[3],'-or')
 plt.subplot(3,2,5)
 plt.title('Government Spending')
-plt.plot(M_time_example.G[sHist_l],'-ok')
-plt.plot(M_time_example.G[sHist_h],'-or')
+plt.plot(M_time_example_CES.G[sHist_l],'-ok')
+plt.plot(M_time_example_CES.G[sHist_h],'-or')
 plt.subplot(3,2,6)
 plt.title('Output')
-plt.plot(M_time_example.Theta[sHist_l]*sim_seq_l[1],'-ok')
-plt.plot(M_time_example.Theta[sHist_h]*sim_seq_h[1],'-or')
+plt.plot(M_time_example_CES.Theta[sHist_l]*sim_seq_l[1],'-ok')
+plt.plot(M_time_example_CES.Theta[sHist_h]*sim_seq_h[1],'-or')
 
 plt.tight_layout()
 plt.savefig('TaxSequence_time_varying.png')
@@ -59,11 +55,12 @@ plt.plot(sim_seq_l[-1],'-ok')
 plt.plot(sim_seq_h[-1],'-or')
 plt.tight_layout()
 plt.savefig('InterestRate_time_varying.png')
+plt.show()
 
 '''
 Time 0 example
 '''
-PP_seq_time0 = LS.Planners_Allocation_Sequential(M2) #solve sequential problem
+PP_seq_time0 = Planners_Allocation_Sequential(M2_CES) #solve sequential problem
 
 B_vec = np.linspace(-1.5,1.,100)
 taxpolicy = np.vstack([PP_seq_time0.simulate(B_,0,2)[3] for B_ in B_vec])
@@ -84,6 +81,7 @@ plt.xlabel('Initial Government Debt')
 plt.tight_layout()
 
 plt.savefig('Time0_taxpolicy.png')
+plt.show()
 
 
 
@@ -102,6 +100,7 @@ plt.legend((r'$\tau_1$', r'$\tau_1^R$'),loc=2,shadow=True)
 plt.tight_layout()
 
 plt.savefig('Time0_inconsistent.png')
+plt.show()
 
 
 '''
@@ -111,11 +110,11 @@ BGP Example
 muvec = np.linspace(-0.6,0.0,200)
 
 
-PP_seq = LS.Planners_Allocation_Sequential(M1) #solve sequential problem
-PP_bel = LS.Planners_Allocation_Bellman(M1,muvec) #solve recursive problem
+PP_seq = Planners_Allocation_Sequential(M1_BGP) #solve sequential problem
+PP_bel = Planners_Allocation_Bellman(M1_BGP,muvec) #solve recursive problem
 
 T = 20
-#sHist = utilities.simulate_markov(M1.Pi,0,T)
+#sHist = utilities.simulate_markov(M1_BGP.Pi,0,T)
 sHist = np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0],dtype=int)
 
 #simulate
@@ -143,13 +142,13 @@ plt.plot(sim_seq[3],'-ok')
 plt.plot(sim_bel[3],'-xk')
 plt.subplot(3,2,5)
 plt.title('Government Spending')
-plt.plot(M1.G[sHist],'-ok')
-plt.plot(M1.G[sHist],'-xk')
-plt.plot(M1.G[sHist],'-^k')
+plt.plot(M1_BGP.G[sHist],'-ok')
+plt.plot(M1_BGP.G[sHist],'-xk')
+plt.plot(M1_BGP.G[sHist],'-^k')
 plt.subplot(3,2,6)
 plt.title('Output')
-plt.plot(M1.Theta[sHist]*sim_seq[1],'-ok')
-plt.plot(M1.Theta[sHist]*sim_bel[1],'-xk')
+plt.plot(M1_BGP.Theta[sHist]*sim_seq[1],'-ok')
+plt.plot(M1_BGP.Theta[sHist]*sim_bel[1],'-xk')
 
 plt.tight_layout()
 plt.savefig('TaxSequence_LS.png')
@@ -160,3 +159,4 @@ plt.plot(sim_seq[-1],'-ok')
 plt.plot(sim_bel[-1],'-xk')
 plt.legend(('Sequential','Recursive'),loc='best')
 plt.tight_layout()
+plt.show()
