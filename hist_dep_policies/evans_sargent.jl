@@ -217,9 +217,9 @@ function plot2(rp::RamseyPath)
     x_vals = [tt2 tt tt tt]
     y_vals = [tauhatdif uhatdif mu G]
     ylabels = [L"$\Delta\tau$" L"$\Delta u$" L"$\mu$" L"$G$"]
-    labels = ["time inconsistency differential for tax rate" 
-              L"time inconsistency differential for $u$" 
-              "Lagrange multiplier" "government revenue"]
+    labels = hcat("time inconsistency differential for tax rate", 
+              L"time inconsistency differential for $u$", 
+              "Lagrange multiplier", "government revenue")
     p = plot(x_vals, y_vals, ylabel=ylabels, label=labels,
              layout=(4, 1), xlims=(-0.5, 15), lw=2, alpha=0.7,
              legend=:topright, color=:blue, xlabel=["" "" "" "time"])

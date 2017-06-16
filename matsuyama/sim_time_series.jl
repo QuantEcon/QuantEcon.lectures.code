@@ -1,4 +1,4 @@
-function plot_timeseries(n2_0::Float64, n2_0::Float64,
+function plot_timeseries(n1_0::Float64, n2_0::Float64,
         s1::Float64=0.5, theta::Float64=2.5, delta::Float64=0.7, rho::Float64=0.2; ax=nothing)
     """
     Plot a single time series with initial conditions

@@ -2,6 +2,7 @@
 Plots reservation wage against gamma
 
 """
+import matplotlib.pyplot as plt
 
 grid_size = 25  
 gamma_vals = np.linspace(0.05, 0.95, grid_size)  
