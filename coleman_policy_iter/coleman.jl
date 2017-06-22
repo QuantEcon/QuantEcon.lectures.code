@@ -1,12 +1,9 @@
 #=
-Filename: coleman.jl
+Solving the optimal growth problem via Coleman policy function iteration. 
 Author: Shunsuke Hori
 
-Solving the optimal growth problem via Coleman policy function iteration. 
-The model is described in 
-
-    http://lectures.quantecon.org/jl/coleman_policy_iter.html
 =#
+
 using QuantEcon
 
 """

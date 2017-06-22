@@ -1,10 +1,13 @@
 #=
-
+  
 lucas_stokey.jl
 
 @author: Shunsuke Hori
 
 =#
+
+module LS
+
 using QuantEcon
 using Dierckx
 
@@ -22,6 +25,7 @@ type Para{TAF<:AbstractFloat}
     Ucc::Function
     Un::Function
     Unn::Function
+    n_less_than_one::Bool
 end
 
 """
@@ -69,7 +73,6 @@ function find_first_best(para::Para,S::Integer,
         out[1:S] = Theta.*Uc(c,n)+Un(c,n)
         out[S+1:end] = Theta.*n - c - G
     end
-    out=zeros(2S)
     res = nlsolve(res!, 0.5*ones(2*S))
 
     if converged(res) == false
@@ -479,8 +482,6 @@ function time0_allocation(pab::Planners_Allocation_Bellman,
     else
         error("T.time_0 is $(T.time_0), which is invalid")
     end
-    # PF = T_operator(pab.Vf)
-    # z0 = PF(B_, s0)
     c0, n0, xprime0 = z0[2], z0[3], z0[4:end]
     return c0, n0, xprime0
 end
@@ -525,4 +526,5 @@ function simulate(pab::Planners_Allocation_Bellman,
         cHist[t], nHist[t], Bhist[t] = c[s], n, x/u_c[s]
     end
     return cHist, nHist, Bhist, TauHist, sHist, muHist, RHist
+end
 end

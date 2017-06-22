@@ -1,11 +1,12 @@
 #=
-Filename: coleman_egm.jl
-Authors: Shunsuke Hori
-
 Solving the optimal growth problem via Coleman policy function iteration
 and Carroll's endogenous grid method.
+
+Authors: Shunsuke Hori
 =#
+
 using QuantEcon
+
 """
 The approximate Coleman operator, updated using the endogenous grid
 method.  

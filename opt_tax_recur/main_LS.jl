@@ -6,18 +6,22 @@ main_LS.jl
 
 =#
 
-using PyPlot
+using LS
+using CES
+using BGP
 
 """
 Time Varying Example
 """
-PP_seq_time = Planners_Allocation_Sequential(M_time_example_CES) #solve sequential problem
+PP_seq_time = LS.Planners_Allocation_Sequential(CES.M_time_example) #solve sequential problem
 
 sHist_h = [1,2,3,4,6,6,6]
 sHist_l = [1,2,3,5,6,6,6]
 
-sim_seq_h = simulate(PP_seq_time, 1.0, 1, 7, sHist_h)
-sim_seq_l = simulate(PP_seq_time, 1.0, 1, 7, sHist_l)
+sim_seq_h = LS.simulate(PP_seq_time, 1.0, 1, 7, sHist_h)
+sim_seq_l = LS.simulate(PP_seq_time, 1.0, 1, 7, sHist_l)
+
+using PyPlot
 
 plt[:figure](figsize=[14,10])
 plt[:subplot](3,2,1)
@@ -38,12 +42,12 @@ plt[:plot](sim_seq_l[4],"-ok")
 plt[:plot](sim_seq_h[4],"-or")
 plt[:subplot](3,2,5)
 plt[:title]("Government Spending")
-plt[:plot](M_time_example_CES.G[sHist_l],"-ok")
-plt[:plot](M_time_example_CES.G[sHist_h],"-or")
+plt[:plot](CES.M_time_example.G[sHist_l],"-ok")
+plt[:plot](CES.M_time_example.G[sHist_h],"-or")
 plt[:subplot](3,2,6)
 plt[:title]("Output")
-plt[:plot](M_time_example_CES.Theta[sHist_l].*sim_seq_l[2],"-ok")
-plt[:plot](M_time_example_CES.Theta[sHist_h].*sim_seq_h[2],"-or")
+plt[:plot](CES.M_time_example.Theta[sHist_l].*sim_seq_l[2],"-ok")
+plt[:plot](CES.M_time_example.Theta[sHist_h].*sim_seq_h[2],"-or")
 
 plt[:tight_layout]()
 plt[:savefig]("TaxSequence_time_varying.png")
@@ -59,11 +63,11 @@ plt[:savefig]("InterestRate_time_varying.png")
 """
 Time 0 example
 """
-PP_seq_time0 = Planners_Allocation_Sequential(M2_CES) #solve sequential problem
+PP_seq_time0 = LS.Planners_Allocation_Sequential(CES.M2) #solve sequential problem
 
 B_vec = linspace(-1.5,1.0,100)
-taxpolicy = hcat([simulate(PP_seq_time0, B_, 1, 2)[4] for B_ in B_vec]...)'
-interest_rate = hcat([simulate(PP_seq_time0, B_, 1, 3)[end] for B_ in B_vec]...)'
+taxpolicy = hcat([LS.simulate(PP_seq_time0, B_, 1, 2)[4] for B_ in B_vec]...)'
+interest_rate = hcat([LS.simulate(PP_seq_time0, B_, 1, 3)[end] for B_ in B_vec]...)'
 
 plt[:figure](figsize=(14,6))
 plt[:subplot](211)
@@ -83,9 +87,9 @@ plt[:tight_layout]()
 plt[:savefig]("Time0_taxpolicy.png")
 
 #compute the debt entered with at time 1
-B1_vec = hcat([simulate(PP_seq_time0,B_,1,2)[3][2] for B_ in B_vec]...)'
+B1_vec = hcat([LS.simulate(PP_seq_time0,B_,1,2)[3][2] for B_ in B_vec]...)'
 #now compute the optimal policy if the government could reset
-tau1_reset = hcat([simulate(PP_seq_time0,B1,1,1)[4] for B1 in B1_vec]...)'
+tau1_reset = hcat([LS.simulate(PP_seq_time0,B1,1,1)[4] for B1 in B1_vec]...)'
 
 plt[:figure](figsize=[10,6])
 plt[:plot](B_vec,taxpolicy[:,2],linewidth=2.)
@@ -97,24 +101,25 @@ plt[:tight_layout]()
 
 plt[:savefig]("Time0_inconsistent.png")
 
+
 """
 BGP Example
 """
 #initialize mugrid for value function iteration
-muvec = linspace(-0.6,0.0,300)
+muvec = linspace(-0.6,0.0,200)
 
 
-PP_seq = Planners_Allocation_Sequential(M1_BGP) #solve sequential problem
+PP_seq = LS.Planners_Allocation_Sequential(BGP.M1) #solve sequential problem
 
-PP_bel = Planners_Allocation_Bellman(M1_BGP,muvec) #solve recursive problem
+PP_bel = LS.Planners_Allocation_Bellman(BGP.M1,muvec) #solve recursive problem
 
 T = 20
 #sHist = utilities.simulate_markov(M1.Pi,0,T)
 sHist = [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1]
 
 #simulate
-sim_seq = simulate(PP_seq,0.5,1,T,sHist)
-sim_bel = simulate(PP_bel,0.5,1,T,sHist)
+sim_seq = LS.simulate(PP_seq,0.5,1,T,sHist)
+sim_bel = LS.simulate(PP_bel,0.5,1,T,sHist)
 
 #plot policies
 plt[:figure](figsize=[14,10])
@@ -137,13 +142,13 @@ plt[:plot](sim_seq[4],"-ok")
 plt[:plot](sim_bel[4],"-xk")
 plt[:subplot](3,2,5)
 plt[:title]("Government Spending")
-plt[:plot](M1_BGP.G[sHist],"-ok")
-plt[:plot](M1_BGP.G[sHist],"-xk")
-plt[:plot](M1_BGP.G[sHist],"-^k")
+plt[:plot](BGP.M1.G[sHist],"-ok")
+plt[:plot](BGP.M1.G[sHist],"-xk")
+plt[:plot](BGP.M1.G[sHist],"-^k")
 plt[:subplot](3,2,6)
 plt[:title]("Output")
-plt[:plot](M1_BGP.Theta[sHist].*sim_seq[2],"-ok")
-plt[:plot](M1_BGP.Theta[sHist].*sim_bel[2],"-xk")
+plt[:plot](BGP.M1.Theta[sHist].*sim_seq[2],"-ok")
+plt[:plot](BGP.M1.Theta[sHist].*sim_bel[2],"-xk")
 
 plt[:tight_layout]()
 plt[:savefig]("TaxSequence_LS.png")

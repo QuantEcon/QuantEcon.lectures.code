@@ -7,9 +7,7 @@ Created on Sun Feb 22 10:26:11 2015
 import numpy as np
 from scipy.optimize import root
 from scipy.optimize import fmin_slsqp
-import utilities
 import lucas_stokey as LS
-from utilities import simulate_markov
 
 class Planners_Allocation_Bellman(object):
     '''
@@ -43,7 +41,7 @@ class Planners_Allocation_Bellman(object):
         #First get initial fit from lucas stockey solution.  
         #Need to change things to be ex_ante
         PP = LS.Planners_Allocation_Sequential(Para)
-        interp = utilities.interpolator_factory(2,None)
+        interp = interpolator_factory(2,None)
         
         def incomplete_allocation(mu_,s_):
             c,n,x,V = PP.time1_value(mu_)
@@ -59,8 +57,8 @@ class Planners_Allocation_Bellman(object):
             Vf.append(interp(x,V))
             xgrid.append(x)
             xprimef.append(interp(x,xprimes))
-        cf,nf,xprimef = utilities.fun_vstack(cf), utilities.fun_vstack(nf),utilities.fun_vstack(xprimef)
-        Vf = utilities.fun_hstack(Vf)
+        cf,nf,xprimef = fun_vstack(cf), fun_vstack(nf),fun_vstack(xprimef)
+        Vf = fun_hstack(Vf)
         policies = [cf,nf,xprimef]            
         
         
@@ -92,7 +90,7 @@ class Planners_Allocation_Bellman(object):
         Fits the policy functions
         '''
         S,xgrid = len(self.Pi),self.xgrid
-        interp = utilities.interpolator_factory(3,0)
+        interp = interpolator_factory(3,0)
         cf,nf,xprimef,Tf,Vf = [],[],[],[],[]
         for s_ in range(S):
             PFvec = np.vstack([PF(x,s_) for x in self.xgrid]).T
@@ -101,8 +99,8 @@ class Planners_Allocation_Bellman(object):
             nf.append(interp(xgrid,PFvec[1+S:1+2*S]))
             xprimef.append(interp(xgrid,PFvec[1+2*S:1+3*S]))
             Tf.append(interp(xgrid,PFvec[1+3*S:]))
-        policies = utilities.fun_vstack(cf), utilities.fun_vstack(nf),utilities.fun_vstack(xprimef),utilities.fun_vstack(Tf)
-        Vf = utilities.fun_hstack(Vf)
+        policies = fun_vstack(cf), fun_vstack(nf),fun_vstack(xprimef),fun_vstack(Tf)
+        Vf = fun_hstack(Vf)
         return Vf,policies
         
     def Tau(self,c,n):

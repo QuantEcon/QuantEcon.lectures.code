@@ -1,16 +1,5 @@
-"""
-Filename: coleman.py
-Authors: John Stachurski, Thomas Sargent
-
-Solving the optimal growth problem via Coleman policy function iteration.  
-The model is described in 
-
-    http://lectures.quantecon.org/py/coleman_policy_iter.html
-"""
-
 import numpy as np
 from scipy.optimize import brentq
-
 
 def coleman_operator(g, grid, beta, u_prime, f, f_prime, shocks, Kg=None):
     """

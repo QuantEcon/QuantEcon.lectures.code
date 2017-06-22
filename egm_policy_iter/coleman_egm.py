@@ -1,14 +1,4 @@
-"""
-Filename: coleman_egm.py
-Authors: John Stachurski, Thomas Sargent
-
-Solving the optimal growth problem via Coleman policy function iteration
-and Carroll's endogenous grid method.
-
-"""
-
 import numpy as np
-from scipy.interpolate import interp1d
 
 def coleman_egm(g, k_grid, beta, u_prime, u_prime_inv, f, f_prime, shocks):
     """
@@ -49,5 +39,5 @@ def coleman_egm(g, k_grid, beta, u_prime, u_prime_inv, f, f_prime, shocks):
     y = k_grid + c  # y_i = k_i + c_i
 
     # Update policy function and return
-    Kg = interp1d(y, c, fill_value="extrapolate")
+    Kg = lambda x: np.interp(x, y, c)
     return Kg
