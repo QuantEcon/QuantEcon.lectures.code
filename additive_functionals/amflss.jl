@@ -12,77 +12,87 @@ using Distributions
 This type transforms an additive (multipilcative)
 functional into a QuantEcon linear state space system.
 """
-type AMF_LSS_VAR{TF<:AbstractFloat,TI<:Integer}
-    A::Array{TF}
-    B::Array{TF}
-    D::Array{TF}
-    F::Array{TF}
-    nu::Array{TF}
+struct AMF_LSS_VAR{TF<:AbstractFloat, TI<:Integer}
+    A::Array{TF, 2}
+    B::Array{TF, 2}
+    D::Array{TF, 2}
+    F::Array{TF, 2}
+    nu::Array{TF, 2}
     nx::TI
     nk::TI
     nm::TI
     lss::LSS
 end
 
-function AMF_LSS_VAR(A::Array, B::Array, D::Array,
+function AMF_LSS_VAR(A::Array, B::Array,
+                D::Union{RowVector, Array},
                 F::Union{Void, Array}=nothing;
-                nu::Union{Void,Array}=nothing)
+                nu::Union{Void, Array}=nothing)
+    
+    if typeof(B) <: Vector
+        B = reshape(B, length(B), 1)
+    end
     # Unpack required elements
     nx, nk = size(B)
 
     # checking the dimension of D (extended from the scalar case)
     if ndims(D) > 1
-        nm = size(D,1)
+        nm = size(D, 1)
+        if typeof(D) <: RowVector
+            D = convert(Matrix, D)
+        end
     else
         nm = 1
-        D = reshape(D, 1,length(D))
+        D = reshape(D, 1, length(D))
     end
 
     # Set F
     if F==nothing
         F = zeros(nk, 1)
+    elseif ndims(F) == 1
+        F = reshape(F, length(F), 1)
     end
 
     # Set nu
     if nu==nothing
         nu = zeros(nm, 1)
     elseif ndims(nu) == 1
-        nu = reshape(nu,length(nu), 1)
+        nu = reshape(nu, length(nu), 1)
     else
         throw(ArgumentError("nu must be column vector!"))
     end
 
-    if size(nu,1) != size(D,1)
+    if size(nu, 1) != size(D, 1)
         error("The size of nu is inconsistent with D!")
     end
 
     # Construct BIG state space representation
     lss = construct_ss(A, B, D, F, nu, nx, nk, nm)
 
-    return AMF_LSS_VAR(A,B,D,F,nu,nx,nk,nm,lss)
+    return AMF_LSS_VAR(A, B, D, F, nu, nx, nk, nm, lss)
 end
 
-AMF_LSS_VAR(A::Array, B::Array, D::Array) = 
+AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}) = 
     AMF_LSS_VAR(A, B, D, nothing, nu=nothing)
-AMF_LSS_VAR(A::Array, B::Array, D::Array, F::Real, nu::Real) = 
+AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}, F::Real, nu::Real) = 
     AMF_LSS_VAR(A, B, D, [F], nu=[nu])
 
 """
 This creates the state space representation that can be passed
 into the quantecon LSS class.
 """
-function construct_ss(A::Array, B::Array, D::Array, F::Array,
-                      nu, nx, nk, nm)
+function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
+                      nu, nx::TI, nk::TI, nm::TI) where TI <: Integer
 
-    H, g = additive_decomp(A,B,D,F,nx)
+    H, g = additive_decomp(A, B, D, F, nx)
 
     # Auxiliary blocks with 0's and 1's to fill out the lss matrices
     nx0c = zeros(nx, 1)
-    nx0r = zeros(1,nx)
-    nx1 = ones(1,nx)
-    nk0 = zeros(1,nk)
+    nx0r = zeros(1, nx)
+    nx1 = ones(1, nx)
+    nk0 = zeros(1, nk)
     ny0c = zeros(nm, 1)
-    ny0r = zeros(1,nm)
+    ny0r = zeros(1, nm)
     ny1m = eye(nm)
     ny0m = zeros(nm, nm)
     nyx0m = zeros(D)
@@ -123,7 +133,8 @@ Return values for the martingale decomposition
     - g         : coefficient for the stationary component g(x)
     - Y_0       : it should be the function of X_0 (for now set it to 0.0)
 """
-function additive_decomp(A,B,D,F,nx::Integer)
+function additive_decomp(A::Array, B::Array, D::Array, F::Union{Array, Real},
+                          nx::Integer)
     I = eye(nx)
     A_res = \(I-A, I)
     g = D * A_res
@@ -138,9 +149,9 @@ Return values for the multiplicative decomposition (Example 5.4.4.)
     - nu_tilde  : eigenvalue
     - H         : vector for the Jensen term
 """
-function multiplicative_decomp(A,B,D,F,
-                               nu,nx::Integer)
-    H, g = additive_decomp(A,B,D,F,nx)
+function multiplicative_decomp(A::Array, B::Array, D::Array, F::Union{Array, Real},
+                                nu::Union{Array, Real}, nx::Integer)
+    H, g = additive_decomp(A, B, D, F, nx)
     nu_tilde = nu + 0.5*diag(H*H')
 
     return H, g, nu_tilde
@@ -160,7 +171,7 @@ function loglikelihood_path(amf::AMF_LSS_VAR, x::Array, y::Array)
 end
 
 function loglikelihood(amf::AMF_LSS_VAR, x::Array, y::Array)
-    llh = loglikelihood_path(amf,x, y)
+    llh = loglikelihood_path(amf, x, y)
 
     return llh[end]
 end
@@ -236,8 +247,8 @@ function plot_additive(amf::AMF_LSS_VAR, T::Integer;
         li, ui = npaths*(ii), npaths*(ii+1)
         LI, UI = 2*(ii), 2*(ii+1)
         add_figs[ii+1] = 
-            plot_given_paths(T, ypath[li+1:ui,:], mpath[li+1:ui,:], spath[li+1:ui,:],
-                             tpath[li+1:ui,:], mbounds[LI+1:UI,:], sbounds[LI+1:UI,:],
+            plot_given_paths(T, ypath[li+1:ui, :], mpath[li+1:ui, :], spath[li+1:ui, :],
+                             tpath[li+1:ui, :], mbounds[LI+1:UI, :], sbounds[LI+1:UI, :],
                              show_trend=show_trend)
 
         add_figs[ii+1][:suptitle]( L"Additive decomposition of $y_{$(ii+1)}$", fontsize=14 )
@@ -254,7 +265,7 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
     # Pull out right sizes so we know how to increment
     nx, nk, nm = amf.nx, amf.nk, amf.nm
     # Matrices for the multiplicative decomposition
-    H, g, nu_tilde = multiplicative_decomp(A,B,D,F,nu,nx)
+    H, g, nu_tilde = multiplicative_decomp(A, B, D, F, nu, nx)
 
     # Allocate space (nm is the number of functionals - we want npaths for each)
     mpath_mult = Array{Real}(nm*npaths, T)
@@ -282,8 +293,8 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
                 mbounds_mult[li, t] = quantile(Mdist, 0.01)
                 mbounds_mult[ui, t] = quantile(Mdist, 0.99)
             elseif yvar[nx+nm+ii, nx+nm+ii] == 0.0
-                mbounds_mult[li, t] = exp(ymeans[nx+nm+ii]- t*0.5*diag(H * H')[ii])
-                mbounds_mult[ui, t] = exp(ymeans[nx+nm+ii]- t*0.5*diag(H * H')[ii])
+                mbounds_mult[li, t] = exp.(ymeans[nx+nm+ii]- t*0.5*diag(H * H')[ii])
+                mbounds_mult[ui, t] = exp.(ymeans[nx+nm+ii]- t*0.5*diag(H * H')[ii])
             else
                 error("standard error is negative")
             end
@@ -293,8 +304,8 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
                 sbounds_mult[li, t] = quantile(Sdist, 0.01)
                 sbounds_mult[ui, t] = quantile(Sdist, 0.99)
             elseif yvar[nx+2*nm+ii, nx+2*nm+ii] == 0.0
-                sbounds_mult[li, t] = exp(-ymeans[nx+2*nm+ii])
-                sbounds_mult[ui, t] = exp(-ymeans[nx+2*nm+ii])
+                sbounds_mult[li, t] = exp.(-ymeans[nx+2*nm+ii])
+                sbounds_mult[ui, t] = exp.(-ymeans[nx+2*nm+ii])
             else
                 error("standard error is negative")
             end
@@ -305,12 +316,12 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
     for n in 1:npaths
         x, y = simulate(amf.lss,T)
         for ii in 0:nm-1
-            ypath_mult[npaths*ii+n, :] = exp(y[nx+ii+1, :])
+            ypath_mult[npaths*ii+n, :] = exp.(y[nx+ii+1, :])
             mpath_mult[npaths*ii+n, :] = 
-                exp(y[nx+nm + ii+1, :] - collect(1:T)*0.5*diag(H * H')[ii+1])
-            spath_mult[npaths*ii+n, :] = 1./exp(-y[nx+2*nm + ii+1, :])
+                exp.(y[nx+nm + ii+1, :] - collect(1:T)*0.5*diag(H * H')[ii+1])
+            spath_mult[npaths*ii+n, :] = 1./exp.(-y[nx+2*nm + ii+1, :])
             tpath_mult[npaths*ii+n, :] = 
-                exp(y[nx+3*nm + ii+1, :] + collect(1:T)*0.5*diag(H * H')[ii+1])
+                exp.(y[nx+3*nm + ii+1, :] + collect(1:T)*0.5*diag(H * H')[ii+1])
         end
     end
 
@@ -320,9 +331,9 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
         li, ui = npaths*(ii), npaths*(ii+1)
         LI, UI = 2*(ii), 2*(ii+1)
         mult_figs[ii+1] = 
-            plot_given_paths(T, ypath_mult[li+1:ui,:], mpath_mult[li+1:ui,:],
-                             spath_mult[li+1:ui,:], tpath_mult[li+1:ui,:],
-                             mbounds_mult[LI+1:UI,:], sbounds_mult[LI+1:UI,:],
+            plot_given_paths(T, ypath_mult[li+1:ui, :], mpath_mult[li+1:ui, :],
+                             spath_mult[li+1:ui, :], tpath_mult[li+1:ui, :],
+                             mbounds_mult[LI+1:UI, :], sbounds_mult[LI+1:UI, :],
                              horline = 1.0, show_trend=show_trend)
         mult_figs[ii+1][:suptitle]( L"Multiplicative decomposition of $y_{$(ii+1)}$", 
                                     fontsize=14)
@@ -336,7 +347,7 @@ function plot_martingales(amf::AMF_LSS_VAR, T::Integer, npaths::Integer=25)
     # Pull out right sizes so we know how to increment
     nx, nk, nm = amf.nx, amf.nk, amf.nm
     # Matrices for the multiplicative decomposition
-    H, g, nu_tilde = multiplicative_decomp(amf.A,amf.B,amf.D,amf.F,amf.nu,amf.nx)
+    H, g, nu_tilde = multiplicative_decomp(amf.A, amf.B, amf.D, amf.F, amf.nu, amf.nx)
 
     # Allocate space (nm is the number of functionals - we want npaths for each)
     mpath_mult = Array{Real}(nm*npaths, T)
@@ -373,7 +384,7 @@ function plot_martingales(amf::AMF_LSS_VAR, T::Integer, npaths::Integer=25)
         x, y = simulate(amf.lss, T)
         for ii in 0:nm-1
             mpath_mult[npaths*ii+n, :] = 
-                exp(y[nx+nm + ii+1, :] - (1:T)*0.5*diag(H*H')[ii+1])
+                exp.(y[nx+nm + ii+1, :] - (1:T)*0.5*diag(H*H')[ii+1])
         end
     end
 
@@ -382,8 +393,8 @@ function plot_martingales(amf::AMF_LSS_VAR, T::Integer, npaths::Integer=25)
     for ii in 0:nm-1
         li, ui = npaths*(ii), npaths*(ii+1)
         LI, UI = 2*(ii), 2*(ii+1)
-        mart_figs[ii+1] = plot_martingale_paths(T, mpath_mult[li+1:ui,:],
-                                                    mbounds_mult[LI+1:UI,:], horline=1)
+        mart_figs[ii+1] = plot_martingale_paths(T, mpath_mult[li+1:ui, :],
+                                                    mbounds_mult[LI+1:UI, :], horline=1)
         mart_figs[ii+1][:suptitle](L"Martingale components for many paths of $y_{ii+1}$",
                                    fontsize=14)
     end
@@ -449,7 +460,7 @@ function plot_martingale_paths(T::Integer,
     trange = 1:T
 
     # Create figure
-    fig, ax = subplots(1,1, figsize=(10,6))
+    fig, ax = subplots(1, 1, figsize=(10, 6))
 
     # Plot Martingale Component
     ub = mbounds[2, :]
@@ -460,4 +471,3 @@ function plot_martingale_paths(T::Integer,
 
     return fig
 end
-    
