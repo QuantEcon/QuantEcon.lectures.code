@@ -1,13 +1,3 @@
-"""
-Filename: optgrowth.py
-Authors: John Stachurski, Thomas Sargent
-
-Solving the optimal growth problem via value function iteration.  The model is
-described in 
-
-    http://quant-econ.net/py/optgrowth.html
-"""
-
 import numpy as np
 from scipy.optimize import fminbound
 
@@ -64,6 +54,4 @@ def bellman_operator(w, grid, beta, u, f, shocks, Tw=None, compute_policy=0):
         return Tw, sigma
     else:
         return Tw
-
-
 

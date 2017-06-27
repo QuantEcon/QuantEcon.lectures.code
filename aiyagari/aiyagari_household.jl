@@ -15,55 +15,65 @@ problem.
 
 ##### Fields
 
-- `r::Float64` : interest rate
-- `w::Float64` : wage
-- `beta::Float64` : discount factor
+- `r::Real` : interest rate
+- `w::Real` : wage
+- `sigma::Real` : risk aversion
+- `beta::AbstractFloat` : discount factor
 - `z_chain::MarkovChain` : MarkovChain for income
-- `a_min::Float64` : minimum on asset grid
-- `a_max::Float64` : maximum on asset grid
-- `a_size::Int64` : number of points on asset grid
-- `z_size::Int64` : number of points on income grid
-- `n::Int64` : number of points in state space: (a, z)
-- `s_vals::Array{Float64}` : stores all the possible (a, z) combinations
-- `s_i_vals::Array{Int64}` : stores indices of all the possible (a, z) combinations
-- `R::Array{Float64}` : reward array
-- `Q::Array{Float64}` : transition probability array
+- `a_min::Real` : minimum on asset grid
+- `a_max::Real` : maximum on asset grid
+- `a_size::Integer` : number of points on asset grid
+- `z_size::Integer` : number of points on income grid
+- `n::Integer` : number of points in state space: (a, z)
+- `s_vals::Array{TF} where TF<:AbstractFloat` : stores all the possible (a, z) combinations
+- `s_i_vals::Array{TI} where TI<:Integer` : stores indices of all the possible (a, z) combinations
+- `R::Array{TF} where TF<:AbstractFloat` : reward array
+- `Q::Array{TF} where TF<:AbstractFloat` : transition probability array
+- `u::Function` : utility function
 """
-type Household
-    r::Float64
-    w::Float64
-    beta::Float64
-    z_chain::MarkovChain{Float64,Array{Float64,2},Array{Float64,1}}
-    a_min::Float64
-    a_max::Float64
-    a_size::Int64
-    a_vals::Vector{Float64}
-    z_size::Int64
-    n::Int64
-    s_vals::Array{Float64}
-    s_i_vals::Array{Int64}
-    R::Array{Float64}
-    Q::Array{Float64}
+mutable struct Household{TR<:Real, TF<:AbstractFloat, TI<:Integer}
+    r::TR
+    w::TR
+    sigma::TR
+    beta::TF
+    z_chain::MarkovChain{TF, Array{TF, 2}, Array{TF, 1}}
+    a_min::TR
+    a_max::TR
+    a_size::TI
+    a_vals::AbstractVector{TF}
+    z_size::TI
+    n::TI
+    s_vals::Array{TF}
+    s_i_vals::Array{TI}
+    R::Array{TR}
+    Q::Array{TR}
+    u::Function
 end
 
 """
 Constructor for `Household`
 
 ##### Arguments
-- `r::Float64(0.01)` : interest rate
-- `w::Float64(1.0)` : wage
-- `beta::Float64(0.96)` : discount factor
+- `r::Real(0.01)` : interest rate
+- `w::Real(1.0)` : wage
+- `beta::AbstractFloat(0.96)` : discount factor
 - `z_chain::MarkovChain` : MarkovChain for income
-- `a_min::Float64(1e-10)` : minimum on asset grid
-- `a_max::Float64(18.0)` : maximum on asset grid
-- `a_size::Int64(200)` : number of points on asset grid
+- `a_min::Real(1e-10)` : minimum on asset grid
+- `a_max::Real(18.0)` : maximum on asset grid
+- `a_size::TI(200)` : number of points on asset grid
 
 """
-function Household(;r::Float64=0.01, w::Float64=1.0, beta::Float64=0.96, 
-                   z_chain::MarkovChain{Float64,Array{Float64,2},Array{Float64,1}}
-                   =MarkovChain([0.9 0.1; 0.1 0.9], [0.1; 1.0]), a_min::Float64=1e-10, 
-                   a_max::Float64=18.0, a_size::Int64=200)
-    
+function Household{TF<:AbstractFloat}(;
+                    r::Real=0.01,
+                    w::Real=1.0,
+                    sigma::Real=1.0,
+                    beta::TF=0.96,
+                    z_chain::MarkovChain{TF,Array{TF,2},Array{TF,1}}
+                        =MarkovChain([0.9 0.1; 0.1 0.9], [0.1; 1.0]),
+                    a_min::Real=1e-10,
+                    a_max::Real=18.0,
+                    a_size::Integer=200)
+
     # set up grids
     a_vals = linspace(a_min, a_max, a_size)
     z_size = length(z_chain.state_values)
@@ -72,7 +82,7 @@ function Household(;r::Float64=0.01, w::Float64=1.0, beta::Float64=0.96,
     s_i_vals = gridmake(1:a_size, 1:z_size)
 
     # set up Q
-    Q = zeros(Float64, n, a_size, n)
+    Q = zeros(TF, n, a_size, n)
     for next_s_i in 1:n
         for a_i in 1:a_size
             for s_i in 1:n
@@ -86,10 +96,16 @@ function Household(;r::Float64=0.01, w::Float64=1.0, beta::Float64=0.96,
         end
     end
 
+    if sigma == 1   # log utility
+        u = x -> log(x)
+    else
+        u = x -> (x^(1-sigma)-1)/(1-sigma)
+    end
+
     # placeholder for R
     R = fill(-Inf, n, a_size)
-    h = Household(r, w, beta, z_chain, a_min, a_max, a_size, 
-                  a_vals, z_size, n, s_vals, s_i_vals, R, Q)
+    h = Household(r, w, sigma, beta, z_chain, a_min, a_max, a_size,
+                  a_vals, z_size, n, s_vals, s_i_vals, R, Q, u)
 
     setup_R!(h, r, w)
 
@@ -103,10 +119,10 @@ a new interest rate and wage.
 
 ##### Arguments
 - `h::Household` : instance of Household type
-- `r::Float64(0.01)` : interest rate
-- `w::Float64(1.0)` : wage
+- `r::Real(0.01)` : interest rate
+- `w::Real(1.0)` : wage
 """
-function setup_R!(h::Household, r::Float64, w::Float64)
+function setup_R!(h::Household, r::Real, w::Real)
 
     # set up R
     R = h.R
@@ -117,7 +133,7 @@ function setup_R!(h::Household, r::Float64, w::Float64)
             z = h.s_vals[s_i, 2]
             c = w * z + (1 + r) * a - a_new
             if c > 0
-                R[s_i, new_a_i] = log(c)
+                R[s_i, new_a_i] = h.u(c)
             end
         end
     end

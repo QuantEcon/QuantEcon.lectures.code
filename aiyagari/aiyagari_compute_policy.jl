@@ -29,17 +29,11 @@ z_size, a_size  = am.z_size, am.a_size
 z_vals, a_vals = am.z_chain.state_values, am.a_vals
 n = am.n
 
-# Get all optimal actions across the set of 
+# Get all optimal actions across the set of
 # a indices with z fixed in each column
-a_star = Array{Float64}(a_size, z_size)
-s_i_vals = gridmake(1:a_size, 1:z_size)
-for s_i in 1:n
-    a_i = s_i_vals[s_i, 1]
-    z_i = s_i_vals[s_i, 2]
-    a_star[a_i, z_i] = a_vals[results.sigma[s_i]]
-end
+a_star = reshape([a_vals[results.sigma[s_i]] for s_i in 1:n], a_size, z_size)
 
-labels = [string(L"$z = $", z_vals[1]); string(L"$z = $", z_vals[2])]
-plot(a_vals, a_star, label=reshape(labels,1,length(labels)), lw=2, alpha=0.6)
+labels = [latexstring("\z = $(z_vals[1])") latexstring("\z = $(z_vals[2])")]
+plot(a_vals, a_star, label=labels, lw=2, alpha=0.6)
 plot!(a_vals, a_vals, label="", color=:black, linestyle=:dash)
 plot!(xlabel="current assets", ylabel="next period assets", grid=false)
