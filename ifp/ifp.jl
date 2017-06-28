@@ -1,19 +1,3 @@
-
-#=
-Tools for solving the standard optimal savings / income fluctuation
-problem for an infinitely lived consumer facing an exogenous income
-process that evolves according to a Markov chain.
-
-@author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-18
-
-References
-----------
-
-http://quant-econ.net/jl/ifp.html
-
-=#
 using Interpolations
 using Optim
 
@@ -35,23 +19,29 @@ Income fluctuation problem
 - `asset_grid::LinSpace{Float64}` : Grid of asset values
 
 """
-type ConsumerProblem
-    r::Float64
-    R::Float64
-    bet::Float64
-    b::Float64
-    Pi::Matrix{Float64}
-    z_vals::Vector{Float64}
-    asset_grid::LinSpace{Float64}
+struct ConsumerProblem{T <: Real}
+    r::T
+    R::T
+    bet::T
+    b::T
+    Pi::Matrix{T}
+    z_vals::Vector{T}
+    asset_grid::AbstractArray
 end
 
-function ConsumerProblem(;r=0.01, bet=0.96, Pi=[0.6 0.4; 0.05 0.95],
-                         z_vals=[0.5, 1.0], b=0.0, grid_max=16, grid_size=50)
+function ConsumerProblem(;r=0.01, 
+                         bet=0.96, 
+                         Pi=[0.6 0.4; 0.05 0.95],
+                         z_vals=[0.5, 1.0], 
+                         b=0.0, 
+                         grid_max=16, 
+                         grid_size=50)
     R = 1 + r
     asset_grid = linspace(-b, grid_max, grid_size)
 
     ConsumerProblem(r, R, bet, b, Pi, z_vals, asset_grid)
 end
+
 
 """
 Given a matrix of size `(length(cp.asset_grid), length(cp.z_vals))`, construct
@@ -85,16 +75,17 @@ None, `out` is updated in place. If `ret_policy == true` out is filled with the
 policy function, otherwise the value function is stored in `out`.
 
 """
-function update_bellman!(cp::ConsumerProblem, V::Matrix, out::Matrix;
-                           ret_policy::Bool=false)
+function bellman_operator!(cp::ConsumerProblem, 
+                          V::Matrix, 
+                          out::Matrix;
+                          ret_policy::Bool=false)
+
     # simplify names, set up arrays
     R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
-
     z_idx = 1:length(z_vals)
     vf = interpolate(cp, V)
 
-    # compute lower_bound for optimization
     opt_lb = 1e-8
 
     # solve for RHS of Bellman equation
@@ -122,8 +113,8 @@ function update_bellman!(cp::ConsumerProblem, V::Matrix, out::Matrix;
     out
 end
 
-update_bellman(cp::ConsumerProblem, V::Matrix; ret_policy=false) =
-    update_bellman!(cp, V, similar(V); ret_policy=ret_policy)
+bellman_operator(cp::ConsumerProblem, V::Matrix; ret_policy=false) =
+    bellman_operator!(cp, V, similar(V); ret_policy=ret_policy)
 
 """
 Extract the greedy policy (policy function) of the model.
@@ -165,7 +156,7 @@ possible value of z.
 None, `out` is updated in place to hold the policy function
 
 """
-function update_coleman!(cp::ConsumerProblem, c::Matrix, out::Matrix)
+function coleman_operator!(cp::ConsumerProblem, c::Matrix, out::Matrix)
     # simplify names, set up arrays
     R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
@@ -204,10 +195,10 @@ Apply the Coleman operator for a given model and initial value
 See the specific methods of the mutating version of this function for more
 details on arguments
 """
-update_coleman(cp::ConsumerProblem, c::Matrix) =
-    update_coleman!(cp, c, similar(c))
+coleman_operator(cp::ConsumerProblem, c::Matrix) =
+    coleman_operator!(cp, c, similar(c))
 
-function init_values(cp::ConsumerProblem)
+function initialize(cp::ConsumerProblem)
     # simplify names, set up arrays
     R, bet, b = cp.R, cp.bet, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
