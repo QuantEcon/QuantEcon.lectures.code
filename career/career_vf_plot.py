@@ -13,10 +13,16 @@ from matplotlib import cm
 import quantecon as qe
 from career import CareerWorkerProblem
 
+# === set matplotlib parameters === #
+plt.rcParams['axes.xmargin'] = 0
+plt.rcParams['axes.ymargin'] = 0
+plt.rcParams['patch.force_edgecolor'] = True
+
 # === solve for the value function === #
 wp = CareerWorkerProblem()
 v_init = np.ones((wp.N, wp.N))*100
-v = qe.compute_fixed_point(wp.bellman_operator, v_init)
+v = qe.compute_fixed_point(wp.bellman_operator, v_init,
+                           max_iter=200, print_skip=25)
 
 # === plot value function === #
 fig = plt.figure(figsize=(8, 6))
@@ -32,4 +38,5 @@ ax.plot_surface(tg,
 ax.set_zlim(150, 200)
 ax.set_xlabel('theta', fontsize=14)
 ax.set_ylabel('epsilon', fontsize=14)
+ax.view_init(ax.elev, 225)
 plt.show()
