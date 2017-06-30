@@ -15,7 +15,7 @@ Journal of Labor Economics, 17(2), 237-261.
 =#
 
 """
-Career/job choice model fo Derek Neal (1999)
+Career/job choice model of Derek Neal (1999)
 
 ##### Fields
 
@@ -30,6 +30,9 @@ Career/job choice model fo Derek Neal (1999)
 - `G_mean::Real` : The mean of the distribution G
 
 """
+
+using Distributions
+
 type CareerWorkerProblem
     beta::Real
     N::Int

@@ -26,31 +26,36 @@ Tw will be overwritten.
 
 #### Arguments
 
-w : array_like(float, ndim=1)
-    The value of the input function on different grid points
-grid : array_like(float, ndim=1)
-    The set of grid points
-u : function
-    The utility function
-f : function
-    The production function
-shocks : numpy array
-    An array of draws from the shock, for Monte Carlo integration (to
-    compute expectations).
-beta : scalar
-    The discount factor
-Tw : array_like(float, ndim=1) optional (default=None)
-    Array to write output values to
-compute_policy : Boolean, optional (default=False)
-    Whether or not to compute policy function
+`w` : Vector
+      The value of the input function on different grid points
+`grid` : Vector
+         The set of grid points
+`beta` : AbstractFloat
+         The discount factor
+`u` : Function
+      The utility function
+`f` : Function
+      The production function
+`shocks` : Vector
+           An array of draws from the shock, for Monte Carlo integration (to
+           compute expectations).
+`Tw` : Vector, optional (default=similar(w))
+       Array to write output values to
+`compute_policy` : Bool, optional (default=false)
+                   Whether or not to compute policy function
 
 """
-function bellman_operator(w, grid, beta, u, f, shocks; compute_policy=false)
+function bellman_operator(w::Vector, 
+                          grid::Vector,
+                          beta::AbstractFloat, 
+                          u::Function, 
+                          f::Function, 
+                          shocks::Vector, 
+                          Tw::Vector = similar(w);
+                          compute_policy::Bool = false)
 
     # === Apply linear interpolation to w === #
     w_func = LinInterp(grid, w)
-    
-    Tw = similar(w)
 
     if compute_policy
         sigma = similar(w)
