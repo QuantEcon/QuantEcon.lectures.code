@@ -1,18 +1,5 @@
-#=
-A type to solve the career / job choice model due to Derek Neal.
+using Distributions
 
-@author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-05
-
-References
-----------
-
-http://quant-econ.net/jl/career.html
-
-[Neal1999] Neal, D. (1999). The Complexity of Job Mobility among Young Men,
-Journal of Labor Economics, 17(2), 237-261.
-=#
 
 """
 Career/job choice model of Derek Neal (1999)
@@ -31,8 +18,6 @@ Career/job choice model of Derek Neal (1999)
 
 """
 
-using Distributions
-
 type CareerWorkerProblem
     beta::Real
     N::Int
@@ -44,6 +29,7 @@ type CareerWorkerProblem
     F_mean::Real
     G_mean::Real
 end
+
 
 """
 Constructor with default values for `CareerWorkerProblem`
