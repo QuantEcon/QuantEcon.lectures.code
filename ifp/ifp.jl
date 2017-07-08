@@ -1,22 +1,22 @@
-using Interpolations
+using QuantEcon
 using Optim
 
 # utility and marginal utility functions
 u(x) = log(x)
-du(x) = 1 ./ x
+du(x) = 1 / x
 
 """
 Income fluctuation problem
 
 ##### Fields
 
-- `r::Float64` : Strictly positive interest rate
-- `R::Float64` : The interest rate plus 1 (strictly greater than 1)
-- `bet::Float64` : Discount rate in (0, 1)
-- `b::Float64` :  The borrowing constraint
-- `Pi::Matrix{Floa64}` : Transition matrix for `z`
-- `z_vals::Vector{Float64}` : Levels of productivity
-- `asset_grid::LinSpace{Float64}` : Grid of asset values
+- `r::Real` : Strictly positive interest rate
+- `R::Real` : The interest rate plus 1 (strictly greater than 1)
+- `bet::Real` : Discount rate in (0, 1)
+- `b::Real` :  The borrowing constraint
+- `Pi::Matrix{T} where T<:Real` : Transition matrix for `z`
+- `z_vals::Vector{T} where T<:Real` : Levels of productivity
+- `asset_grid::AbstractArray` : Grid of asset values
 
 """
 struct ConsumerProblem{T <: Real}
@@ -44,22 +44,6 @@ end
 
 
 """
-Given a matrix of size `(length(cp.asset_grid), length(cp.z_vals))`, construct
-an interpolation object that does linear interpolation in the asset dimension
-and has a lookup table in the z dimension
-"""
-function Interpolations.interpolate(cp::ConsumerProblem, x::AbstractMatrix)
-    sz = (length(cp.asset_grid), length(cp.z_vals))
-    if size(x) != sz
-        msg = "x must have dimensions $(sz)"
-        throw(DimensionMismatch(msg))
-    end
-
-    itp = interpolate(x, (BSpline(Linear()), NoInterp()), OnGrid())
-    scale(itp, cp.asset_grid, 1:sz[2])
-end
-
-"""
 Apply the Bellman operator for a given model and initial value.
 
 ##### Arguments
@@ -84,8 +68,10 @@ function bellman_operator!(cp::ConsumerProblem,
     R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     z_idx = 1:length(z_vals)
-    vf = interpolate(cp, V)
-
+    
+    # value function when the shock index is z_i
+    vf = interp(asset_grid, V)
+    
     opt_lb = 1e-8
 
     # solve for RHS of Bellman equation
@@ -93,11 +79,8 @@ function bellman_operator!(cp::ConsumerProblem,
         for (i_a, a) in enumerate(asset_grid)
 
             function obj(c)
-                y = 0.0
-                for j in z_idx
-                    y += vf[R*a+z-c, j] * Pi[i_z, j]
-                end
-                return -u(c)  - bet * y
+                EV = dot(vf.(R*a+z-c, z_idx), Pi[i_z, :]) # compute expectation
+                return -u(c)  - bet * EV
             end
             res = optimize(obj, opt_lb, R.*a.+z.+b)
             c_star = Optim.minimizer(res)
@@ -105,7 +88,7 @@ function bellman_operator!(cp::ConsumerProblem,
             if ret_policy
                 out[i_a, i_z] = c_star
             else
-               out[i_a, i_z] = - obj(c_star)
+               out[i_a, i_z] = - Optim.minimum(res)
             end
 
         end
@@ -160,14 +143,11 @@ function coleman_operator!(cp::ConsumerProblem, c::Matrix, out::Matrix)
     # simplify names, set up arrays
     R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
-    z_size = length(z_vals)
+    z_idx = 1:length(z_vals)
     gam = R * bet
-    vals = Array{Float64}(z_size)
-
-    cf = interpolate(cp, c)
-
-    # linear interpolation to get consumption function. Updates vals inplace
-    cf!(a, vals) = map!(i->cf[a, i], vals, 1:z_size)
+    
+    # policy function when the shock index is z_i
+    cf = interp(asset_grid, c)
 
     # compute lower_bound for optimization
     opt_lb = 1e-8
@@ -175,8 +155,8 @@ function coleman_operator!(cp::ConsumerProblem, c::Matrix, out::Matrix)
     for (i_z, z) in enumerate(z_vals)
         for (i_a, a) in enumerate(asset_grid)
             function h(t)
-                cf!(R*a+z-t, vals)  # update vals
-                expectation = dot(du(vals), vec(Pi[i_z, :]))
+                cps = cf.(R*a+z-t, z_idx) # c' for each z'
+                expectation = dot(du.(cps), Pi[i_z, :])
                 return abs(du(t) - max(gam * expectation, du(R*a+z+b)))
             end
             opt_ub = R*a + z + b  # addresses issue #8 on github
@@ -216,5 +196,3 @@ function initialize(cp::ConsumerProblem)
 
     return V, c
 end
-
-

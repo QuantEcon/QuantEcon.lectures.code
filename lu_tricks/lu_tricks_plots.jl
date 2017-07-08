@@ -2,18 +2,18 @@ using PyPlot
 # == Set seed and generate a_t sequence == #
 srand(123)
 n = 100
-a_seq = sin(linspace(0, 5*pi, n)) + 2 + 0.1 * randn(n)
+a_seq = sin.(linspace(0, 5*pi, n)) + 2 + 0.1 * randn(n)
 
 
 # == Model parameters == #
 gamma = 0.8
 m = 1
-d = gamma * [1, -1]''
+d = gamma * [1, -1]
 h = 1.0
 
 
 # == Initial conditions == #
-y_m = [2.0]''
+y_m = [2.0]
 
 testlq = LQFilter(d, h, y_m)
 y_hist, L, U, y = optimal_y(testlq, a_seq)

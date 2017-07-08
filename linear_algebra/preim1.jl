@@ -11,12 +11,12 @@ using Plots
 pyplot()
 using LaTeXStrings
 
-f(x) = 0.6 .* cos(4.0 .* x) .+ 1.3
+f(x) = 0.6 * cos(4.0 * x) + 1.3
 
 xmin, xmax = -1.0, 1.0
 Nx = 160
 x = linspace(xmin, xmax, Nx)
-y = f(x)
+y = f.(x)
 ya, yb = minimum(y), maximum(y)
 
 p1 = plot(x, y, color=:black, label=[L"$f$" ""], grid=false)

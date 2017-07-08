@@ -17,63 +17,54 @@ Authors: Shunsuke Hori
 
 using Polynomials
 
-type LQFilter
-    d::Array
-    h::Real
-    y_m::Array
-    m::Integer
-    phi::Vector
-    beta::Real
-    phi_r::Union{Vector,Void}
-    k::Union{Integer,Void}
+struct LQFilter{TR<:Real, TI<:Integer, TF<:AbstractFloat}
+    d::Vector{TF}
+    h::TR
+    y_m::Vector{TF}
+    m::TI
+    phi::Vector{TF}
+    beta::TR
+    phi_r::Union{Vector{TF},Void}
+    k::Union{TI,Void}
 end
 
 
 """
 Parameters
 ----------
-d : Array (1-D or a 2-D column vector)
+d : Vector
         The order of the coefficients: [d_0, d_1, ..., d_m]
 h : Real
         Parameter of the objective function (corresponding to the
         quadratic term)
-y_m : Array (1-D or a 2-D column vector)
+y_m : Vector
         Initial conditions for y
-r : Array (1-D or a 2-D column vector)
+r : Vector
         The order of the coefficients: [r_0, r_1, ..., r_k]
         (optional, if not defined -> deterministic problem)
 beta : Real or nothing
         Discount factor (optional, default value is one)
 h_eps : 
 """
-function LQFilter{TD<:Real}(d::Array{TD},
-                   h::Real,
-                   y_m::Array;
-                   r::Union{Array,Void}=nothing,
-                   beta::Union{Real,Void}=nothing,
-                   h_eps::Union{Real,Void}=nothing,
+function LQFilter{TR<:Real}(d::Vector{TR},
+                   h::TR,
+                   y_m::Vector{TR};
+                   r::Union{Vector{TR},Void}=nothing,
+                   beta::Union{TR,Void}=nothing,
+                   h_eps::Union{TR,Void}=nothing,
                    )
 
-    if ndims(d) > 2 || ndims(y_m) > 2
-        throw(ArgumentError("d and y_m must be vector or 2-D array"))
-    end
 
-    if size(d,2) != 1 || size(y_m,2) != 1
-        throw(ArgumentError("d and y_m must be columnvector"))
-    end
-    d = d''
-    y_m = y_m''
+    m = length(d) - 1
 
-    m = size(d,1) - 1
-
-    m == size(y_m,1) ||
+    m == length(y_m) ||
         throw(ArgumentError("y_m and d must be of same length = $m"))
 
     #---------------------------------------------
     # Define the coefficients of phi up front
     #---------------------------------------------
 
-    phi = Vector{TD}(2m + 1)
+    phi = Vector{TR}(2m + 1)
     for i in -m:m
         phi[m-i+1] = sum(diag(d*d', -i))
     end
@@ -87,9 +78,8 @@ function LQFilter{TD<:Real}(d::Array{TD},
         k=nothing
         phi_r = nothing
     else
-        TR=eltype(r)
         k = size(r,1) - 1
-        phi_r = Array{TR}(2k + 1)
+        phi_r = Vector{TR}(2k + 1)
 
         for i = -k:k
             phi_r[k-i+1] = sum(diag(r*r', -i))
@@ -107,7 +97,7 @@ function LQFilter{TD<:Real}(d::Array{TD},
         beta = 1.0
     else
         d = beta.^(collect(0:m)/2) * d
-        y_m = y_m * beta.^(- collect(1:m)''/2)
+        y_m = y_m * beta.^(- collect(1:m)/2)
     end
 
     return LQFilter(d,h,y_m,m,phi,beta,phi_r,k)
@@ -116,7 +106,7 @@ end
 """
 This constructs the matrices W and W_m for a given number of periods N
 """
-function construct_W_and_Wm(lqf::LQFilter, N)
+function construct_W_and_Wm(lqf::LQFilter, N::Integer)
 
     d, m = lqf.d, lqf.m
 
@@ -134,7 +124,7 @@ function construct_W_and_Wm(lqf::LQFilter, N)
 
     for j in 1:(m+1)
         for k in j:(m+1)
-            D_m1[j, k] = (d[1:j,1]' * d[k-j+1:k,1])[1]
+            D_m1[j, k] = dot(d[1:j,1], d[k-j+1:k,1])
         end
     end
 
@@ -191,7 +181,7 @@ function roots_of_characteristic(lqf::LQFilter)
     proots = roots(phi_poly)
     # sort the roots according to their length (in descending order)
     roots_sorted = sort(proots, by=abs)[end:-1:1]
-    z_0 = sum(phi) / polyval(poly(proots),1.0)
+    z_0 = sum(phi) / polyval(poly(proots), 1.0)
     z_1_to_m = roots_sorted[1:m]     # we need only those outside the unit circle
     lambdas = 1 ./ z_1_to_m
     return z_1_to_m, z_0, lambdas
@@ -230,7 +220,7 @@ end
 This function constructs the covariance matrix for x^N (see section 6)
 for a given period N
 """
-function construct_V(lqf::LQFilter; N=nothing)
+function construct_V(lqf::LQFilter; N::Integer=nothing)
     if N == nothing
         error("N must be provided!!")
     end
@@ -268,7 +258,6 @@ Output:  E[abar | a_t, a_{t-1}, ..., a_1, a_0]
 """
 function predict(lqf::LQFilter, a_hist::Vector, t::Integer)
     N = length(a_hist) - 1
-    a_hist = a_hist''
     V = construct_V(N + 1)
 
     aux_matrix = zeros(N + 1, N + 1)
@@ -295,7 +284,7 @@ To make things cosistent with the lecture, we need an auxiliary diagonal
 matrix D which renormalizes L and U
 """
 
-function optimal_y(lqf, a_hist, t = nothing )
+function optimal_y(lqf::LQFilter, a_hist::Vector, t = nothing)
     beta, y_m, m = lqf.beta, lqf.y_m, lqf.m
 
     N = length(a_hist) - 1
@@ -311,7 +300,7 @@ function optimal_y(lqf, a_hist, t = nothing )
     J = flipdim(eye(N + 1), 2)
 
     if t == nothing   # if the problem is deterministic
-        a_hist = J * a_hist''
+        a_hist = J * a_hist
 
         #--------------------------------------------
         # Transform the a sequence if beta is given

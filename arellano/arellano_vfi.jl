@@ -12,53 +12,53 @@ domestic households. Domestic households receive a stochastic
 path of income.
 
 ##### Fields
-* `β::Real`: Time discounting parameter
-* `γ::Real`: Risk aversion parameter
-* `r::Real`: World interest rate
-* `ρ::Real`: Autoregressive coefficient on income process
-* `η::Real`: Standard deviation of noise in income process
-* `θ::Real`: Probability of re-entering the world financial sector after default
-* `ny::Int`: Number of points to use in approximation of income process
-* `nB::Int`: Number of points to use in approximation of asset holdings
-* `ygrid::Vector{Float64}`: This is the grid used to approximate income process
-* `ydefgrid::Vector{Float64}`: When in default get less income than process
+* `β::AbstractFloat`: Time discounting parameter
+* `γ::AbstractFloat`: Risk aversion parameter
+* `r::AbstractFloat`: World interest rate
+* `ρ::AbstractFloat`: Autoregressive coefficient on income process
+* `η::AbstractFloat`: Standard deviation of noise in income process
+* `θ::AbstractFloat`: Probability of re-entering the world financial sector after default
+* `ny::Integer`: Number of points to use in approximation of income process
+* `nB::Integer`: Number of points to use in approximation of asset holdings
+* `ygrid::Vector{AbstractFloat}`: This is the grid used to approximate income process
+* `ydefgrid::Vector{AbstractFloat}`: When in default get less income than process
   would otherwise dictate
-* `Bgrid::Vector{Float64}`: This is grid used to approximate choices of asset
+* `Bgrid::Vector{AbstractFloat}`: This is grid used to approximate choices of asset
   holdings
-* `Π::Array{Float64, 2}`: Transition probabilities between income levels
-* `vf::Array{Float64, 2}`: Place to hold value function
-* `vd::Array{Float64, 2}`: Place to hold value function when in default
-* `vc::Array{Float64, 2}`: Place to hold value function when choosing to
+* `Π::Matrix{AbstractFloat}`: Transition probabilities between income levels
+* `vf::Matrix{AbstractFloat}`: Place to hold value function
+* `vd::Matrix{AbstractFloat}`: Place to hold value function when in default
+* `vc::Matrix{AbstractFloat}`: Place to hold value function when choosing to
   continue
-* `policy::Array{Float64, 2}`: Place to hold asset policy function
-* `q::Array{Float64, 2}`: Place to hold prices at different pairs of (y, B')
-* `defprob::Array{Float64, 2}`: Place to hold the default probabilities for
+* `policy::Matrix{AbstractFloat}`: Place to hold asset policy function
+* `q::Matrix{AbstractFloat}`: Place to hold prices at different pairs of (y, B')
+* `defprob::Matrix{AbstractFloat}`: Place to hold the default probabilities for
   pairs of (y, B')
 """
-immutable ArellanoEconomy
+struct ArellanoEconomy{TF<:AbstractFloat, TI<:Integer}
     # Model Parameters
-    β::Float64
-    γ::Float64
-    r::Float64
-    ρ::Float64
-    η::Float64
-    θ::Float64
+    β::TF
+    γ::TF
+    r::TF
+    ρ::TF
+    η::TF
+    θ::TF
 
     # Grid Parameters
-    ny::Int
-    nB::Int
-    ygrid::Array{Float64, 1}
-    ydefgrid::Array{Float64, 1}
-    Bgrid::Array{Float64, 1}
-    Π::Array{Float64, 2}
+    ny::TI
+    nB::TI
+    ygrid::Vector{TF}
+    ydefgrid::Vector{TF}
+    Bgrid::Vector{TF}
+    Π::Matrix{TF}
 
     # Value function
-    vf::Array{Float64, 2}
-    vd::Array{Float64, 2}
-    vc::Array{Float64, 2}
-    policy::Array{Float64, 2}
-    q::Array{Float64, 2}
-    defprob::Array{Float64, 2}
+    vf::Matrix{TF}
+    vd::Matrix{TF}
+    vc::Matrix{TF}
+    policy::Matrix{TF}
+    q::Matrix{TF}
+    defprob::Matrix{TF}
 end
 
 """
@@ -66,34 +66,35 @@ This is the default constructor for building an economy as presented
 in Arellano 2008.
 
 ##### Arguments
-* `;β::Real(0.953)`: Time discounting parameter
-* `;γ::Real(2.0)`: Risk aversion parameter
-* `;r::Real(0.017)`: World interest rate
-* `;ρ::Real(0.945)`: Autoregressive coefficient on income process
-* `;η::Real(0.025)`: Standard deviation of noise in income process
-* `;θ::Real(0.282)`: Probability of re-entering the world financial sector
+* `;β::AbstractFloat(0.953)`: Time discounting parameter
+* `;γ::AbstractFloat(2.0)`: Risk aversion parameter
+* `;r::AbstractFloat(0.017)`: World interest rate
+* `;ρ::AbstractFloat(0.945)`: Autoregressive coefficient on income process
+* `;η::AbstractFloat(0.025)`: Standard deviation of noise in income process
+* `;θ::AbstractFloat(0.282)`: Probability of re-entering the world financial sector
   after default
-* `;ny::Int(21)`: Number of points to use in approximation of income process
-* `;nB::Int(251)`: Number of points to use in approximation of asset holdings
+* `;ny::Integer(21)`: Number of points to use in approximation of income process
+* `;nB::Integer(251)`: Number of points to use in approximation of asset holdings
 """
-function ArellanoEconomy(;β=.953, γ=2., r=0.017, ρ=0.945, η=0.025, θ=0.282,
-                          ny=21, nB=251)
+function ArellanoEconomy{TF<:AbstractFloat}(;β::TF=.953, γ::TF=2., r::TF=0.017, 
+                          ρ::TF=0.945, η::TF=0.025, θ::TF=0.282,
+                          ny::Integer=21, nB::Integer=251)
 
     # Create grids
     Bgrid = collect(linspace(-.4, .4, nB))
     mc = tauchen(ny, ρ, η)
     Π = mc.p
-    ygrid = exp(mc.state_values)
-    ydefgrid = min(.969 * mean(ygrid), ygrid)
+    ygrid = exp.(mc.state_values)
+    ydefgrid = min.(.969 * mean(ygrid), ygrid)
 
     # Define value functions (Notice ordered different than Python to take
     # advantage of column major layout of Julia)
     vf = zeros(nB, ny)
     vd = zeros(1, ny)
     vc = zeros(nB, ny)
-    policy = Array{Int}(nB, ny)
+    policy = Array{TF}(nB, ny)
     q = ones(nB, ny) .* (1 / (1 + r))
-    defprob = Array{Float64}(nB, ny)
+    defprob = Array{TF}(nB, ny)
 
     return ArellanoEconomy(β, γ, r, ρ, η, θ, ny, nB, ygrid, ydefgrid, Bgrid, Π,
                             vf, vd, vc, policy, q, defprob)
@@ -119,16 +120,16 @@ choice of savings
 
 * `ae::ArellanoEconomy`: This is the economy we would like to update the
   value functions for
-* `EV::Matrix{Float64}`: Expected value function at each state
-* `EVd::Matrix{Float64}`: Expected value function of default at each state
-* `EVc::Matrix{Float64}`: Expected value function of continuing at each state
+* `EV::Matrix{TF}`: Expected value function at each state
+* `EVd::Matrix{TF}`: Expected value function of default at each state
+* `EVc::Matrix{TF}`: Expected value function of continuing at each state
 
 ##### Notes
 
 * This function updates value functions and policy functions in place.
 """
-function one_step_update!(ae::ArellanoEconomy, EV::Matrix{Float64},
-                          EVd::Matrix{Float64}, EVc::Matrix{Float64})
+function one_step_update!{TF<:AbstractFloat}(ae::ArellanoEconomy, EV::Matrix{TF},
+                          EVd::Matrix{TF}, EVc::Matrix{TF})
 
     # Unpack stuff
     β, γ, r, ρ, η, θ, ny, nB = _unpack(ae)
@@ -242,7 +243,7 @@ function vfi!(ae::ArellanoEconomy; tol=1e-8, maxit=10000)
         # Update prices
         compute_prices!(ae)
 
-        dist = maxabs(V_upd - ae.vf)
+        dist = maximum(abs, V_upd - ae.vf)
 
         if it%25 == 0
             println("Finished iteration $(it) with dist of $(dist)")
@@ -258,18 +259,18 @@ This function simulates the Arellano economy
 ##### Arguments
 
 * `ae::ArellanoEconomy`: This is the economy we would like to solve
-* `capT::Int`: Number of periods to simulate
-* `;y_init::Float64(mean(ae.ygrid)`: The level of income we would like to
+* `capT::Integer`: Number of periods to simulate
+* `;y_init::AbstratFloat(mean(ae.ygrid)`: The level of income we would like to
   start with
-* `;B_init::Float64(mean(ae.Bgrid)`: The level of asset holdings we would like
+* `;B_init::AbstratFloat(mean(ae.Bgrid)`: The level of asset holdings we would like
   to start with
 
 ##### Returns
 
-* `B_sim_val::Vector{Float64}`: Simulated values of assets
-* `y_sim_val::Vector{Float64}`: Simulated values of income
-* `q_sim_val::Vector{Float64}`: Simulated values of prices
-* `default_status::Vector{Float64}`: Simulated default status
+* `B_sim_val::Vector{TI}`: Simulated values of assets
+* `y_sim_val::Vector{TF}`: Simulated values of income
+* `q_sim_val::Vector{TF}`: Simulated values of prices
+* `default_status::Vector{Bool}`: Simulated default status
   (true if in default)
 
 ##### Notes
@@ -277,8 +278,10 @@ This function simulates the Arellano economy
 * This updates all value functions, policy functions, and prices in place.
 
 """
-function QuantEcon.simulate(ae::ArellanoEconomy, capT::Int=5000;
-                            y_init=mean(ae.ygrid), B_init=mean(ae.Bgrid))
+function QuantEcon.simulate{TI<:Integer, TF<:AbstractFloat}(ae::ArellanoEconomy, 
+                            capT::TI=5000;
+                            y_init::TF=mean(ae.ygrid), 
+                            B_init::TF=mean(ae.Bgrid))
 
     # Get initial indices
     zero_index = searchsortedfirst(ae.Bgrid, 0.)
@@ -290,9 +293,9 @@ function QuantEcon.simulate(ae::ArellanoEconomy, capT::Int=5000;
     y_sim_indices = simulate(mc, capT+1; init=y_init_ind)
 
     # Allocate and Fill output
-    y_sim_val = Array{Float64}(capT+1)
+    y_sim_val = Vector{TF}(capT+1)
     B_sim_val, q_sim_val = similar(y_sim_val), similar(y_sim_val)
-    B_sim_indices = Array{Int}(capT+1)
+    B_sim_indices = Vector{TI}(capT+1)
     default_status = fill(false, capT+1)
     B_sim_indices[1], default_status[1] = B_init_ind, false
     y_sim_val[1], B_sim_val[1] = ae.ygrid[y_init_ind], ae.Bgrid[B_init_ind]

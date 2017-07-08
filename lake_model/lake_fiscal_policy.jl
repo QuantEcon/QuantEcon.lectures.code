@@ -6,8 +6,8 @@ using Roots
 # Some global variables that will stay constant
 alpha = 0.013
 alpha_q = (1-(1-alpha)^3)
-b = 0.0124
-d = 0.00822
+b_param = 0.0124
+d_param = 0.00822
 beta = 0.98
 gamma = 1.0
 sigma = 2.0
@@ -52,7 +52,7 @@ function compute_steady_state_quantities(c::Float64, tau::Float64)
   w_bar, lmda, V, U = compute_optimal_quantities(c, tau)
 
   # Compute steady state employment and unemployment rates
-  lm = LakeModel(lambda=lmda, alpha=alpha_q, b=b, d=d)
+  lm = LakeModel(lambda=lmda, alpha=alpha_q, b=b_param, d=d_param)
   x = rate_steady_state(lm)
   e_rate, u_rate = x
 
