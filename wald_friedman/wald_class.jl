@@ -1,5 +1,5 @@
 """
-This type is used to store the solution to the problem presented 
+This type is used to store the solution to the problem presented
 in the "Wald Friedman" notebook presented on the QuantEcon website.
 
 Solution
@@ -58,7 +58,7 @@ function WaldFriedman(c, L0, L1, f0, f1; m=25)
     J = zeros(m)
     lb = 0.
     ub = 0.
-    
+
     WaldFriedman(c, L0, L1, f0, f1, m, pgrid, WFSolution(J, lb, ub))
 end
 
@@ -139,7 +139,7 @@ function EJ(wf::WaldFriedman, p, J)
     # Need to clip to make sure things don't blow up (go to infinity)
     curr_dist = current_distribution(wf, p)
     tp1_dist = bayes_update_all(wf, p)
-   
+
     # Evaluate the expectation
     EJ = dot(curr_dist, J.(tp1_dist))
 
@@ -168,7 +168,7 @@ function bellman_operator(wf::WaldFriedman, J)
 
     J_out = zeros(m)
     J_interp = LinInterp(pgrid, J)
-    
+
     for (p_ind, p) in enumerate(pgrid)
         # Payoff of choosing model 0
         p_c_0 = payoff_choose_f0(wf, p)
@@ -219,7 +219,7 @@ function simulate(wf::WaldFriedman, f; p0=0.5)
     if sumabs(wf.sol.J) < 1e-8
         solve_model(wf)
     end
-        
+
     # Unpack useful info
     lb, ub = wf.sol.lb, wf.sol.ub
     drv = DiscreteRV(f)
@@ -233,7 +233,7 @@ function simulate(wf::WaldFriedman, f; p0=0.5)
     while !decision_made
         # Maybe should specify which distribution is correct one so that
         # the draws come from the "right" distribution
-        k = draw(drv)[1]
+        k = rand(drv)
         t = t+1
         p = bayes_update_k(wf, p, k)
         if p < lb
@@ -244,7 +244,7 @@ function simulate(wf::WaldFriedman, f; p0=0.5)
             decision = 0
         end
     end
-            
+
     return decision, p, t
 end
 
@@ -260,7 +260,7 @@ function simulate_tdgp_f0(wf::WaldFriedman; p0=0.5)
     else
         correct = false
     end
-        
+
     return correct, p, t
 end
 
@@ -276,7 +276,7 @@ function simulate_tdgp_f1(wf::WaldFriedman; p0=0.5)
     else
         correct = false
     end
-        
+
     return correct, p, t
 end
 
@@ -290,7 +290,7 @@ function stopping_dist(wf::WaldFriedman; ndraws=250, tdgp="f0")
     else
         simfunc = simulate_tdgp_f1
     end
-        
+
     # Allocate space
     tdist = Array(Int64, ndraws)
     cdist = Array(Bool, ndraws)
@@ -300,6 +300,6 @@ function stopping_dist(wf::WaldFriedman; ndraws=250, tdgp="f0")
         tdist[i] = t
         cdist[i] = correct
     end
-        
+
     return cdist, tdist
 end
