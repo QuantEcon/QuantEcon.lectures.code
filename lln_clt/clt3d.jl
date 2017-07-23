@@ -51,7 +51,7 @@ end
 S = cumsum(Z, 2)
 
 # == Multiply j-th column by sqrt j == #
-Y = S .* (1. ./ sqrt(ns))'
+Y = S .* (1. ./ sqrt.(ns))'
 
 # == Plot == #
 a, b = -3, 3
@@ -75,4 +75,3 @@ plot(x_vec, z_vec, y_vec, color=reshape(colors,1,length(colors)), legend=:none)
 plot!(xlims=(a,b), xticks=[-3; 0; 3])
 plot!(ylims=(1, nmax), yticks=ns, ylabel="n")
 plot!(zlims=(0, 0.4), zticks=[0.2; 0.4])
-

@@ -35,7 +35,7 @@ function p(x, y)
 
     # scipy silently evaluates the pdf of the lognormal dist at a negative
     # value as zero. It should be undefined and Julia recognizes this.
-    pdf_arg = clamp((y .- (1-delta) .* x) ./ d, eps(), Inf)
+    pdf_arg = clamp.((y .- (1-delta) .* x) ./ d, eps(), Inf)
     return pdf(phi, pdf_arg) ./ d
 end
 
@@ -65,6 +65,6 @@ for i = 1:T
     push!(laes_plot, lae_est(psi, ygrid))
     push!(colors,  RGBA(0, 0, 0, 1 - (i - 1)/T))
 end
-plot(ygrid, laes_plot, color=reshape(colors,1,length(colors)), lw=2, xlabel="capital", legend=:none)
+plot(ygrid, laes_plot, color=reshape(colors, 1, length(colors)), lw=2, xlabel="capital", legend=:none)
 t=LaTeXString("Density of \$k_1\$ (lighter) to \$k_T\$ (darker) for \$T=$T\$")
 plot!(title=t)

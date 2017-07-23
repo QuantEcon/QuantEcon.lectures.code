@@ -56,7 +56,7 @@ for i = 1:num_plots
 end
 
 # == Plot == #
-N = repmat(reshape(repmat(linspace(1, n, n), 1, num_plots)', 1, n*num_plots), 2, 1)
+N = repmat(reshape(repmat(1:n, 1, num_plots)', 1, n*num_plots), 2, 1)
 heights = [zeros(1,n*num_plots); reshape(dist_data, 1, n*num_plots)]
 plot(N, heights, layout=(3, 1), label="", color=:grey, alpha=0.5)
 plot!(1:n, dist_data', layout=(3, 1), color=:grey, markershape=:circle,
@@ -66,4 +66,3 @@ plot!(1:n, sample_means, linewidth=3, alpha=0.6, color=:green, legend=:topleft,
 plot!(1:n, dist_means, color=:black, linewidth=1.5, layout=(3, 1),
       linestyle=:dash, grid=false, label=[LaTeXString("\$\\mu\$") "" ""])
 plot!(title=reshape(titles, 1, length(titles)))
-

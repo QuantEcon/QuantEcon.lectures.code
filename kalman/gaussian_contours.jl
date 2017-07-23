@@ -20,7 +20,7 @@ function bivariate_normal(X::Matrix, Y::Matrix, σ_x::Real=1.0, σ_y::Real=1.0,
     ρ = σ_xy/(σ_x*σ_y)
     z = Xμ.^2/σ_x^2 + Yμ.^2/σ_y^2 - 2*ρ.*Xμ.*Yμ/(σ_x*σ_y)
     denom = 2π*σ_x*σ_y*sqrt(1-ρ^2)
-    return exp( -z/(2*(1-ρ^2))) ./ denom
+    return exp.(-z/(2*(1-ρ^2))) ./ denom
 end
 
 
