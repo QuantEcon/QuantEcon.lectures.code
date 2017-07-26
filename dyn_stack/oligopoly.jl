@@ -26,45 +26,53 @@ using QuantEcon
 using Roots
 
 """
-This type contains all the parameters and 
+This type contains all the parameters and
 matrices that describe the oligopoly problem.
 """
-type Oligopoly
-    a0 :: Real
-    a1 :: Real
-    rho :: Float64
-    c_eps :: Real
-    c :: Real
-    d :: Real
-    e :: Real
-    g :: Real
-    h :: Real
-    beta :: Float64
-    A :: Matrix{Float64}
-    B :: Array{Float64}
-    Q :: Float64
-    R :: Matrix{Float64}
-    Rf :: Matrix{Float64}
+struct Oligopoly{TF<:AbstractFloat}
+    a0 :: TF
+    a1 :: TF
+    rho :: TF
+    c_eps :: TF
+    c :: TF
+    d :: TF
+    e :: TF
+    g :: TF
+    h :: TF
+    beta :: TF
+    A :: Matrix{TF}
+    B :: Array{TF}
+    Q :: TF
+    R :: Matrix{TF}
+    Rf :: Matrix{TF}
 end
 
 """
-Constructor for building all the elements of the oligopoly 
-problem. 
+Constructor for building all the elements of the oligopoly
+problem.
 
 ### Arguments:
-* `;a0::Real(100)`: Intercept of demand curve
-* `;a1::Real(1)`: Slope of demand curve
-* `;rho::Float64(0.8)`: Autocorrelation of demand disturbances
-* `;c_eps::Real(0.2)`: Variance of demand disturbances
-* `;c::Real(1)`: Cost parameter
-* `;d::Real(20)`: Cost parameter
-* `;e::Real(20)`: Cost parameter
-* `;g::Real(0.2)`: Cost parameter
-* `;h::Real(0.2)`: Cost parameter
-* `;beta::Float64(0.95)`: Discount rate
+* `;a0::AbstractFloat(100)`: Intercept of demand curve
+* `;a1::AbstractFloat(1)`: Slope of demand curve
+* `;rho::AbstractFloat(0.8)`: Autocorrelation of demand disturbances
+* `;c_eps::AbstractFloat(0.2)`: Variance of demand disturbances
+* `;c::AbstractFloat(1)`: Cost parameter
+* `;d::AbstractFloat(20)`: Cost parameter
+* `;e::AbstractFloat(20)`: Cost parameter
+* `;g::AbstractFloat(0.2)`: Cost parameter
+* `;h::AbstractFloat(0.2)`: Cost parameter
+* `;beta::AbstractFloat(0.95)`: Discount rate
 """
-function Oligopoly(;a0=100, a1=1, rho=0.8, c_eps=0.2, c=1,
-                   d=20, e=20, g=0.2, h=0.2, beta=0.95)
+function Oligopoly(;a0::AbstractFloat=100.0,
+                    a1::AbstractFloat=1.0,
+                    rho::AbstractFloat=0.8,
+                    c_eps::AbstractFloat=0.2,
+                    c::AbstractFloat=1.0,
+                    d::AbstractFloat=20.0,
+                    e::AbstractFloat=20.0,
+                    g::AbstractFloat=0.2,
+                    h::AbstractFloat=0.2,
+                    beta::AbstractFloat=0.95)
 
     # Left-hand side of (37)
     Alhs = eye(5)
@@ -106,11 +114,11 @@ Find the value function of the optimal linear regulator problem.
 This is steps 2 and 3 in the lecture notes.
 
 ### Arguments:
-* `olig::Oligopoly`: The oligopoly problem we would like 
+* `olig::Oligopoly`: The oligopoly problem we would like
    to find the value function for
 
 ### Returns:
-* (P, F, d)::Matrix{Float64}: Matrices that describe the value
+* (P, F, d)::Matrix{TF} where TF<:AbstractFloat : Matrices that describe the value
    function of the optimal linear regulator problem
 """
 function find_PFd(olig::Oligopoly)
@@ -131,22 +139,23 @@ Taking the parameters as given, solve for the optimal decision rules
 for the firm.
 
 ### Arguments:
-* `olig::Oligopoly`: The oligopoly problem we would like 
+* `olig::Oligopoly`: The oligopoly problem we would like
    to find the decision rules for
-* `(eta0, Q0, q0)::Real`: Initial conditions
+* `(eta0, Q0, q0)::AbstractFloat`: Initial conditions
 
 ### Returns:
-* (P, -F, D0, Pf, -Ff)::Matrix{Float64}: Matrices that describe the 
+* (P, -F, D0, Pf, -Ff)::Matrix{Float64}: Matrices that describe the
    decision rule of the optimal linear regulator problem
 """
-function solve_for_opt_policy(olig::Oligopoly, eta0::Real=0, Q0::Real=0, q0::Real=0)
+function solve_for_opt_policy(olig::Oligopoly, eta0::AbstractFloat=0.0,
+                              Q0::AbstractFloat=0.0, q0::AbstractFloat=0.0)
 
     # Step 1/2: Formulate/solve the optimal linear regulator
     P, F, d, Pf, Ff, df = find_PFd(olig)
 
     # Step 3: Convert implementation into state variables (find coeffs)
     P22 = P[end, end]
-    P21 = P[end, 1:end-1]
+    P21 = P[end, 1:end-1]'
     P22inv = P22^(-1)
 
     # Step 4: Find optimal x_0 and \mu_{x, 0}
@@ -156,7 +165,7 @@ function solve_for_opt_policy(olig::Oligopoly, eta0::Real=0, Q0::Real=0, q0::Rea
 
     # Return -F and -Ff because we use u_t = -F y_t
     return P, -F, D0, Pf, -Ff
-    
+
 end
 
 olig = Oligopoly()
@@ -164,7 +173,7 @@ P, F, D0, Pf, Ff = solve_for_opt_policy(olig)
 
 # Checking time-inconsistency
 # Arbitrary initial z_0
-y0 = [1; 1; 1; 1]
+y0 = [1; 0; 25; 46]
 # optimal x_0 = i_0
 i0 = D0*y0
 # iterate one period using the closed-loop system

@@ -41,22 +41,23 @@ Unemployment/search problem where offer distribution is unknown
 - `quad_weights::Vector` : Weights for quadrature ofer offers
 
 """
-type SearchProblem
-    bet::Real
-    c::Real
+struct SearchProblem{TR<:Real, TI<:Integer, TF<:AbstractFloat,
+                    TAVw<:AbstractVector{TF}, TAVpi<:AbstractVector{TF}}
+    bet::TR
+    c::TR
     F::Distribution
     G::Distribution
     f::Function
     g::Function
-    n_w::Int
-    w_max::Real
-    w_grid::AbstractVector
-    n_pi::Int
-    pi_min::Real
-    pi_max::Real
-    pi_grid::AbstractVector
-    quad_nodes::Vector
-    quad_weights::Vector
+    n_w::TI
+    w_max::TR
+    w_grid::TAVw
+    n_pi::TI
+    pi_min::TR
+    pi_max::TR
+    pi_grid::TAVpi
+    quad_nodes::Vector{TF}
+    quad_weights::Vector{TF}
 end
 
 """
@@ -69,8 +70,8 @@ Constructor for `SearchProblem` with default values
 - `F_a::Real(1), F_b::Real(1)` : Parameters of `Beta` distribution for `F`
 - `G_a::Real(3), G_b::Real(1.2)` : Parameters of `Beta` distribution for `G`
 - `w_max::Real(2)` : Maximum of wage offer grid
-- `w_grid_size::Int(40)` : Number of points in wage offer grid
-- `pi_grid_size::Int(40)` : Number of points in probability grid
+- `w_grid_size::Integer(40)` : Number of points in wage offer grid
+- `pi_grid_size::Integer(40)` : Number of points in probability grid
 
 ##### Notes
 
@@ -80,16 +81,17 @@ each parameter
 """
 
 # use key word argment
-function SearchProblem(;bet=0.95, c=0.6, F_a=1, F_b=1, G_a=3, G_b=1.2,
-                       w_max=2, w_grid_size=40, pi_grid_size=40)
+function SearchProblem(;bet::Real=0.95, c::Real=0.6, F_a::Real=1, F_b::Real=1,
+                       G_a::Real=3, G_b::Real=1.2, w_max::Real=2.0,
+                       w_grid_size::Integer=40, pi_grid_size::Integer=40)
 
     F = Beta(F_a, F_b)
     G = Beta(G_a, G_b)
 
     # NOTE: the x./w_max)./w_max in these functions makes our dist match
     #       the scipy one with scale=w_max given
-    f(x) = pdf(F, x./w_max)./w_max
-    g(x) = pdf(G, x./w_max)./w_max
+    f(x) = pdf(F, x/w_max)/w_max
+    g(x) = pdf(G, x/w_max)/w_max
 
     pi_min = 1e-3  # avoids instability
     pi_max = 1 - pi_min
@@ -105,7 +107,7 @@ function SearchProblem(;bet=0.95, c=0.6, F_a=1, F_b=1, G_a=3, G_b=1.2,
 end
 
 function q(sp::SearchProblem, w, pi_val)
-    new_pi = 1.0 ./ (1 + ((1 - pi_val) .* sp.g(w)) ./ (pi_val .* sp.f(w)))
+    new_pi = 1.0 / (1 + ((1 - pi_val) * sp.g(w)) / (pi_val * sp.f(w)))
 
     # Return new_pi when in [pi_min, pi_max] and else end points
     return clamp(new_pi, sp.pi_min, sp.pi_max)
@@ -133,31 +135,20 @@ function bellman_operator!(sp::SearchProblem, v::Matrix, out::Matrix;
     f, g, bet, c = sp.f, sp.g, sp.bet, sp.c
     nodes, weights = sp.quad_nodes, sp.quad_weights
 
-    vf = extrapolate(interpolate((sp.w_grid, sp.pi_grid), v, 
+    vf = extrapolate(interpolate((sp.w_grid, sp.pi_grid), v,
                      Gridded(Linear())), Flat())
 
     # set up quadrature nodes/weights
     # q_nodes, q_weights = qnwlege(21, 0.0, sp.w_max)
 
-    for w_i=1:sp.n_w
-        w = sp.w_grid[w_i]
-
+    for (w_i, w) in enumerate(sp.w_grid)
         # calculate v1
         v1 = w / (1 - bet)
 
-        for pi_j=1:sp.n_pi
-            _pi = sp.pi_grid[pi_j]
-
+        for (pi_j, _pi) in enumerate(sp.pi_grid)
             # calculate v2
-            function integrand(m)
-                quad_out = similar(m)
-                for i=1:length(m)
-                    mm = m[i]
-                    quad_out[i] = vf[mm, q(sp, mm, _pi)] * (_pi*f(mm) +
-                                                            (1-_pi)*g(mm))
-                end
-                return quad_out
-            end
+            integrand(m) = [vf[m[i], q.(sp, m[i], _pi)]*
+                          (_pi*f(m[i])+(1-_pi)*g(m[i])) for i in 1:length(m)]
             integral = do_quad(integrand, nodes, weights)
             # integral = do_quad(integrand, q_nodes, q_weights)
             v2 = c + bet * integral
@@ -191,13 +182,11 @@ Extract the greedy policy (policy function) of the model.
 None, `out` is updated in place to hold the policy function
 
 """
-function get_greedy!(sp::SearchProblem, v::Matrix, out::Matrix)
+get_greedy!(sp::SearchProblem, v::Matrix, out::Matrix) =
     bellman_operator!(sp, v, out, ret_policy=true)
-end
 
-get_greedy(sp::SearchProblem, v::Matrix) = bellman_operator(sp, v,
-                                                            ret_policy=true)
-
+get_greedy(sp::SearchProblem, v::Matrix) =
+    bellman_operator(sp, v, ret_policy=true)
 
 """
 Updates the reservation wage function guess phi via the operator Q.
@@ -223,7 +212,7 @@ function res_wage_operator!(sp::SearchProblem, phi::Vector, out::Vector)
     q_nodes, q_weights = qnwlege(7, 0.0, sp.w_max)
 
     for (i, _pi) in enumerate(sp.pi_grid)
-        integrand(x) = max(x, phi_f.(q(sp, x, _pi))).*(_pi*f(x) + (1-_pi)*g(x))
+        integrand(x) = max.(x, phi_f.(q.(sp, x, _pi))).*(_pi*f(x) + (1-_pi)*g(x))
         integral = do_quad(integrand, q_nodes, q_weights)
         out[i] = (1 - bet)*c + bet*integral
     end
@@ -240,4 +229,3 @@ function res_wage_operator(sp::SearchProblem, phi::Vector)
     res_wage_operator!(sp, phi, out)
     return out
 end
-

@@ -62,7 +62,7 @@ def consumption_complete(cp):
     # Using equation (7) calculate b2
     b2 = (y2 - y1 - (Q[0, 0] - Q[1, 0] - 1) * b1)/(Q[0, 1] + 1 - Q[1, 1])
     
-    # Using equation (5) calculae c_bar 
+    # Using equation (5) calculate c_bar 
     c_bar = y1 - b0 + Q[0, :] @ np.asarray([b1, b2])
     
     return c_bar, b1, b2
