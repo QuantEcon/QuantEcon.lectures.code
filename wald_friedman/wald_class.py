@@ -9,7 +9,7 @@ import scipy.stats as st
 import scipy.interpolate as interp
 import quantecon as qe
 
-class WaldFriedman(object):
+class WaldFriedman:
     """
     Insert relevant docstrings here
     """

@@ -8,9 +8,10 @@ Authors: Shunsuke Hori
 Function to Solve Optimistic Beliefs
 """
 
-function price_optimisticbeliefs(transitions, dividend_payoff;
-                                beta=.75,max_iter=50000, tol=1e-16)
-    
+function price_optimisticbeliefs(transitions::Vector, dividend_payoff::Vector;
+                                beta::AbstractFloat=.75, max_iter::Integer=50000,
+                                tol::AbstractFloat=1e-16)
+
     # We will guess an initial price vector of [0, 0]
     p_new = [0,0]
     p_old = [10.0,10.0]
@@ -23,13 +24,12 @@ function price_optimisticbeliefs(transitions, dividend_payoff;
         p_new = beta * temp
 
         # If we succed in converging, break out of for loop
-        if maximum(sqrt((p_new - p_old).^2)) < 1e-12
+        if maximum(sqrt, ((p_new - p_old).^2)) < 1e-12
             break
         end
     end
 
-    temp=[minimum((q* p_old) + (q* dividend_payoff))
-                               for q in transitions]
+    temp=[minimum((q* p_old) + (q* dividend_payoff)) for q in transitions]
     ptwiddle = beta * temp
 
     phat_a = [p_new[1], ptwiddle[2]]

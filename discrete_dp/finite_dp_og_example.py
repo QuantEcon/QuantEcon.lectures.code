@@ -5,7 +5,7 @@ Filename: finite_dp_og_example.py
 """
 import numpy as np
 
-class SimpleOG(object):
+class SimpleOG:
 
     def __init__(self, B=10, M=5, alpha=0.5, beta=0.9):
         """

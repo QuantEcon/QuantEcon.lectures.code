@@ -3,9 +3,14 @@ Computes the path of consumption and debt for the previously described
 complete markets model where exogenous income follows a linear
 state space
 """
+function complete_ss(beta::AbstractFloat,
+                     b0::Union{AbstractFloat, Array},
+                     x0::Union{AbstractFloat, Array},
+                     A::Union{AbstractFloat, Array},
+                     C::Union{AbstractFloat, Array},
+                     S_y::Union{AbstractFloat, Array},
+                     T::Integer=12)
 
-function complete_ss(beta, b0, x0, A, C, S_y, T=12)
-    
     # Create a linear state space for simulation purposes
     # This adds "b" as a state to the linear state space system
     # so that setting the seed places shocks in same place for
@@ -28,9 +33,9 @@ function complete_ss(beta, b0, x0, A, C, S_y, T=12)
     c_hist = ones(T)*cbar[1]
 
     # Debt
-    x_hist, y_hist = simulate(lss,T)
+    x_hist, y_hist = simulate(lss, T)
     b_hist = (S_y * rm * x_hist - cbar[1]/(1.0-beta))
-    
+
 
     return c_hist, vec(b_hist), vec(y_hist), x_hist
 end
@@ -78,4 +83,3 @@ ax[2][:plot](1:N_simul, y_hist_com, label = "Income",
 ax[2][:legend](loc = "best", fontsize = 15)
 ax[2][:axhline](0, color = "k", lw = 1)
 ax[2][:set_xlabel]("Periods", fontsize = 13)
-

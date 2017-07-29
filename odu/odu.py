@@ -15,7 +15,7 @@ from numpy import maximum as npmax
 import numpy as np
 
 
-class SearchProblem(object):
+class SearchProblem:
     """
     A class to store a given parameterization of the "offer distribution
     unknown" model.

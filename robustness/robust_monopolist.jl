@@ -32,7 +32,6 @@ http://quant-econ.net/robustness.html#application
 using QuantEcon
 using Plots
 pyplot()
-using Grid
 
 # model parameters
 a_0     = 100
@@ -46,20 +45,20 @@ theta = 0.002
 ac    = (a_0 - c) / 2.0
 
 # Define LQ matrices
-R = [0 ac    0
-     ac -a_1 0.5
+R = [0 ac    0;
+     ac -a_1 0.5;
      0. 0.5  0]
 R = -R  # For minimization
-Q = [gam / 2.0]'
-A = [1. 0. 0.
-     0. 1. 0.
+Q = Matrix([gam / 2.0]')
+A = [1. 0. 0.;
+     0. 1. 0.;
      0. 0. rho]
 B = [0. 1. 0.]'
 C = [0. 0. sigma_d]'
 
 ## Functions
 
-function evaluate_policy(theta, F)
+function evaluate_policy(theta::AbstractFloat, F::AbstractArray)
     rlq = RBLQ(Q, R, A, B, C, bet, theta)
     K_F, P_F, d_F, O_F, o_F = evaluate_F(rlq, F)
     x0 = [1.0 0.0 0.0]'
@@ -69,14 +68,17 @@ function evaluate_policy(theta, F)
 end
 
 
-function value_and_entropy(emax, F, bw, grid_size=1000)
+function value_and_entropy{TF<:AbstractFloat}(emax::AbstractFloat,
+                                              F::AbstractArray{TF},
+                                              bw::String,
+                                              grid_size::Integer=1000)
     if lowercase(bw) == "worst"
         thetas = 1 ./ linspace(1e-8, 1000, grid_size)
     else
         thetas = -1 ./ linspace(1e-8, 1000, grid_size)
     end
 
-    data = Array{Float64}(grid_size, 2)
+    data = Array{TF}(grid_size, 2)
 
     for (i, theta) in enumerate(thetas)
         data[i, :] = collect(evaluate_policy(theta, F))
@@ -121,8 +123,8 @@ egrid_data = Array{Float64}[]
 for data_pair in data_pairs
     for data in data_pair
         x, y = data[:, 2], data[:, 1]
-        curve(z) = InterpIrregular(x, y, BCnearest, InterpLinear)[z]
-        push!(egrid_data, curve(egrid))
+        curve = LinInterp(x, y)
+        push!(egrid_data, curve.(egrid))
     end
 end
 plot(egrid, egrid_data, color=[:red :red :blue :blue])
@@ -131,4 +133,3 @@ plot!(egrid, egrid_data[1], fillrange=egrid_data[2],
 plot!(egrid, egrid_data[3], fillrange=egrid_data[4],
       fillcolor=:blue, fillalpha=0.1, color=:blue, legend=:none)
 plot!(xlabel="Entropy", ylabel="Value")
-

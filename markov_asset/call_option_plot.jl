@@ -4,8 +4,7 @@ Compare call option prices to consol price.
 =#
 
 using Plots
-include("asset_pricing.jl")
-plotly()
+pyplot()
 
 ap = AssetPriceModel(beta=0.9)
 zeta = 1.0

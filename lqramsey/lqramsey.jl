@@ -22,50 +22,49 @@ http://quant-econ.net/lqramsey.html
 =#
 using QuantEcon
 using PyPlot
-#pyplot()
 using LaTeXStrings
 
-abstract AbstractStochProcess
+abstract type AbstractStochProcess end
 
 
-type ContStochProcess <: AbstractStochProcess
-    A::Matrix
-    C::Matrix
+struct ContStochProcess{TF <: AbstractFloat} <: AbstractStochProcess
+    A::Matrix{TF}
+    C::Matrix{TF}
 end
 
 
-type DiscreteStochProcess <: AbstractStochProcess
-    P::Matrix
-    x_vals::Array
+struct DiscreteStochProcess{TF <: AbstractFloat} <: AbstractStochProcess
+    P::Matrix{TF}
+    x_vals::Matrix{TF}
 end
 
 
-type Economy{SP <: AbstractStochProcess}
-    bet::Real
-    Sg::Matrix
-    Sd::Matrix
-    Sb::Matrix
-    Ss::Matrix
+struct Economy{TF <: AbstractFloat, SP <: AbstractStochProcess}
+    bet::TF
+    Sg::Matrix{TF}
+    Sd::Matrix{TF}
+    Sb::Matrix{TF}
+    Ss::Matrix{TF}
     is_discrete::Bool
     proc::SP
 end
 
 
-type Path
-    g
-    d
-    b
-    s
-    c
-    l
-    p
-    tau
-    rvn
-    B
-    R
-    pi
-    Pi
-    xi
+struct Path{TF <: AbstractFloat}
+    g::Vector{TF}
+    d::Vector{TF}
+    b::Vector{TF}
+    s::Vector{TF}
+    c::Vector{TF}
+    l::Vector{TF}
+    p::Vector{TF}
+    tau::Vector{TF}
+    rvn::Vector{TF}
+    B::Vector{TF}
+    R::Vector{TF}
+    pi::Vector{TF}
+    Pi::Vector{TF}
+    xi::Vector{TF}
 end
 
 
@@ -84,7 +83,8 @@ function compute_exog_sequences(econ::Economy, x)
 end
 
 
-function compute_allocation(econ::Economy, Sm, nu, x, b)
+function compute_allocation(econ::Economy, Sm::Array, nu::AbstractFloat,
+                            x::Array, b::Array)
     Sg, Sd, Sb, Ss = econ.Sg, econ.Sd, econ.Sb, econ.Ss
 
     # Solve for the allocation given nu and x
@@ -100,7 +100,7 @@ function compute_allocation(econ::Economy, Sm, nu, x, b)
 end
 
 
-function compute_nu(a0, b0)
+function compute_nu(a0::AbstractFloat, b0::AbstractFloat)
     disc = a0^2 - 4a0*b0
 
     if disc >= 0
@@ -120,20 +120,21 @@ function compute_nu(a0, b0)
 end
 
 
-function compute_Pi(B, R, rvn, g, xi)
+function compute_Pi(B::Vector, R::Vector, rvn::Vector, g::Vector, xi::Vector)
     pi = B[2:end] - R[1:end-1] .* B[1:end-1] - rvn[1:end-1] + g[1:end-1]
     Pi = cumsum(pi .* xi)
     return pi, Pi
 end
 
 
-function compute_paths(econ::Economy{DiscreteStochProcess}, T)
+function compute_paths{TF <: AbstractFloat}(econ::Economy{TF, DiscreteStochProcess{TF}},
+                                            T::Integer)
     # simplify notation
     bet, Sg, Sd, Sb, Ss = econ.bet, econ.Sg, econ.Sd, econ.Sb, econ.Ss
     P, x_vals = econ.proc.P, econ.proc.x_vals
 
     mc = MarkovChain(P)
-    state=simulate(mc,T,init=1)
+    state = simulate(mc, T, init=1)
     x = x_vals[:, state]
 
     # Compute exogenous sequence
@@ -168,7 +169,8 @@ function compute_paths(econ::Economy{DiscreteStochProcess}, T)
 end
 
 
-function compute_paths(econ::Economy{ContStochProcess}, T)
+function compute_paths{TF<:AbstractFloat}(
+                econ::Economy{TF, ContStochProcess{TF}}, T::Integer)
     # simplify notation
     bet, Sg, Sd, Sb, Ss = econ.bet, econ.Sg, econ.Sd, econ.Sb, econ.Ss
     A, C = econ.proc.A, econ.proc.C
@@ -182,7 +184,7 @@ function compute_paths(econ::Economy{ContStochProcess}, T)
 
     # Generate a time series x of length T starting from x0
     nx, nw = size(C)
-    x = zeros(nx, T)
+    x = Matrix{TF}(nx, T)
     w = randn(nw, T)
     x[:, 1] = x0
     for t=2:T
@@ -206,7 +208,7 @@ function compute_paths(econ::Economy{ContStochProcess}, T)
 
     # compute remaining variables
     H = Sl'Sl - (Sb - Sc)' *(Sl - Sg)
-    L = Array{Float64}(T)
+    L = Vector{TF}(T)
     for t=1:T
         L[t] = var_quadratic_sum(A, C, H, bet, x[:, t])
     end
@@ -225,69 +227,29 @@ function compute_paths(econ::Economy{ContStochProcess}, T)
 end
 
 function gen_fig_1(path::Path)
-    #=
     T = length(path.c)
 
-    tr1, tr2, tr4 = GenericTrace[], GenericTrace[], GenericTrace[]
-
-    # Plot consumption, govt expenditure and revenue
-    push!(tr1, scatter(; y = path.rvn, legendgroup = "rev",
-     marker_color = "blue", name = L"$\tau_t \ell_t$"))
-    push!(tr1, scatter(; y = path.g, legendgroup = "gov",
-     marker_color = "red", name = L"$g_t$"))
-    push!(tr1, scatter(; y = path.c, marker_color = "green",name = L"$c_t$"))
-
-    # Plot govt expenditure and debt
-    push!(tr2, scatter(; x = 1:T, y = path.rvn, legendgroup = "rev",
-     marker_color = "blue", showlegend = false, name = L"$\tau_t \ell_t$"))
-    push!(tr2, scatter(; x = 1:T, y = path.g, legendgroup = "gov",
-     marker_color = "red", showlegend = false, name = L"$g_t$"))
-    push!(tr2, scatter(; x = 1:T-1, y = path.B[2:end],
-     marker_color = "orange", name = L"$B_{t+1}$"))
-
-    # Plot risk free return
-    tr3 = scatter(; x =1:T, y = path.R - 1, marker_color = "pink", name = L"$R_{t - 1}$")
-
-    # Plot revenue, expenditure and risk free rate
-    push!(tr4, scatter(; x = 1:T, y = path.rvn, legendgroup = "rev",
-     marker_color = "blue",  showlegend = false, name = L"$\tau_t \ell_t$"))
-    push!(tr4, scatter(; x = 1:T, y = path.g, legendgroup = "gov", 
-     marker_color = "red", showlegend = false, name = L"$g_t$"))
-    push!(tr4, scatter(; x = 1:T-1, y = path.pi,
-     marker_color = "violet", name = L"$\pi_{t+1}$"))
-
-    p1 = plot(tr1)
-    p2 = plot(tr2)
-    p3 = plot(tr3, Layout(; xaxis_title = "Time"))
-    p4 = plot(tr4, Layout(; xaxis_title = "Time"))
-    p = [p1 p2; p3 p4]
-    relayout!(p, height = 900)
-
-    p
-    =#
-    T = length(path.c)
-    
     figure(figsize=(12,8))
-    
+
     ax1=subplot(2, 2, 1)
     ax1[:plot](path.rvn)
     ax1[:plot](path.g)
     ax1[:plot](path.c)
     ax1[:set_xlabel]("Time")
     ax1[:legend]([L"$\tau_t \ell_t$",L"$g_t$",L"$c_t$"])
-    
+
     ax2=subplot(2, 2, 2)
     ax2[:plot](path.rvn)
     ax2[:plot](path.g)
     ax2[:plot](path.B[2:end])
     ax2[:set_xlabel]("Time")
     ax2[:legend]([L"$\tau_t \ell_t$",L"$g_t$",L"$B_{t+1}$"])
-    
+
     ax3=subplot(2, 2, 3)
     ax3[:plot](path.R-1)
     ax3[:set_xlabel]("Time")
     ax3[:legend]([L"$R_{t - 1}$"])
-    
+
     ax4=subplot(2, 2, 4)
     ax4[:plot](path.rvn)
     ax4[:plot](path.g)
@@ -309,16 +271,16 @@ function gen_fig_2(path::Path)
     #relayout!(p, height = 600)
 
     #p
-    
+
     T = length(path.c)
-    
+
     figure(figsize=(12,7))
-    
+
     ax1=subplot(2, 1, 1)
     ax1[:plot](2:T, path.xi)
     ax1[:set_xlabel]("Time")
     ax1[:legend]([L"$\xi_t$"])
-    
+
     ax2=subplot(2, 1, 2)
     ax2[:plot](2:T,path.Pi)
     ax2[:set_xlabel]("Time")

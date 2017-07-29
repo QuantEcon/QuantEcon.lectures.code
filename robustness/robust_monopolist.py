@@ -164,7 +164,7 @@ df_pairs = ((optimal_best_case, optimal_worst_case),
             (robust_best_case, robust_worst_case))
 
 
-class Curve(object):
+class Curve:
 
     def __init__(self, x, y):
         self.x, self.y = x, y
