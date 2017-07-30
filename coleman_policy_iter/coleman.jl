@@ -1,5 +1,5 @@
 #=
-Solving the optimal growth problem via Coleman policy function iteration. 
+Solving the optimal growth problem via Coleman policy function iteration.
 Author: Shunsuke Hori
 
 =#
@@ -16,19 +16,19 @@ f_prime: derivative of production function
 shocks::shock draws, used for Monte Carlo integration to compute expectation
 Kg: output value is stored
 """
-function coleman_operator!(g::Vector{Float64},
-                           grid::Vector{Float64},
-                           beta::Float64,
+function coleman_operator!(g::AbstractVector,
+                           grid::AbstractVector,
+                           beta::AbstractFloat,
                            u_prime::Function,
                            f::Function,
                            f_prime::Function,
-                           shocks::Vector{Float64},
-                           Kg::Vector{Float64}=similar(g))
-    
+                           shocks::AbstractVector,
+                           Kg::AbstractVector=similar(g))
+
     # This function requires the container of the output value as argument Kg
 
     # Construct linear interpolation object #
-    g_func=LinInterp(grid, g)    
+    g_func=LinInterp(grid, g)
 
     # solve for updated consumption value #
     for (i,y) in enumerate(grid)
@@ -42,14 +42,14 @@ function coleman_operator!(g::Vector{Float64},
 end
 
 # The following function does NOT require the container of the output value as argument
-function coleman_operator(g::Vector{Float64},
-                          grid::Vector{Float64},
-                          beta::Float64,
+function coleman_operator(g::AbstractVector,
+                          grid::AbstractVector,
+                          beta::AbstractFloat,
                           u_prime::Function,
                           f::Function,
                           f_prime::Function,
-                          shocks::Vector{Float64})
+                          shocks::AbstractVector)
 
-    return coleman_operator!(g, grid, beta, u_prime, 
+    return coleman_operator!(g, grid, beta, u_prime,
                              f, f_prime, shocks, similar(g))
 end
