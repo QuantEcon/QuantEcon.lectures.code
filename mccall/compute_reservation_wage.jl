@@ -18,18 +18,18 @@ Parameters
 ----------
 mcm : an instance of McCallModel
 return_values : bool (optional, default=false)
-    Return the value functions as well 
+    Return the value functions as well
 
 Returns
 -------
 w_bar : scalar
     The reservation wage
-    
+
 """
-function compute_reservation_wage(mcm; return_values=false)
+function compute_reservation_wage(mcm::McCallModel; return_values::Bool=false)
 
     V, U = solve_mccall_model(mcm)
-    w_idx = searchsortedfirst(V - U, 0)  
+    w_idx = searchsortedfirst(V - U, 0)
 
     if w_idx == length(V)
         w_bar = Inf

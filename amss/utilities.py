@@ -7,7 +7,7 @@ Created on Sun Feb 22 10:47:42 2015
 import numpy as np
 from scipy.interpolate import UnivariateSpline
 
-class interpolate_wrapper(object):
+class interpolate_wrapper:
     '''
     Wrapper to interpolate vector function
     '''
@@ -56,7 +56,7 @@ class interpolate_wrapper(object):
             fhat = np.vstack([f(x) for f in self.F.flatten()])
             return fhat.reshape( np.hstack((shape,len(x))) )
 
-class interpolator_factory(object):
+class interpolator_factory:
     '''
     Generates an interpolator factory which will interpolate vector functions
     '''

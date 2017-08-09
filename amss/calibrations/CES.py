@@ -7,7 +7,7 @@ Created on Tue Mar 10 08:55:03 2015
 
 import numpy as np
 
-class baseline(object):
+class baseline:
     beta = 0.9
     
     sigma = 2.

@@ -1,19 +1,20 @@
-type SimpleOG
-    B :: Int64
-    M :: Int64
-    alpha :: Float64
-    beta :: Float64
-    R :: Array{Float64}
-    Q :: Array{Float64}
+struct SimpleOG{TI <: Integer, T <: Real,
+                TR <: AbstractArray{T}, TQ <: AbstractArray{T}}
+    B :: TI
+    M :: TI
+    alpha :: T
+    beta :: T
+    R :: TR
+    Q :: TQ
 end
 
-function SimpleOG(;B=10, M=5, alpha=0.5, beta=0.9)
+function SimpleOG{T <: Real}(;B::Integer=10, M::Integer=5, alpha::T=0.5, beta::T=0.9)
 
     u(c) = c^alpha
     n = B + M + 1
     m = M + 1
 
-    R = Array{Float64}(n,m)
+    R = Matrix{T}(n, m)
     Q = zeros(Float64,n,m,n)
 
     for a in 0:M
@@ -22,6 +23,6 @@ function SimpleOG(;B=10, M=5, alpha=0.5, beta=0.9)
             R[s + 1, a + 1] = a<=s ? u(s - a) : -Inf
         end
     end
-    
+
     return SimpleOG(B, M, alpha, beta, R, Q)
 end

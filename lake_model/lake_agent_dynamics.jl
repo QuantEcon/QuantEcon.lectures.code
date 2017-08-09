@@ -5,7 +5,7 @@ Agent dynamics in the lake model
 using QuantEcon
 
 srand(42)
-lm = LakeModel(d=0, b=0)
+lm = LakeModel(d=0.0, b=0.0)
 T = 5000     # Simulation length
 
 alpha, lambda = lm.alpha, lm.lambda

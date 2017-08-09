@@ -28,7 +28,7 @@ else:
 epsilon = 1e-4  # A small number, used in the optimization routine
 
 
-class JvWorker(object):
+class JvWorker:
     r"""
     A Jovanovic-type model of employment with on-the-job search. The
     value function is given by

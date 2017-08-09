@@ -24,7 +24,7 @@ qs_names = ["Qa", "Qb", "Qpess", "Qopt"]
 the_qs = [qa, qb, qpess, qopt]
 
 
-class PriceHolder(object):
+class PriceHolder:
     """
     This holds the results for Harrison Kreps.  In particular, it
     accepts two matrices Qa and Qb and compares the single belief,

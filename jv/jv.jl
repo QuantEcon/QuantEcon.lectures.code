@@ -3,20 +3,12 @@
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
 
-@date: 2014-06-27
-
-References
-----------
-
-Simple port of the file quantecon.models.jv
-
-http://quant-econ.net/jl/jv.html
 =#
 
 using Distributions
 using QuantEcon
 
-# NOTE: only brute-force approach is available in bellman operator. 
+# NOTE: only brute-force approach is available in bellman operator.
 # Waiting on a simple constrained optimizer to be written in pure Julia
 
 """
@@ -33,7 +25,7 @@ for
 
 where
 
-* `x`: : human capital
+* `x`: human capital
 * `s` : search effort
 * `phi` : investment in human capital
 * `pi(s)` : probability of new offer given search level s
@@ -45,29 +37,30 @@ where
 
 - `A::Real` : Parameter in human capital transition function
 - `alpha::Real` : Parameter in human capital transition function
-- `bet::Real` : Discount factor in (0, 1)
-- `x_grid::Vector` : Grid for potential levels of x
+- `bet::AbstractFloat` : Discount factor in (0, 1)
+- `x_grid::AbstractVector` : Grid for potential levels of x
 - `G::Function` : Transition `function` for human captial
-- `pi_func::Function` : `function` mapping search effort to 
+- `pi_func::Function` : `function` mapping search effort to
    the probability of getting a new job offer
-- `F::UnivariateDistribution` : A univariate distribution from which 
+- `F::UnivariateDistribution` : A univariate distribution from which
    the value of new job offers is drawn
 - `quad_nodes::Vector` : Quadrature nodes for integrating over phi
 - `quad_weights::Vector` : Quadrature weights for integrating over phi
-- `epsilon::Float64` : A small number, used in optimization routine
+- `epsilon::AbstractFloat` : A small number, used in optimization routine
 
 """
-type JvWorker
-    A::Real
-    alpha::Real
-    bet::Real
-    x_grid::Vector{Float64}
+struct JvWorker{TR <: Real, TF <: AbstractFloat, TUD <: UnivariateDistribution,
+                TAV <: AbstractVector, TV <: Vector}
+    A::TR
+    alpha::TR
+    bet::TF
+    x_grid::TAV
     G::Function
     pi_func::Function
-    F::UnivariateDistribution
-    quad_nodes::Vector
-    quad_weights::Vector
-    epsilon::Float64
+    F::TUD
+    quad_nodes::TV
+    quad_weights::TV
+    epsilon::TF
 end
 
 """
@@ -78,7 +71,7 @@ Constructor with default values for `JvWorker`
  - `A::Real(1.4)` : Parameter in human capital transition function
  - `alpha::Real(0.6)` : Parameter in human capital transition function
  - `bet::Real(0.96)` : Discount factor in (0, 1)
- - `grid_size::Int(50)` : Number of points in discrete grid for `x`
+ - `grid_size::Integer(50)` : Number of points in discrete grid for `x`
  - `epsilon::Float(1e-4)` : A small number, used in optimization routine
 
 ##### Notes
@@ -88,13 +81,14 @@ each parameter
 
 """
 # use key word argument
-function JvWorker(;A=1.4, alpha=0.6, bet=0.96, grid_size=50, epsilon=1e-4)
+function JvWorker(;A::Real=1.4, alpha::Real=0.6, bet::Real=0.96,
+                  grid_size::Integer=50, epsilon::AbstractFloat=1e-4)
     G(x, phi) = A .* (x .* phi).^alpha
     pi_func = sqrt
     F = Beta(2, 2)
 
     # integration bounds
-    a, b, = quantile(F, 0.005), quantile(F, 0.995)
+    a, b = quantile(F, 0.005), quantile(F, 0.995)
 
     # quadrature nodes/weights
     nodes, weights = qnwlege(21, a, b)
@@ -106,7 +100,7 @@ function JvWorker(;A=1.4, alpha=0.6, bet=0.96, grid_size=50, epsilon=1e-4)
 
     # range for linspace(epsilon, grid_max, grid_size). Needed for
     # CoordInterpGrid below
-    x_grid = collect(linspace(epsilon, grid_max, grid_size))
+    x_grid = linspace(epsilon, grid_max, grid_size)
 
     JvWorker(A, alpha, bet, x_grid, G, pi_func, F, nodes, weights, epsilon)
 end
@@ -128,11 +122,11 @@ None, `new_V` is updated in place with the value function.
 
 ##### Notes
 
-Currently, only the brute-force approach is available. 
+Currently, only the brute-force approach is available.
 We are waiting on a simple constrained optimizer to be written in pure Julia
 
 """
-function bellman_operator!(jv::JvWorker, V::Vector, new_V::Vector)
+function bellman_operator!(jv::JvWorker, V::AbstractVector, new_V::AbstractVector)
 
     # simplify notation
     G, pi_func, F, bet, epsilon = jv.G, jv.pi_func, jv.F, jv.bet, jv.epsilon
@@ -152,13 +146,7 @@ function bellman_operator!(jv::JvWorker, V::Vector, new_V::Vector)
 
         function w(z)
             s, phi = z
-            function h(u)
-              out = similar(u)
-              for j in 1:length(u)
-                out[j] = Vf(max(G(x, phi), u[j])) * pdf(F, u[j])
-              end
-              out
-            end
+            h(u) = [Vf(max(G(x, phi), uval)) * pdf(F, uval) for uval in u]
             integral = do_quad(h, nodes, weights)
             q = pi_func(s) * integral + (1.0 - pi_func(s)) * Vf(G(x, phi))
 
@@ -167,11 +155,7 @@ function bellman_operator!(jv::JvWorker, V::Vector, new_V::Vector)
 
         for s in search_grid
             for phi in search_grid
-                if s + phi <= 1.0
-                    cur_val = -w((s, phi))
-                else
-                    cur_val = -1.0
-                end
+                cur_val = ifelse(s + phi <= 1.0, -w((s, phi)), -1.0)
                 if cur_val > max_val
                     max_val, max_s, max_phi = cur_val, s, phi
                 end
@@ -197,11 +181,12 @@ None, `out` is updated in place with the two policy functions.
 
 ##### Notes
 
-Currently, only the brute-force approach is available. 
+Currently, only the brute-force approach is available.
 We are waiting on a simple constrained optimizer to be written in pure Julia
 
 """
-function bellman_operator!(jv::JvWorker, V::Vector, out::Tuple{Vector, Vector})
+function bellman_operator!(jv::JvWorker, V::AbstractVector,
+                           out::Tuple{AbstractVector, AbstractVector})
 
     # simplify notation
     G, pi_func, F, bet, epsilon = jv.G, jv.pi_func, jv.F, jv.bet, jv.epsilon
@@ -224,13 +209,7 @@ function bellman_operator!(jv::JvWorker, V::Vector, out::Tuple{Vector, Vector})
 
         function w(z)
             s, phi = z
-            function h(u)
-              out = similar(u)
-              for j in 1:length(u)
-                out[j] = Vf(max(G(x, phi), u[j])) * pdf(F, u[j])
-              end
-              out
-            end
+            h(u) = [Vf(max(G(x, phi), uval)) * pdf(F, uval) for uval in u]
             integral = do_quad(h, nodes, weights)
             q = pi_func(s) * integral + (1.0 - pi_func(s)) * Vf(G(x, phi))
 
@@ -239,11 +218,7 @@ function bellman_operator!(jv::JvWorker, V::Vector, out::Tuple{Vector, Vector})
 
         for s in search_grid
             for phi in search_grid
-                if s + phi <= 1.0
-                    cur_val = -w((s, phi))
-                else
-                    cur_val = -1.0
-                end
+                cur_val = ifelse(s + phi <= 1.0, -w((s, phi)), -1.0)
                 if cur_val > max_val
                     max_val, max_s, max_phi = cur_val, s, phi
                 end
@@ -254,15 +229,8 @@ function bellman_operator!(jv::JvWorker, V::Vector, out::Tuple{Vector, Vector})
   end
 end
 
-function bellman_operator(jv::JvWorker, V::Vector; ret_policies=false)
-    if ret_policies
-        out = (similar(V), similar(V))
-    else
-        out = similar(V)
-    end
+function bellman_operator(jv::JvWorker, V::AbstractVector; ret_policies::Bool=false)
+    out = ifelse(ret_policies, (similar(V), similar(V)), similar(V))
     bellman_operator!(jv, V, out)
     return out
 end
-
-
-

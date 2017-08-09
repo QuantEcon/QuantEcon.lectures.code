@@ -305,7 +305,7 @@ class Planners_Allocation_Bellman:
         
         return cHist,nHist,Bhist,TauHist,sHist,muHist,RHist
     
-class BellmanEquation(object):
+class BellmanEquation:
     '''
     Bellman equation for the continuation of the Lucas-Stokey Problem
     '''

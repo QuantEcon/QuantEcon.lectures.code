@@ -2,7 +2,7 @@
 #=
 
 Code to simulate the model in Globalization and Synchronization of Innovation
-Cycles by Kiminori Matsuyama, Laura Gardini and Iryna Sushko 
+Cycles by Kiminori Matsuyama, Laura Gardini and Iryna Sushko
 
 See <http://www.centreformacroeconomics.ac.uk/Discussion-Papers/2015/CFMDP2015-27-Paper.pdf>
 
@@ -16,7 +16,8 @@ it is a quadratic. We know that h_j(n_k) > 0 so we can get its
 value by using the quadratic form
 """
 
-function h_j(j::Int64, nk, s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
+function h_j(j::Integer, nk::Real, s1::Real, s2::Real,
+             theta::Real, delta::Real, rho::Real)
     # Find out who's h we are evaluating
     if j == 1
         sj = s1
@@ -37,36 +38,50 @@ function h_j(j::Int64, nk, s1::Float64, s2::Float64, theta::Float64, delta::Floa
     return root
 end
 
-"Determine whether (n1, n2) is in the set DLL"
-function DLL(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
-    return (n1 <= s1_rho) && (n2 <= s2_rho)
-end
+"""
+Determine whether (n1, n2) is in the set DLL
+"""
+DLL(n1::Real, n2::Real,
+    s1_rho::Real, s2_rho::Real,
+    s1::Real, s2::Real,
+    theta::Real, delta::Real, rho::Real) =
+        (n1 <= s1_rho) && (n2 <= s2_rho)
 
-"Determine whether (n1, n2) is in the set DHH"
-function DHH(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
-    return (n1 >= h_j(1, n2, s1, s2, theta, delta, rho)) && (n2 >= h_j(2, n1, s1, s2, theta, delta, rho))
-end
+"""
+Determine whether (n1, n2) is in the set DHH
+"""
+DHH(n1::Real, n2::Real,
+    s1_rho::Real, s2_rho::Real,
+    s1::Real, s2::Real,
+    theta::Real, delta::Real, rho::Real) =
+        (n1 >= h_j(1, n2, s1, s2, theta, delta, rho)) && (n2 >= h_j(2, n1, s1, s2, theta, delta, rho))
 
-"Determine whether (n1, n2) is in the set DHL"
-function DHL(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
-    return (n1 >= s1_rho) && (n2 <= h_j(2, n1, s1, s2, theta, delta, rho))
-end
+"""
+Determine whether (n1, n2) is in the set DHL
+"""
+DHL(n1::Real, n2::Real,
+    s1_rho::Real, s2_rho::Real,
+    s1::Real, s2::Real,
+    theta::Real, delta::Real, rho::Real) =
+        (n1 >= s1_rho) && (n2 <= h_j(2, n1, s1, s2, theta, delta, rho))
 
-"Determine whether (n1, n2) is in the set DLH"
-function DLH(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
-    return (n1 <= h_j(1, n2, s1, s2, theta, delta, rho)) && (n2 >= s2_rho)
-end
+"""
+Determine whether (n1, n2) is in the set DLH
+"""
+DLH(n1::Real, n2::Real,
+    s1_rho::Real, s2_rho::Real,
+    s1::Real, s2::Real,
+    theta::Real, delta::Real, rho::Real) =
+        (n1 <= h_j(1, n2, s1, s2, theta, delta, rho)) && (n2 >= s2_rho)
 
 """
 Takes a current value for (n_{1, t}, n_{2, t}) and returns the
 values (n_{1, t+1}, n_{2, t+1}) according to the law of motion.
 """
-function one_step(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
+function one_step(n1::Real, n2::Real,
+                  s1_rho::Real, s2_rho::Real,
+                  s1::Real, s2::Real,
+                  theta::Real, delta::Real, rho::Real)
     # Depending on where we are, evaluate the right branch
     if DLL(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho)
         n1_tp1 = delta*(theta*s1_rho + (1-theta)*n1)
@@ -82,18 +97,17 @@ function one_step(n1::Float64, n2::Float64, s1_rho::Float64, s2_rho::Float64,
         n2_tp1 = delta*n2
     end
 
-    return n1_tp1, n2_tp1    
+    return n1_tp1, n2_tp1
 end
 
 """
-Given an initial condition, continues to yield new values of
-n1 and n2
+Given an initial condition, continues to yield new values of `n1` and `n2`
 """
-function new_n1n2(n1_0::Float64, n2_0::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64)
-    n1_tp1, n2_tp1 = one_step(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho)
-    return n1_tp1, n2_tp1
-end
+new_n1n2(n1_0::Real, n2_0::Real,
+         s1_rho::Real, s2_rho::Real,
+         s1::Real, s2::Real,
+         theta::Real, delta::Real, rho::Real) =
+            one_step(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho)
 
 """
 Takes initial values and iterates forward to see whether
@@ -105,41 +119,43 @@ they are not symmetric then it is possible they have the same measure
 of firms but are not yet synchronized. To address this, we check whether
 firms stay synchronized for `npers` periods with Euclidean norm
 
-Parameters
+##### Parameters
 ----------
-n1_0 : scalar(Float)
-    Initial normalized measure of firms in country one
-n2_0 : scalar(Float)
-    Initial normalized measure of firms in country two
-maxiter : scalar(Int)
-    Maximum number of periods to simulate
-npers : scalar(Int)
-    Number of periods we would like the countries to have the
-    same measure for
+- `n1_0` : `Real`,
+Initial normalized measure of firms in country one
+- `n2_0` : `Real`,
+Initial normalized measure of firms in country two
+- `maxiter` : `Integer`,
+Maximum number of periods to simulate
+- `npers` : `Integer`,
+Number of periods we would like the countries to have the same measure for
 
-Returns
+##### Returns
 -------
-synchronized : scalar(Bool)
-    Did they two economies end up synchronized
-pers_2_sync : scalar(Int)
-    The number of periods required until they synchronized
+- `synchronized` : `Bool`,
+Did they two economies end up synchronized
+- `pers_2_sync` : `Integer`,
+The number of periods required until they synchronized
 """
-function pers_till_sync(n1_0::Float64, n2_0::Float64, s1_rho::Float64, s2_rho::Float64,
-        s1::Float64, s2::Float64, theta::Float64, delta::Float64, rho::Float64,maxiter::Int64, npers)
-    
+function pers_till_sync(n1_0::Real, n2_0::Real,
+                        s1_rho::Real, s2_rho::Real,
+                        s1::Real, s2::Real,
+                        theta::Real, delta::Real, rho::Real,
+                        maxiter::Integer, npers::Integer)
+
     # Initialize the status of synchronization
     synchronized = false
     pers_2_sync = maxiter
     iters = 0
-    
+
     nsync = 0
 
     while (~synchronized) && (iters < maxiter)
         # Increment the number of iterations and get next values
         iters += 1
-        
+
         n1_t, n2_t = new_n1n2(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho)
-        
+
         # Check whether same in this period
         if abs(n1_t - n2_t) < 1e-8
             nsync += 1
@@ -156,33 +172,33 @@ function pers_till_sync(n1_0::Float64, n2_0::Float64, s1_rho::Float64, s2_rho::F
         end
         n1_0, n2_0 = n1_t, n2_t
     end
-    return synchronized, pers_2_sync    
+    return synchronized, pers_2_sync
 end
 
-function create_attraction_basis(s1_rho, s2_rho, s1, s2, theta, delta, rho,
-        maxiter, npers, npts)
+function create_attraction_basis{TR <: Real}(s1_rho::TR, s2_rho::TR,
+                                 s1::TR, s2::TR, theta::TR, delta::TR, rho::TR,
+                                 maxiter::Integer, npers::Integer, npts::Integer)
     # Create unit range with npts
     synchronized, pers_2_sync = false, 0
     unit_range = linspace(0.0, 1.0, npts)
 
     # Allocate space to store time to sync
-    time_2_sync = Array{Float64}(npts, npts)
+    time_2_sync = Matrix{TR}(npts, npts)
     # Iterate over initial conditions
     for (i, n1_0) in enumerate(unit_range)
         for (j, n2_0) in enumerate(unit_range)
-            #println((i,j))
             synchronized, pers_2_sync = pers_till_sync(n1_0, n2_0, s1_rho, s2_rho,
                                                         s1, s2, theta, delta, rho,
                                                         maxiter, npers)
             time_2_sync[i, j] = pers_2_sync
         end
-    end    
+    end
 
     return time_2_sync
-end             
+end
 
 
-# == Now we define a class for the model == #
+# == Now we define a type for the model == #
 
 """
 The paper "Globalization and Synchronization of Innovation Cycles" presents
@@ -196,69 +212,66 @@ synchronize their innovation cycles. To do this, we only need a few
 of the many parameters. In particular, we need the parameters listed
 below
 
-Parameters
+##### Parameters
 ----------
-s1 : scalar(Float)
-    Amount of total labor in country 1 relative to total worldwide labor
-theta : scalar(Float)
-    A measure of how mcuh more of the competitive variety is used in
-    production of final goods
-delta : scalar(Float)
-    Percentage of firms that are not exogenously destroyed every period
-rho : scalar(Float)
-    Measure of how expensive it is to trade between countries
+- `s1` : `Real`,
+Amount of total labor in country 1 relative to total worldwide labor
+- `theta` : `Real`,
+A measure of how mcuh more of the competitive variety is used in
+production of final goods
+- `delta` : `Real`,
+Percentage of firms that are not exogenously destroyed every period
+- `rho` : `Real`,
+Measure of how expensive it is to trade between countries
 """
-type MSGSync
-    s1::Float64
-    s2::Float64
-    s1_rho::Float64
-    s2_rho::Float64
-    theta::Float64
-    delta::Float64
-    rho::Float64
-end       
- 
-function MSGSync(s1::Float64=0.5, theta::Float64=2.5,
-                 delta::Float64=0.7, rho::Float64=0.2)  
+struct MSGSync{TR <: Real}
+    s1::TR
+    s2::TR
+    s1_rho::TR
+    s2_rho::TR
+    theta::TR
+    delta::TR
+    rho::TR
+end
+
+function MSGSync(s1::Real=0.5, theta::Real=2.5,
+                 delta::Real=0.7, rho::Real=0.2)
     # Store other cutoffs and parameters we use
     s2 = 1 - s1
-    s1_rho = min((s1 - rho*s2) / (1 - rho),1) 
+    s1_rho = min((s1 - rho*s2) / (1 - rho),1)
     s2_rho = 1 - s1_rho
-    
+
     model=MSGSync(s1,s2,s1_rho,s2_rho,theta,delta,rho)
-    
+
     return model
 end
-        
-function unpack_params(model::MSGSync)
-    return model.s1, model.s2, model.theta, model.delta, model.rho, model.s1_rho, model.s2_rho
-end
+
+unpack_params(model::MSGSync) =
+    model.s1, model.s2, model.theta, model.delta, model.rho, model.s1_rho, model.s2_rho
 
 """
-Simulates the values of (n1, n2) for T periods
+Simulates the values of `n1` and `n2` for `T` periods
 
-Parameters
+##### Parameters
 ----------
-n1_0 : scalar(Float)
-Initial normalized measure of firms in country one
-n2_0 : scalar(Float)
-Initial normalized measure of firms in country two
-T : scalar(Int)Number of periods to simulate
+- `n1_0` : `Real`, Initial normalized measure of firms in country one
+- `n2_0` : `Real`, Initial normalized measure of firms in country two
+- `T` : `Integer`, Number of periods to simulate
 
-Returns
+##### Returns
 -------
-n1 : Array{Float64}(ndim=1)
+- `n1` : `Vector{TR}(ndim=1) where TR <: Real`,
 A history of normalized measures of firms in country one
-n2 : Array{Float64}(ndim=1)
+- `n2` : `Vector{TR}(ndim=1) where TR <: Real`,
 A history of normalized measures of firms in country two
 """
-function simulate_n(model::MSGSync, n1_0::Float64, n2_0::Float64, T::Int64)
+function simulate_n{TR <: Real}(model::MSGSync, n1_0::TR, n2_0::TR, T::Integer)
     # Unpack parameters
     s1, s2, theta, delta, rho, s1_rho, s2_rho = unpack_params(model)
 
     # Allocate space
-    n1 = Array{Float64}(T)
-    n2 = Array{Float64}(T)
+    n1 = Vector{TR}(T)
+    n2 = Vector{TR}(T)
 
     # Simulate for T periods
     for t in 1:T
@@ -279,38 +292,41 @@ same measure of firms then they will by synchronized -- However, if
 they are not symmetric then it is possible they have the same measure
 of firms but are not yet synchronized. To address this, we check whether
 firms stay synchronized for `npers` periods with Euclidean norm
-        
-Parameters
-----------
-n1_0 : scalar(Float)
-    Initial normalized measure of firms in country one
-n2_0 : scalar(Float)
-    Initial normalized measure of firms in country two
-maxiter : scalar(Int)
-    Maximum number of periods to simulate
-npers : scalar(Int)
-    Number of periods we would like the countries to have the
-    same measure for
 
-Returns
+##### Parameters
+----------
+- `n1_0` : `Real`,
+Initial normalized measure of firms in country one
+- `n2_0` : `Real`,
+Initial normalized measure of firms in country two
+- `maxiter` : `Integer`,
+Maximum number of periods to simulate
+- `npers` : `Integer`,
+Number of periods we would like the countries to have the same measure for
+
+##### Returns
 -------
-synchronized : scalar(Bool)
-    Did they two economies end up synchronized
-pers_2_sync : scalar(Int)
-    The number of periods required until they synchronized
+- `synchronized` : `Bool`,
+Did they two economies end up synchronized
+- `pers_2_sync` : `Integer`,
+The number of periods required until they synchronized
 """
-function pers_till_sync(model::MSGSync, n1_0::Float64, n2_0::Float64,
-                        maxiter=500, npers=3)
+function pers_till_sync(model::MSGSync, n1_0::Real, n2_0::Real,
+                        maxiter::Integer=500, npers::Integer=3)
     # Unpack parameters
     s1, s2, theta, delta, rho, s1_rho, s2_rho = unpack_params(model)
-    
-    return pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho, maxiter, npers)
+
+    return pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2,
+                          theta, delta, rho, maxiter, npers)
 end
 
 """
 Creates an attraction basis for values of n on [0, 1] X [0, 1] with npts in each dimension
-"""    
-function create_attraction_basis(model::MSGSync; maxiter=250, npers=3, npts=50)
+"""
+function create_attraction_basis(model::MSGSync;
+                                 maxiter::Integer=250,
+                                 npers::Integer=3,
+                                 npts::Integer=50)
     # Unpack parameters
     s1, s2, theta, delta, rho, s1_rho, s2_rho = unpack_params(model)
 

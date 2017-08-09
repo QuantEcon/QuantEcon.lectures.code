@@ -37,8 +37,8 @@ if plot_choice == 'value_function':
     ax.contourf(pi_plot_grid, w_plot_grid, Z, 12, alpha=0.6, cmap=cm.jet)
     cs = ax.contour(pi_plot_grid, w_plot_grid, Z, 12, colors="black")
     ax.clabel(cs, inline=1, fontsize=10)
-    ax.set_xlabel('pi', fontsize=14)
-    ax.set_ylabel('wage', fontsize=14)
+    ax.set_xlabel('$\pi$', fontsize=14)
+    ax.set_ylabel('$w$', fontsize=14, rotation=0, labelpad=15)
 else:
     Z = np.empty((w_plot_grid_size, pi_plot_grid_size))
     for i in range(w_plot_grid_size):
@@ -47,8 +47,8 @@ else:
     fig, ax = plt.subplots()
     ax.contourf(pi_plot_grid, w_plot_grid, Z, 1, alpha=0.6, cmap=cm.jet)
     ax.contour(pi_plot_grid, w_plot_grid, Z, 1, colors="black")
-    ax.set_xlabel('pi', fontsize=14)
-    ax.set_ylabel('wage', fontsize=14)
+    ax.set_xlabel('$\pi$', fontsize=14)
+    ax.set_ylabel('$w$', fontsize=14, rotation=0, labelpad=15)
     ax.text(0.4, 1.0, 'reject')
     ax.text(0.7, 1.8, 'accept')
 

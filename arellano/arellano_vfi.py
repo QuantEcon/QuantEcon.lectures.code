@@ -21,7 +21,7 @@ import quantecon as qe
 from numba import jit
 
 
-class Arellano_Economy(object):
+class Arellano_Economy:
     """
     Arellano 2008 deals with a small open economy whose government
     invests in foreign assets in order to smooth the consumption of

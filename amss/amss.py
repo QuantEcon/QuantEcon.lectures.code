@@ -9,7 +9,7 @@ from scipy.optimize import root
 from scipy.optimize import fmin_slsqp
 import lucas_stokey as LS
 
-class Planners_Allocation_Bellman(object):
+class Planners_Allocation_Bellman:
     '''
     Compute the planner's allocation by solving Bellman
     equation.
@@ -156,7 +156,7 @@ class Planners_Allocation_Bellman(object):
         return cHist,nHist,Bhist,xHist,TauHist,THist,muHist,sHist
         
         
-class BellmanEquation(object):
+class BellmanEquation:
     '''
     Bellman equation for the continuation of the Lucas-Stokey Problem
     '''

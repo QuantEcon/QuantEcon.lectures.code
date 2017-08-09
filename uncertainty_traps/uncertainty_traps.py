@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 
-class UncertaintyTrapEcon(object):
+class UncertaintyTrapEcon:
 
     def __init__(self,
                 a=1.5,          # Risk aversion

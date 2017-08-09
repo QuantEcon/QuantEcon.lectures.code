@@ -18,7 +18,7 @@ import numpy as np
 from quantecon.distributions import BetaBinomial
 
 
-class CareerWorkerProblem(object):
+class CareerWorkerProblem:
     """
     An instance of the class is an object with data on a particular
     problem of this type, including probabilites, discount factor and

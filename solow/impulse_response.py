@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-class ImpulseResponse(object):
+class ImpulseResponse:
     """Base class representing an impulse response function for a Model."""
 
     # number of points to use for "padding"

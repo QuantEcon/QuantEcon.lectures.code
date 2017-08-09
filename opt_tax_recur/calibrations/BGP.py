@@ -6,7 +6,7 @@ Created on Wed Feb 18 15:32:07 2015
 """
 import numpy as np
 
-class baseline_BGP(object):
+class baseline_BGP:
     beta = 0.9
     psi = 0.69
 

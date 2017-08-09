@@ -97,7 +97,7 @@ A, k, K, L, Y = sym.symbols('A, k, K, L, Y')
 g, n, s, delta = sym.symbols('g, n, s, delta')
 
 
-class Model(object):
+class Model:
 
     __intensive_output = None
 
