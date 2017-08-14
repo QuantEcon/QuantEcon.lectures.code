@@ -1,3 +1,9 @@
+#=
+
+Author: Shunsuke Hori
+
+=#
+
 """
 This type is used to store the solution to the problem presented
 in the "Wald Friedman" notebook presented on the QuantEcon website.

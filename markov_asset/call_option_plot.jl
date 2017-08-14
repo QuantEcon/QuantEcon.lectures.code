@@ -1,8 +1,3 @@
-#=
-Compare call option prices to consol price.
-
-=#
-
 using Plots
 pyplot()
 

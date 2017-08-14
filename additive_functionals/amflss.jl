@@ -1,8 +1,7 @@
 #=
-Code for simulating, visualizing and manipulating additive and
-multiplicative functionals.
 
-@authors: Shunsuke Hori
+Author: Shunsuke Hori
+
 =#
 using QuantEcon
 using PyPlot

@@ -1,11 +1,7 @@
-
 #=
+
 @authors: Shunsuke Hori
 
-Markov Perfect Equilibrium for the simple duopoly example.
-
-See the lecture at http://quant-econ.net/jl/markov_perf.html for a
-description of the model.
 =#
 
 using QuantEcon

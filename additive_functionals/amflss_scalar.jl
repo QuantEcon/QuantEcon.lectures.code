@@ -1,8 +1,6 @@
 #=
-Code for simulating, visualizing and manipulating *scalar* additive and
-multiplicative functionals.
 
-@authors: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 

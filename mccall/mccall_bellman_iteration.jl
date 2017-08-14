@@ -1,10 +1,3 @@
-
-#=
-
-Implements iteration on the Bellman equations to solve the McCall growth model
-
-=#
-
 using Distributions
 
 # A default utility function

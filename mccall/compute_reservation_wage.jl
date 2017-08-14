@@ -1,10 +1,3 @@
-
-#=
-Compute the reservation wage in the McCall model.
-
-=#
-
-
 """
 Computes the reservation wage of an instance of the McCall model
 by finding the smallest w such that V(w) > U.

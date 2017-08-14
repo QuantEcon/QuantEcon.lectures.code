@@ -1,10 +1,3 @@
-
-#=
-
-Plot the price-dividend ratio in the risk neutral case, for the Markov asset pricing
-lecture.
-
-=#
 using QuantEcon
 using Plots
 using LaTeXStrings

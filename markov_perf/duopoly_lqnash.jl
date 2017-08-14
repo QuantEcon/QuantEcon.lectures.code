@@ -1,12 +1,6 @@
 #=
-Filename: lqnash.jl
+
 Authors: Chase Coleman, Thomas Sargent
-
-This file provides an example of a Markov Perfect Equilibrium for a
-simple duopoly example.
-
-See the lecture at http://quant-econ.net/markov_perfect.html for a
-description of the model.
 
 =#
 

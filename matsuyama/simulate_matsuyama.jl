@@ -1,10 +1,6 @@
-
 #=
 
-Code to simulate the model in Globalization and Synchronization of Innovation
-Cycles by Kiminori Matsuyama, Laura Gardini and Iryna Sushko
-
-See <http://www.centreformacroeconomics.ac.uk/Discussion-Papers/2015/CFMDP2015-27-Paper.pdf>
+Author: Shunsuke Hori
 
 =#
 

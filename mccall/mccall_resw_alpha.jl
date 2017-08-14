@@ -1,11 +1,3 @@
-
-#=
-
-Plots reservation wage against the job separation rate
-
-=#
-
-
 grid_size = 25  
 alpha_vals = linspace(0.05, 0.5, grid_size)  
 w_bar_vals = similar(alpha_vals)

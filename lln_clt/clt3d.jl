@@ -1,13 +1,8 @@
-
 #=
-Visual illustration of the central limit theorem in 3d
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-References
-----------
-Based off the original python  file clt3d.py
 =#
 using Plots
 pyplot()

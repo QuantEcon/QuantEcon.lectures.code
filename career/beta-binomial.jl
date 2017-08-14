@@ -1,10 +1,7 @@
 #=
-Illustrates the usage of the BetaBinomial type
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
-
-@date: 2014-08-04
 
 =#
 

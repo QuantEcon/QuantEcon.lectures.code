@@ -1,8 +1,6 @@
 #=
 
-main_LS.jl
-
-@author: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 using LS

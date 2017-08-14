@@ -1,9 +1,3 @@
-
-#=
-Plots of Lucas tree price for different gamma.
-
-=#
-
 using Plots, LaTeXStrings
 pyplot()
 

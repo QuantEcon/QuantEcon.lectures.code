@@ -1,19 +1,8 @@
-
 #=
-Example continuous state Markov chains within the stochastic growth
-model
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-@date: 2014-08-05
-
-References
-----------
-
-Simple port of the file quantecon/examples/stochasticgrowth.py
-
-http://quant-econ.net/stationary_densities.html
 =#
 using QuantEcon: LAE, lae_est
 using Distributions

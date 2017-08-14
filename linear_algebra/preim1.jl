@@ -1,11 +1,8 @@
-
 #=
-Illustrates preimages of functions
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-@date: 07/09/2014
 =#
 using Plots
 pyplot()

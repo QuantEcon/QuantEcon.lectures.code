@@ -1,8 +1,6 @@
 #=
 
-CES.jl
-
-@author: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 

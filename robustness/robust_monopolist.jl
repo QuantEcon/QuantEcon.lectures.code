@@ -1,32 +1,6 @@
-
 #=
 
-The robust control problem for a monopolist with adjustment costs.  The
-inverse demand curve is:
-
-  p_t = a_0 - a_1 y_t + d_t
-
-where d_{t+1} = \rho d_t + \sigma_d w_{t+1} for w_t ~ N(0,1) and iid.
-The period return function for the monopolist is
-
-  r_t =  p_t y_t - gam (y_{t+1} - y_t)^2 / 2 - c y_t
-
-The objective of the firm is E_t \sum_{t=0}^\infty \beta^t r_t
-
-For the linear regulator, we take the state and control to be
-
-    x_t = (1, y_t, d_t) and u_t = y_{t+1} - y_t
-
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date : 2014-07-05
-
-References
-----------
-
-Simple port of the file examples/robust_monopolist.py
-
-http://quant-econ.net/robustness.html#application
 
 =#
 using QuantEcon

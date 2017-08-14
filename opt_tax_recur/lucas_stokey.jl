@@ -1,8 +1,6 @@
 #=
 
-lucas_stokey.jl
-
-@author: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 

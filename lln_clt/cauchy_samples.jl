@@ -1,13 +1,8 @@
-
 #=
-Visual illustration of when the law of large numbers fails
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-References
-----------
-Based off the original python file cauchy_samples.py
 =#
 
 using Plots

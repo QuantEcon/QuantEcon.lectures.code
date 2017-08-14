@@ -1,15 +1,8 @@
 #=
-Shows
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-@date: 2014-08-05
-
-References
-----------
-
-http://quant-econ.net/career.html
 =#
 
 srand(41)  # reproducible results

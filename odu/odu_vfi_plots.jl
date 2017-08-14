@@ -1,11 +1,8 @@
-
 #=
-Filename: odu_vfi_plots.jl
+
 Author: Victoria Gregory
 
-Demonstrates the solution to the Offer Distribution Unknown Model
 =#
-
 using LaTeXStrings
 
 # Set up the problem and initial guess, solve by VFI

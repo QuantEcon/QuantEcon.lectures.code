@@ -1,8 +1,6 @@
 #=
 
-amss_figures.jl
-
-@author: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 

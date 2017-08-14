@@ -1,10 +1,7 @@
 #=
-Filename: aiyagari_compute_equilibrium.jl
-Author: Victoria Gregory
-Date: 8/30/2016
 
-Draws the aggregate supply and demand curves for
-the Aiyagari model.
+Author: Victoria Gregory
+
 =#
 
 

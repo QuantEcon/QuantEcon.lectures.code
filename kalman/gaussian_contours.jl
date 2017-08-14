@@ -1,9 +1,8 @@
-
 #=
-Plots of bivariate Gaussians to illustrate the Kalman filter.
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
+
 =#
 using Plots
 pyplot()

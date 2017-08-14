@@ -1,14 +1,8 @@
-
 #=
-Visual illustration of the law of large numbers.
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-References
-----------
-
-Based off the original python file illustrates_lln.py
 =#
 using Plots
 pyplot()

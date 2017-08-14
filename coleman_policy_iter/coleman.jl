@@ -1,5 +1,5 @@
 #=
-Solving the optimal growth problem via Coleman policy function iteration.
+
 Author: Shunsuke Hori
 
 =#

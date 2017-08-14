@@ -1,8 +1,7 @@
 #=
-Provides a function to solve for asset prices under optimistic beliefs in the
-Harrison -- Kreps model.
 
 Authors: Shunsuke Hori
+
 =#
 """
 Function to Solve Optimistic Beliefs

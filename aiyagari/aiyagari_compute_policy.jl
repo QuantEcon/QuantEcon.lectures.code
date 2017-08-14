@@ -1,10 +1,7 @@
 #=
-Filename: aiyagari_compute_policy.jl
-Author: Victoria Gregory
-Date: 8/29/2016
 
-Computes and plots the optimal policy of a household
-from the Aiyagari model, given prices.
+Author: Victoria Gregory
+
 =#
 
 using LaTeXStrings

@@ -1,9 +1,6 @@
 #=
 
-Filename: Model.jl.
 Author: Shunsuke Hori
-
-Defining an instance "Model" storing parameters, functional forms, and grid.
 
 =#
 

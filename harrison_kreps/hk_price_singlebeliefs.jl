@@ -1,8 +1,7 @@
 #=
-Provides a function to solve for asset prices under one set of beliefs in the
-Harrison -- Kreps model.
 
 Authors: Shunsuke Hori
+
 =#
 """
 Function to Solve Single Beliefs

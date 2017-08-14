@@ -1,14 +1,8 @@
-
 #=
-Visual illustration of the central limit theorem
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
 
-References
-----------
-
-Based off the original python file illustrates_clt.py
 =#
 using Plots
 pyplot()

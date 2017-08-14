@@ -1,10 +1,3 @@
-
-#=
-
-Plots reservation wage against unemployment compensation
-
-=#
-
 using Plots, LaTeXStrings
 pyplot()
 

@@ -1,4 +1,3 @@
-
 #=
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>

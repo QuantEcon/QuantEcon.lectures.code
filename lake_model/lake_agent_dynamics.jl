@@ -1,7 +1,3 @@
-#=
-Agent dynamics in the lake model
-=#
-
 using QuantEcon
 
 srand(42)

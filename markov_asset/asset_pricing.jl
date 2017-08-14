@@ -1,26 +1,6 @@
-
 #=
 
-Filename: asset_pricing.jl
-
 @authors: Spencer Lyon, Tom Sargent, John Stachurski
-
-Computes asset prices with a Lucas style discount factor when the endowment
-obeys geometric growth driven by a finite state Markov chain.  That is,
-
-.. math::
-    d_{t+1} = g(X_{t+1}) d_t
-
-where
-
-    * :math:`\{X_t\}` is a finite Markov chain with transition matrix P.
-
-    * :math:`g` is a given positive-valued function
-
-References
-----------
-
-    http://quant-econ.net/py/markov_asset.html
 
 =#
 

@@ -2,11 +2,6 @@
 
 @author : Victoria Gregory, John Stachurski
 
-@date: 2016-08-03
-
-Provides a class that simulates the dynamics of unemployment and employment in
-the lake model.
-
 =#
 
 

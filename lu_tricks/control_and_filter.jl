@@ -1,18 +1,7 @@
 #=
-Classical discrete time LQ optimal control and filtering problems. The
-control problems we consider take the form
 
-    \max \sum_{t = 0}^N \beta^t \{a_t y_t - h y^2_t / 2 - [d(L)y_t]^2 \}
+Author: Shunsuke Hori
 
-subject to h > 0, 0 < \beta < 1 and
-
- * y_{-1},y_{-2}, \dots, y_{-m} (initial conditions)
-
- * d(L) = d_0 + d_1L + d_2L^2 + \dots + d_mL^m
-
-The sequence {y_t} is scalar
-
-Authors: Shunsuke Hori
 =#
 
 using Polynomials

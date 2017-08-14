@@ -1,15 +1,6 @@
-
 #=
-Solving the optimal growth problem via value function iteration.
 
 @authors : Spencer Lyon, John Stachurski
-
-@date : Thu Feb 2 14:39:36 AEDT 2017
-
-References
-----------
-    
-https://lectures.quantecon.org/jl/optgrowth.html
 
 =#
 

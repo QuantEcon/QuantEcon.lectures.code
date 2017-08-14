@@ -1,9 +1,3 @@
-#=
-Plot the dividend process and the state process for the Markov asset pricing
-lecture.
-
-=#
-
 using QuantEcon
 using Plots
 using LaTeXStrings

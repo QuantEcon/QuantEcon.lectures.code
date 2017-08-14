@@ -1,17 +1,6 @@
-
 #=
-Example 2: LQ Ramsey model with discrete exogenous process.
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-21
-
-References
-----------
-
-Simple port of the file examples/lqramsey_discrete.py
-
-http://quant-econ.net/lqramsey.html
 
 =#
 

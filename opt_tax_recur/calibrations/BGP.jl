@@ -1,8 +1,6 @@
 #=
 
-BGP.jl
-
-@author: Shunsuke Hori
+Author: Shunsuke Hori
 
 =#
 

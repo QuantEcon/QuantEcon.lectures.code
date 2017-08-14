@@ -1,15 +1,3 @@
-
-#=
-
-Log linear optimal growth model, with log utility, CD production and
-multiplicative lognormal shock, so that
-
-    y = f(k, z) = z k^alpha
-
-with z ~ LN(mu, s).
-
-=#
-
 alpha = 0.4
 beta = 0.96
 mu = 0

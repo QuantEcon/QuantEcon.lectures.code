@@ -1,17 +1,6 @@
-
 #=
-Solves the "Offer Distribution Unknown" Model by value function
-iteration and a second faster method discussed in the corresponding
-quantecon lecture.
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-14
-
-References
-----------
-
-http://quant-econ.net/jl/odu.html
 
 =#
 

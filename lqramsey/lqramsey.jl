@@ -1,23 +1,6 @@
-
 #=
 
-This module provides code to compute Ramsey equilibria in a LQ economy with
-distortionary taxation.  The program computes allocations (consumption,
-leisure), tax rates, revenues, the net present value of the debt and other
-related quantities.
-
-Functions for plotting the results are also provided below.
-
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-21
-
-References
-----------
-
-Simple port of the file examples/lqramsey.py
-
-http://quant-econ.net/lqramsey.html
 
 =#
 using QuantEcon

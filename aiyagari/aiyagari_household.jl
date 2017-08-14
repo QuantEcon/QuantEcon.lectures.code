@@ -1,10 +1,7 @@
 #=
-Filename: aiyagari_household.jl
-Author: Victoria Gregory
-Date: 8/29/2016
 
-This file defines the Household type (and its constructor)
-for setting up an Aiyagari household problem.
+Author: Victoria Gregory
+
 =#
 
 using QuantEcon

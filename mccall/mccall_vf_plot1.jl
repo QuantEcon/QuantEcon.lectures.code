@@ -1,10 +1,3 @@
-
-#=
-
-Generate plots of value of employment and unemployment in the McCall model.
-
-=#
-
 using Plots, LaTeXStrings
 pyplot()
 

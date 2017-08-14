@@ -1,25 +1,7 @@
-
 #=
-
-In the following, ``uhat`` and ``tauhat`` are what the planner would
-choose if he could reset at time t, ``uhatdif`` and ``tauhatdif`` are
-the difference between those and what the planner is constrained to
-choose.  The variable ``mu`` is the Lagrange multiplier associated with
-the constraint at time t.
-
-For more complete description of inputs and outputs see the website.
 
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
           Victoria Gregory <victoria.gregory@nyu.edu>
-
-@date: 2014-08-21
-
-References
-----------
-
-Simple port of the file examples/evans_sargent.py
-
-http://quant-econ.net/hist_dep_policies.html
 
 =#
 using QuantEcon

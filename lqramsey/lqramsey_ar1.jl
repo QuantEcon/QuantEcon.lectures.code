@@ -1,18 +1,6 @@
-
 #=
 
-Example 1: Govt spending is AR(1) and state is (g, 1).
-
 @author : Spencer Lyon <spencer.lyon@nyu.edu>
-
-@date: 2014-08-21
-
-References
-----------
-
-Simple port of the file examples/lqramsey_ar1.py
-
-http://quant-econ.net/lqramsey.html
 
 =#
 

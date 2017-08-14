@@ -1,9 +1,8 @@
-
 #=
+
 @author : Spencer Lyon
           Victoria Gregory
 
-@date: 07/09/2014
 =#
 
 using Plots
