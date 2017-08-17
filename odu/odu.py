@@ -1,11 +1,6 @@
 """
-Filename: odu.py
 
 Authors: Thomas Sargent, John Stachurski
-
-Solves the "Offer Distribution Unknown" Model by value function
-iteration and a second faster method discussed in the corresponding
-quantecon lecture.
 
 """
 from scipy.interpolate import LinearNDInterpolator

@@ -1,9 +1,3 @@
-"""
-Plots consumption, income and debt for the simple infinite horizon LQ
-permanent income model with Gaussian iid income.
-"""
-
-
 import random
 import numpy as np
 import matplotlib.pyplot as plt

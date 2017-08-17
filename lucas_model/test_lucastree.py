@@ -1,8 +1,6 @@
 """
-Tests for lucastree
 
 @author : Spencer Lyon
-@date : 2014-08-05 09:15:45
 
 """
 from __future__ import division

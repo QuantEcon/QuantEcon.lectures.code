@@ -1,7 +1,3 @@
-"""
-QE by Tom Sargent and John Stachurski.
-Illustrates the span of two vectors in R^3.
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm

@@ -1,8 +1,6 @@
 """
-Tests for career module
 
 @author : Spencer Lyon
-@date : 2014-07-31
 
 """
 from __future__ import division

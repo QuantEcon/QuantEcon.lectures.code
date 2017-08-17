@@ -1,6 +1,4 @@
 """ 
-Code for simulating, visualizing and manipulating additive and
-multiplicative functionals.
 
 @authors: Chase Coleman, Balint Skoze, Tom Sargent
 

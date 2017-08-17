@@ -1,4 +1,3 @@
-
 def deadw(m):
     "Computes deadweight loss for market m."
     # == Create analogous market with no tax == #

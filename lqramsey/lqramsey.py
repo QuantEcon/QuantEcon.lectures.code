@@ -1,16 +1,6 @@
 """
-Filename: lqramsey.py
+
 Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
-
-This module provides code to compute Ramsey equilibria in a LQ economy with
-distortionary taxation.  The program computes allocations (consumption,
-leisure), tax rates, revenues, the net present value of the debt and other
-related quantities.
-
-Functions for plotting the results are also provided below.
-
-See the lecture at http://quant-econ.net/py/lqramsey.html for a description of
-the model.
 
 """
 

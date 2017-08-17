@@ -1,6 +1,7 @@
 """
-Filename: nx_demo.py
+
 Authors: John Stachurski and Thomas J. Sargent
+
 """
 
 import networkx as nx

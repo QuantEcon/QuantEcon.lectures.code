@@ -1,8 +1,6 @@
 """
-tests for quantecon.jv
 
 @author : Spencer Lyon
-@date : 2014-08-01 13:53:29
 
 """
 from __future__ import division

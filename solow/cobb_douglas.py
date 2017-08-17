@@ -1,8 +1,6 @@
 """
-Solow growth model with Cobb-Douglas aggregate production.
 
 @author : David R. Pugh
-@date : 2014-11-27
 
 """
 from __future__ import division

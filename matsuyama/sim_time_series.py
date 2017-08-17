@@ -1,4 +1,3 @@
-
 def plot_timeseries(n1_0, n2_0, s1=0.5, theta=2.5, delta=0.7, rho=0.2, ax=None):
     """
     Plot a single time series with initial conditions

@@ -1,8 +1,6 @@
 """
-Test suite for ces.py module.
 
 @author : David R. Pugh
-@date : 2014-12-08
 
 """
 import nose

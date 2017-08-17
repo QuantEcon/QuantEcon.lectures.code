@@ -1,7 +1,3 @@
-"""
-Filename: choatic_ts.py
-Reference: http://quant-econ.net/py/python_oop.html
-"""
 import matplotlib.pyplot as plt
 
 ch = Chaos(0.1, 4.0) 

@@ -1,8 +1,7 @@
 """
-Provides a function to solve for asset prices under pessimistic beliefs in the
-Harrison -- Kreps model.
 
 Authors: Chase Coleman, Tom Sargent
+
 """
 import numpy as np
 

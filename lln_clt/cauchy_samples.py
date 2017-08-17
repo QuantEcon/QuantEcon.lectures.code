@@ -1,4 +1,3 @@
-
 import numpy as np
 from scipy.stats import cauchy
 import matplotlib.pyplot as plt

@@ -1,39 +1,3 @@
-r"""
-Filename: lucastree.py
-
-Reference: http://quant-econ.net/py/lucas_model.html
-
-Solves the price function for the Lucas tree in a continuous state
-setting, using piecewise linear approximation for the sequence of
-candidate price functions.  The consumption endownment follows the log
-linear AR(1) process
-
-.. math::
-
-    log y' = \alpha log y + \sigma \epsilon
-
-where y' is a next period y and epsilon is an iid standard normal shock.
-Hence
-
-.. math::
-
-    y' = y^{\alpha} * \xi,
-
-where
-
-.. math::
-
-    \xi = e^(\sigma * \epsilon)
-
-The distribution phi of xi is
-
-.. math::
-
-    \phi = LN(0, \sigma^2),
-
-where LN means lognormal.
-
-"""
 import numpy as np
 from scipy.stats import lognorm
 from scipy.integrate import fixed_quad

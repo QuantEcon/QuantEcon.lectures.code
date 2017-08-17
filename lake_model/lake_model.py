@@ -1,10 +1,3 @@
-"""
-
-Provides a class that simulates the dynamics of unemployment and employment in
-the lake model. 
-
-"""
-
 import numpy as np
 
 class LakeModel:

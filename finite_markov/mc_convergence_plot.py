@@ -1,5 +1,5 @@
 """
-Filename: mc_convergence_plot.py
+
 Authors: John Stachurski, Thomas J. Sargent
 
 """

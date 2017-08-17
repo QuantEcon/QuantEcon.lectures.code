@@ -1,4 +1,3 @@
-
 mutable struct UncertaintyTrapEcon{TF<:AbstractFloat, TI<:Integer}
     a::TF          # Risk aversion
     gx::TF         # Production shock precision

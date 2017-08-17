@@ -1,12 +1,7 @@
 """
-Filename: illustrates_clt.py
+
 Authors: John Stachurski and Thomas J. Sargent
 
-Visual illustration of the central limit theorem.  Histograms draws of
-
-    Y_n := \sqrt{n} (\bar X_n - \mu)
-
-for a given distribution of X_i, and a given choice of n.
 """
 import numpy as np
 from scipy.stats import expon, norm

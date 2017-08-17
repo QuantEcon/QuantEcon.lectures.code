@@ -1,6 +1,7 @@
 """
-Filename: odu_vfi_plots.py
+
 Authors: John Stachurski and Thomas Sargent
+
 """
 
 import matplotlib.pyplot as plt

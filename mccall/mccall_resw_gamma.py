@@ -1,7 +1,3 @@
-"""
-Plots reservation wage against gamma
-
-"""
 import matplotlib.pyplot as plt
 
 grid_size = 25  

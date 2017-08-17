@@ -1,8 +1,6 @@
 """
-Filename: lqramsey_ar1.py
-Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
 
-Example 1: Govt spending is AR(1) and state is (g, 1).
+Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
 
 """
 

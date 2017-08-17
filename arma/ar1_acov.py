@@ -1,6 +1,3 @@
-"""
-Plots autocovariance function for AR(1) X' = phi X + epsilon
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 

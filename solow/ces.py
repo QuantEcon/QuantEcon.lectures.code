@@ -1,8 +1,6 @@
 """
-Solow model with constant elasticity of substitution (CES) production.
 
 @author : David R. Pugh
-@date : 2014-12-11
 
 """
 from __future__ import division

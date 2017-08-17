@@ -1,5 +1,4 @@
 """
-Test suite for solow.cobb_douglas.py module.
 
 @author : David R. Pugh
 

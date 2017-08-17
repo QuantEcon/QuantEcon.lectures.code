@@ -1,8 +1,6 @@
 """
-tests for quantecon.ifp
 
 @author : Spencer Lyon
-@date : 2014-08-01 12:09:17
 
 """
 from __future__ import division

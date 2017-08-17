@@ -1,8 +1,6 @@
 """
-tests for odu
 
 @author : Spencer Lyon
-@date : 2014-08-05 10:20:53
 
 """
 from __future__ import division

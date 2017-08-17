@@ -1,7 +1,3 @@
-"""
-Filename: bifurcation_diagram.py
-Reference: http://quant-econ.net/py/python_oop.html
-"""
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots()

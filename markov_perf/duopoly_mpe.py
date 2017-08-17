@@ -1,12 +1,8 @@
 """
+
 @authors: Chase Coleman, Thomas Sargent, John Stachurski
 
-Markov Perfect Equilibrium for the simple duopoly example.
-
-See the lecture at http://quant-econ.net/py/markov_perf.html for a
-description of the model.
 """
-
 from __future__ import division
 import numpy as np
 import quantecon as qe

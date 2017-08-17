@@ -1,11 +1,3 @@
-"""
-Beta distribution plots for Wald--Friedman lecture.
-
-The Beta distributions are discretized for ease of use in the dynamic
-programing code used in the lecture.
-
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as st

@@ -1,4 +1,3 @@
-
 using Plots
 pyplot()
 using LaTeXStrings

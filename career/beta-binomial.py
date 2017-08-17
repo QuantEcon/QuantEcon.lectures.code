@@ -1,5 +1,5 @@
 """
-Filename: beta-binomial.py
+
 Authors: John Stachurski, Thomas J. Sargent
 
 """

@@ -1,8 +1,3 @@
-"""
-Compare call option prices to consol price.
-
-"""
-
 import matplotlib.pyplot as plt
 from asset_pricing import *
 

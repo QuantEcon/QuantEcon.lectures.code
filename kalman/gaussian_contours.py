@@ -1,8 +1,7 @@
 """
-Filename: gaussian_contours.py
+
 Authors: John Stachurski and Thomas Sargent
 
-Plots of bivariate Gaussians to illustrate the Kalman filter.
 """
 
 from scipy import linalg

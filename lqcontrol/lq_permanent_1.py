@@ -1,8 +1,7 @@
 """
-Filename: lq_permanent_1.py
+
 Authors: John Stachurski and Thomas J. Sargent
 
-A permanent income / life-cycle model with iid income
 """
 
 import numpy as np

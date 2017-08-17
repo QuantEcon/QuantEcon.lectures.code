@@ -1,7 +1,3 @@
-"""
-QE by Tom Sargent and John Stachurski.
-Illustrates vectors in the plane.
-"""
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots()

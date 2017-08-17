@@ -1,9 +1,3 @@
-"""
-Solving Wald's sequential decision problem using dynamic programming.  An
-approach using classes.
-
-"""
-
 import numpy as np
 import scipy.stats as st
 import scipy.interpolate as interp

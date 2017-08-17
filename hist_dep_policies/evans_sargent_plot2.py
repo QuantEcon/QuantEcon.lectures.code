@@ -1,5 +1,4 @@
 """
-Plot 2 from the Evans Sargent model.
 
 @author: David Evans
 Edited by: John Stachurski

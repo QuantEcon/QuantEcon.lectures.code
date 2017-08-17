@@ -1,17 +1,6 @@
 """
-Filename: career.py
 
 Authors: Thomas Sargent, John Stachurski
-
-A class to solve the career / job choice model due to Derek Neal.
-
-References
-----------
-
-http://quant-econ.net/py/career.html
-
-..  [Neal1999] Neal, D. (1999). The Complexity of Job Mobility among
-    Young Men, Journal of Labor Economics, 17(2), 237-261.
 
 """
 import numpy as np

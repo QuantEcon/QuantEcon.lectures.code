@@ -1,6 +1,7 @@
 """
-Created on Wed Sep 23 17:00:17 EDT 2015
+
 @authors: John Stachurski, Thomas Sargent
+
 """
 
 import numpy as np

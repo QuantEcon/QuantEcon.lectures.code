@@ -1,4 +1,3 @@
-
 using QuantEcon
 using Plots
 pyplot()

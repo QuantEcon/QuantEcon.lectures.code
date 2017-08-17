@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Feb 22 10:47:42 2015
 
 @author: dgevans
+
 """
 import numpy as np
 from scipy.interpolate import UnivariateSpline

@@ -1,7 +1,3 @@
-"""
-Filename: solow.py
-Reference: http://quant-econ.net/py/python_oop.html
-"""
 from __future__ import division  # Omit for Python 3.x
 import numpy as np
 

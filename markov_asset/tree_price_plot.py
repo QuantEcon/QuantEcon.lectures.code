@@ -1,8 +1,3 @@
-"""
-Plots of Lucas tree price for different gamma.
-
-"""
-
 import matplotlib.pyplot as plt
 from asset_pricing import *
 

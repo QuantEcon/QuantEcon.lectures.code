@@ -1,8 +1,6 @@
 """
-Test suite for solow module.
 
 @author : David R. Pugh
-@date : 2014-11-27
 
 """
 from __future__ import division

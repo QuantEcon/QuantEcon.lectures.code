@@ -1,5 +1,3 @@
-## Filename: main_program.py
-
 from useful_functions import meaning_of_life
 
 x = meaning_of_life()

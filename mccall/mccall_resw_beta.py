@@ -1,8 +1,3 @@
-"""
-Plots reservation wage against the discount factor
-
-"""
-
 grid_size = 25  
 beta_vals = np.linspace(0.8, 0.99, grid_size)  
 w_bar_vals = np.empty_like(beta_vals)

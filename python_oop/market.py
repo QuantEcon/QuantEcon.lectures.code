@@ -1,8 +1,3 @@
-"""
-Filename: market.py
-Reference: http://quant-econ.net/py/python_oop.html
-"""
-
 from __future__ import division
 from scipy.integrate import quad
 

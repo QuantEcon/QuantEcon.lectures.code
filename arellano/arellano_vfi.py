@@ -1,17 +1,6 @@
 """
-Filename: arellano_vfi.py
 
 Authors: Chase Coleman, John Stachurski
-
-Solve the Arellano default risk model
-
-References
-----------
-
-http://quant-econ.net/py/arellano.html
-
-.. Arellano, Cristina. "Default risk and income fluctuations in emerging
-   economies." The American Economic Review (2008): 690-712.
 
 """
 from __future__ import division

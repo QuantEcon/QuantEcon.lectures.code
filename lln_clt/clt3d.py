@@ -1,12 +1,3 @@
-"""
-Origin: QE by John Stachurski and Thomas J. Sargent
-Filename: clt3d.py
-
-Visual illustration of the central limit theorem.  Produces a 3D figure
-showing the density of the scaled sample mean  \sqrt{n} \bar X_n plotted
-against n.
-"""
-
 import numpy as np
 from scipy.stats import beta, gaussian_kde
 from mpl_toolkits.mplot3d import Axes3D

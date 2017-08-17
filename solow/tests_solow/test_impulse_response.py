@@ -1,5 +1,4 @@
 """
-Test suite for the impulse_response.py module.
 
 @author : David R. Pugh
 

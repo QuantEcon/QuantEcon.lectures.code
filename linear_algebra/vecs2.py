@@ -1,7 +1,3 @@
-"""
-QE by Tom Sargent and John Stachurski.
-Illustrates scalar multiplication.
-"""
 import matplotlib.pyplot as plt
 import numpy as np
 

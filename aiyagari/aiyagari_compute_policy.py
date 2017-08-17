@@ -1,11 +1,6 @@
 """
-Created on Wed Sep 23 17:00:17 EDT 2015
+
 @authors: John Stachurski, Thomas Sargent
-
-Filename: aiyagari_compute_policy.py
-
-Computes and plots the optimal policy of a household from the Aiyagari model,
-given prices.
 
 """
 import numpy as np

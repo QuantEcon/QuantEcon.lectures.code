@@ -1,13 +1,3 @@
-"""
-
-Code to simulate the model in Globalization and Synchronization of Innovation
-Cycles by Kiminori Matsuyama, Laura Gardini and Iryna Sushko 
-
-See <http://www.centreformacroeconomics.ac.uk/Discussion-Papers/2015/CFMDP2015-27-Paper.pdf>
-
-"""
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns

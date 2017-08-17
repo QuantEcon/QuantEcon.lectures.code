@@ -1,19 +1,7 @@
 """
-Filename: oligopoly.py
+
 Authors: Chase Coleman, Tom Sargent, Balint Szoke
-This is an example for the lecture dyn_stack.rst from the QuantEcon
-series of lectures by Tom Sargent and John Stachurski.
-We deal with a large monopolistic firm who faces costs:
-C_t = e Q_t + .5 g Q_t^2 + .5 c (Q_{t+1} - Q_t)^2
-where the fringe firms face:
-sigma_t = d q_t + .5 h q_t^2 + .5 c (q_{t+1} - q_t)^2
-Additionally, there is a linear inverse demand curve of the form:
-p_t = A_0 - A_1 (Q_t + \bar{q_t}) + \eta_t,
-where:
-.. math
-    \eta_{t+1} = \rho \eta_t + C_{\varepsilon} \varepsilon_{t+1};
-    \varepsilon_{t+1} \sim N(0, 1)
-For more details, see the lecture.
+
 """
 import numpy as np
 import scipy.linalg as la

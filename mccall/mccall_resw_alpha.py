@@ -1,8 +1,3 @@
-"""
-Plots reservation wage against the job separation rate
-
-"""
-
 import matplotlib.pyplot as plt
 
 grid_size = 25  

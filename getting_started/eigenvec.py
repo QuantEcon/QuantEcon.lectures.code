@@ -1,8 +1,7 @@
 """
-Filename: eigenvec.py
+
 Authors: Tom Sargent and John Stachurski.
 
-Illustrates eigenvectors.
 """
 
 import matplotlib.pyplot as plt

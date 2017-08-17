@@ -1,8 +1,6 @@
 """
-Classes for generating and plotting impulse response functions.
 
 @author : David R. Pugh
-@date : 2014-10-06
 
 """
 from __future__ import division

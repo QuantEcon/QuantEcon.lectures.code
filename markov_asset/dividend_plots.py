@@ -1,8 +1,3 @@
-"""
-Plot the dividend process and the state process for the Markov asset pricing
-lecture.
-
-"""
 import numpy as np
 import matplotlib.pyplot as plt
 import quantecon as qe

@@ -1,8 +1,3 @@
-"""
-A simple optimal growth model, for testing the DiscreteDP class.
-
-Filename: finite_dp_og_example.py
-"""
 import numpy as np
 
 class SimpleOG:

@@ -1,8 +1,7 @@
 """
-Filename: illustrates_lln.py
+
 Authors: John Stachurski and Thomas J. Sargent
 
-Visual illustration of the law of large numbers.
 """
 
 import random

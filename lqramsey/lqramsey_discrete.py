@@ -1,8 +1,6 @@
 """
-Filename: lqramsey_discrete.py
-Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
 
-LQ Ramsey model with discrete exogenous process.
+Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
 
 """
 from numpy import array

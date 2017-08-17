@@ -1,8 +1,7 @@
 """
-Author: Chase Coleman
-Date: Today
 
-This file is some simple calculations for Tom
+Author: Chase Coleman
+
 """
 import numpy as np
 import scipy.linalg as la

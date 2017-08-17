@@ -1,12 +1,6 @@
 """
-Filename: jv.py
 
 Authors: Thomas Sargent, John Stachurski
-
-References
------------
-
-http://quant-econ.net/py/jv.html
 
 """
 from textwrap import dedent

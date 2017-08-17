@@ -1,8 +1,3 @@
-"""
-Plots reservation wage against unemployment compensation
-
-"""
-
 grid_size = 25  
 c_vals = np.linspace(2, 12, grid_size)  # values of unemployment compensation
 w_bar_vals = np.empty_like(c_vals)

@@ -1,9 +1,3 @@
-"""
-Impulse response functions for the LQ permanent income model permanent and
-transitory shocks.
-"""
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -1,7 +1,3 @@
-"""
-Filename: chaos_class.py
-Reference: http://quant-econ.net/py/python_oop.html
-"""
 class Chaos:
     """
     Models the dynamical system with :math:`x_{t+1} = r x_t (1 - x_t)`

@@ -1,19 +1,7 @@
 """
-Created on Mon Dec 16 19:12:17 2013
+
 @author: dgevans
 Edited by: Chase Coleman, John Stachurski
-
-This file corresponds to the Ramsey model from the QE lecture on
-history dependent policies:
-
-    http://quant-econ.net/py/hist_dep_policies.html
-
-In the following, ``uhat`` and ``tauhat`` are what the planner would choose if
-he could reset at time t, ``uhatdif`` and ``tauhatdif`` are the difference
-between those and what the planner is constrained to choose.  The variable
-``mu`` is the Lagrange multiplier associated with the constraint at time t.
-
-For more complete description of inputs and outputs see the website.
 
 """
 

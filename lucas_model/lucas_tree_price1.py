@@ -1,9 +1,3 @@
-"""
-Computes prices in the Lucas asset pricing model.
-
-Default parameterization.
-"""
-
 import matplotlib.pyplot as plt
 from lucastree import LucasTree, compute_lt_price
 

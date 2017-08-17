@@ -1,4 +1,3 @@
-
 grid_size = 25  
 gamma_vals = linspace(0.05, 0.95, grid_size)  
 w_bar_vals = similar(gamma_vals)
