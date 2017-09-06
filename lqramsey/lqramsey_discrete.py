@@ -1,16 +1,11 @@
-"""
-
-Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
-
-"""
 from numpy import array
-#import lqramsey
 
 # == Parameters == #
 beta = 1 / 1.05
 P = array([[0.8, 0.2, 0.0],
            [0.0, 0.5, 0.5],
            [0.0, 0.0, 1.0]])
+
 # == Possible states of the world == #
 # Each column is a state of the world. The rows are [g d b s 1]
 x_vals = array([[0.5, 0.5, 0.25],
@@ -18,6 +13,7 @@ x_vals = array([[0.5, 0.5, 0.25],
                 [2.2, 2.2, 2.2],
                 [0.0, 0.0, 0.0],
                 [1.0, 1.0, 1.0]])
+
 Sg = array((1, 0, 0, 0, 0)).reshape(1, 5)
 Sd = array((0, 1, 0, 0, 0)).reshape(1, 5)
 Sb = array((0, 0, 1, 0, 0)).reshape(1, 5)

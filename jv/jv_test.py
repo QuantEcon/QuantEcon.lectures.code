@@ -1,8 +1,3 @@
-"""
-
-Authors: John Stachurski and Thomas Sargent
-
-"""
 import matplotlib.pyplot as plt
 from quantecon import compute_fixed_point
 

@@ -1,12 +1,5 @@
-"""
-
-Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
-
-"""
-
 import numpy as np
 from numpy import array
-#import lqramsey
 
 # == Parameters == #
 beta = 1 / 1.05

@@ -1,9 +1,3 @@
-"""
-
-Authors: Thomas Sargent, Doc-Jin Jang, Jeong-hun Choi, John Stachurski
-
-"""
-
 import sys
 import numpy as np
 from numpy import sqrt, eye, dot, zeros, cumsum

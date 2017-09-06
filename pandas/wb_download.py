@@ -1,12 +1,3 @@
-"""
-Origin: QE by John Stachurski and Thomas J. Sargent
-Filename: wb_download.py
-Authors: John Stachurski, Tomohito Okabe
-LastModified: 29/08/2013
-
-Dowloads data from the World Bank site on GDP per capita and plots result for
-a subset of countries.
-"""
 import matplotlib.pyplot as plt
 import requests
 import pandas as pd
