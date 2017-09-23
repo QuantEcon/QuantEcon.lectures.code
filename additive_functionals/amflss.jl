@@ -120,7 +120,7 @@ function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
     # Build LSS type
     x0 = hcat(1, 0, nx0r, ny0r, ny0r)
     S0 = zeros(length(x0), length(x0))
-    lss = LSS(Abar, Bbar, Gbar, x0, S0)
+    lss = LSS(Abar, Bbar, Gbar, zeros(nx+4nm, 1), x0, S0)
 
     return lss
 end
