@@ -1,7 +1,3 @@
-
-using Distributions
-
-
 # Some global variables that will stay constant
 alpha = 0.013
 alpha_q = (1-(1-alpha)^3)
@@ -53,13 +49,13 @@ function compute_steady_state_quantities(c::AbstractFloat, tau::AbstractFloat)
     # Compute steady state employment and unemployment rates
     lm = LakeModel(lambda=lmda, alpha=alpha_q, b=b_param, d=d_param)
     x = rate_steady_state(lm)
-    e_rate, u_rate = x
+    u_rate, e_rate = x
 
     # Compute steady state welfare
     w = sum(V .* p_vec .* (w_vec - tau .> w_bar)) / sum(p_vec .* (w_vec - tau .> w_bar))
     welfare = e_rate .* w + u_rate .* U
 
-    return e_rate, u_rate, welfare
+    return u_rate, e_rate, welfare
 end
 
 """
@@ -68,7 +64,7 @@ Find tax level that will induce a balanced budget.
 """
 function find_balanced_budget_tax(c::Real)
     function steady_state_budget(t::Real)
-      e_rate, u_rate, w = compute_steady_state_quantities(c, t)
+      u_rate, e_rate, w = compute_steady_state_quantities(c, t)
       return t - u_rate * c
     end
 
@@ -88,13 +84,25 @@ welfare_vec = Vector{Float64}(Nc)
 
 for i = 1:Nc
     t = find_balanced_budget_tax(c_vec[i])
-    e_rate, u_rate, welfare = compute_steady_state_quantities(c_vec[i], t)
+    u_rate, e_rate, welfare = compute_steady_state_quantities(c_vec[i], t)
     tax_vec[i] = t
     unempl_vec[i] = u_rate
     empl_vec[i] = e_rate
     welfare_vec[i] = welfare
 end
 
-titles = ["Unemployment" "Employment" "Tax" "Welfare"]
-plot(c_vec, [unempl_vec empl_vec tax_vec welfare_vec],
-    color=:blue, lw=2, alpha=0.7, title=titles, legend=:none, layout=(2,2))
+fig, axes = subplots(2, 2, figsize=(15, 10))
+
+axes[1, 1][:plot](c_vec, unempl_vec, "b-", lw=2, alpha=0.7)
+axes[1, 1][:set](title="Unemployment")
+
+axes[1, 2][:plot](c_vec, empl_vec, "b-", lw=2, alpha=0.7)
+axes[1, 2][:set](title="Employment")
+
+axes[2, 1][:plot](c_vec, tax_vec, "b-", lw=2, alpha=0.7)
+axes[2, 1][:set](title="Tax")
+
+axes[2, 2][:plot](c_vec, welfare_vec, "b-", lw=2, alpha=0.7)
+axes[2, 2][:set](title="Welfare")
+
+fig[:tight_layout]()

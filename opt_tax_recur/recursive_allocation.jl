@@ -3,10 +3,10 @@
 Compute the planner's allocation by solving Bellman
 equation.
 """
-struct Planners_Allocation_Bellman{TP <: Para, TI <: Integer,
-                                   TVg <: AbstractVector, TVv <: AbstractVector,
-                                   TVp <: AbstractArray}
-    para::TP
+struct RecursiveAllocation{TP <: Model, TI <: Integer,
+                           TVg <: AbstractVector, TVv <: AbstractVector,
+                           TVp <: AbstractArray}
+    model::TP
     mc::MarkovChain
     S::TI
     T::BellmanEquation
@@ -17,26 +17,26 @@ struct Planners_Allocation_Bellman{TP <: Para, TI <: Integer,
 end
 
 """
-Initializes the class from the calibration `Para`
+Initializes the class from the calibration `Model`
 """
-function Planners_Allocation_Bellman(para::Para, mugrid::AbstractArray)
-    mc = MarkovChain(para.Pi)
-    G = para.G
-    S = size(para.Pi, 1) # number of states
-    #now find the first best allocation
-    Vf, policies, T, xgrid = solve_time1_bellman(para, mugrid)
+function RecursiveAllocation(model::Model, mugrid::AbstractArray)
+    mc = MarkovChain(model.Pi)
+    G = model.G
+    S = size(model.Pi, 1) # number of states
+    # now find the first best allocation
+    Vf, policies, T, xgrid = solve_time1_bellman(model, mugrid)
     T.time_0 = true #Bellman equation now solves time 0 problem
-    return Planners_Allocation_Bellman(para, mc, S, T, mugrid, xgrid, Vf, policies)
+    return RecursiveAllocation(model, mc, S, T, mugrid, xgrid, Vf, policies)
 end
 
 """
-Solve the time 1 Bellman equation for calibration `Para` and initial grid `mugrid0`
+Solve the time 1 Bellman equation for calibration `Model` and initial grid `mugrid0`
 """
-function solve_time1_bellman{TF <: AbstractFloat}(para::Para{TF}, mugrid::AbstractArray)
+function solve_time1_bellman{TF <: AbstractFloat}(model::Model{TF}, mugrid::AbstractArray)
     mugrid0 = mugrid
-    S = size(para.Pi, 1)
+    S = size(model.Pi, 1)
     #First get initial fit
-    PP = Planners_Allocation_Sequential(para)
+    PP = SequentialAllocation(model)
     c = Matrix{TF}(length(mugrid), 2)
     n = Matrix{TF}(length(mugrid), 2)
     x = Matrix{TF}(length(mugrid), 2)
@@ -61,7 +61,7 @@ function solve_time1_bellman{TF <: AbstractFloat}(para::Para{TF}, mugrid::Abstra
     xbar = [maximum(minimum(x, 1)), minimum(maximum(x, 1))]
     xgrid = linspace(xbar[1], xbar[2], length(mugrid0))
     #Now iterate on bellman equation
-    T = BellmanEquation(para, xgrid, policies)
+    T = BellmanEquation(model, xgrid, policies)
     diff = 1.0
     while diff > 1e-6
         if T.time_0 == false
@@ -89,7 +89,7 @@ end
 """
 Fits the policy functions PF using the points `xgrid` using interpolation
 """
-function fit_policy_function(PP::Planners_Allocation_Sequential,
+function fit_policy_function(PP::SequentialAllocation,
                             PF::Function, xgrid::AbstractArray)
     S = PP.S
     Vf = Vector{LinInterp}(S)
@@ -97,7 +97,7 @@ function fit_policy_function(PP::Planners_Allocation_Sequential,
     nf = Vector{LinInterp}(S)
     xprimef = Array{LinInterp}(S, S)
     for s in 1:S
-        PFvec = Array{typeof(PP.para).parameters[1]}(length(xgrid), 3+S)
+        PFvec = Array{typeof(PP.model).parameters[1]}(length(xgrid), 3+S)
         for (i_x, x) in enumerate(xgrid)
             PFvec[i_x, :] = PF(i_x, x, s)
         end
@@ -114,7 +114,7 @@ end
 """
 Finds the optimal allocation given initial government debt `B_` and state `s_0`
 """
-function time0_allocation(pab::Planners_Allocation_Bellman,
+function time0_allocation(pab::RecursiveAllocation,
                           B_::AbstractFloat, s0::Integer)
     xgrid = pab.xgrid
     if pab.T.time_0 == false
@@ -131,13 +131,13 @@ end
 """
 Simulates Ramsey plan for `T` periods
 """
-function simulate(pab::Planners_Allocation_Bellman,
+function simulate(pab::RecursiveAllocation,
                 B_::AbstractFloat, s_0::Integer, T::Integer,
                 sHist::Vector=QuantEcon.simulate(mc, s_0, T))
-    para, S, policies = pab.para, pab.S, pab.policies
-    beta, Pi, Uc = para.beta, para.Pi, para.Uc
+    model, S, policies = pab.model, pab.S, pab.policies
+    beta, Pi, Uc = model.beta, model.Pi, model.Uc
     cf, nf, xprimef = policies[1], policies[2], policies[3]
-    TF = typeof(para).parameters[1]
+    TF = typeof(model).parameters[1]
     cHist = Vector{TF}(T)
     nHist = Vector{TF}(T)
     Bhist = Vector{TF}(T)
@@ -146,7 +146,7 @@ function simulate(pab::Planners_Allocation_Bellman,
     RHist = Vector{TF}(T-1)
     #time0
     cHist[1], nHist[1], xprime = time0_allocation(pab, B_, s_0)
-    TauHist[1] = Tau(pab.para, cHist[1], nHist[1])[s_0]
+    TauHist[1] = Tau(pab.model, cHist[1], nHist[1])[s_0]
     Bhist[1] = B_
     muHist[1] = 0.0
     #time 1 onward
@@ -155,7 +155,7 @@ function simulate(pab::Planners_Allocation_Bellman,
         n = nf[s](x)
         c = [cf[shat](x) for shat in 1:S]
         xprime = [xprimef[s, sprime](x) for sprime in 1:S]
-        TauHist[t] = Tau(pab.para, c, n)[s]
+        TauHist[t] = Tau(pab.model, c, n)[s]
         u_c = Uc(c, n)
         Eu_c = dot(Pi[sHist[t-1], :], u_c)
         muHist[t] = pab.Vf[s](x)

@@ -1,22 +1,21 @@
-
 from scipy.stats import norm
 from scipy.optimize import brentq
 
 # Some global variables that will stay constant
-alpha  = 0.013               
-alpha_q = (1-(1-alpha)**3)   # quarterly (alpha is monthly)
-b      = 0.0124
-d      = 0.00822
-beta   = 0.98       
-gamma  = 1.0
-sigma  = 2.0
-    
+alpha   = 0.013
+alpha_q = (1-(1-alpha)**3)   # Quarterly (alpha is monthly)
+b       = 0.0124
+d       = 0.00822
+beta    = 0.98
+gamma   = 1.0
+sigma   = 2.0
+
 # The default wage distribution --- a discretized lognormal
 log_wage_mean, wage_grid_size, max_wage = 20, 200, 170
 logw_dist = norm(np.log(log_wage_mean), 1)
-w_vec = np.linspace(0, max_wage, wage_grid_size + 1) 
+w_vec = np.linspace(0, max_wage, wage_grid_size + 1)
 cdf = logw_dist.cdf(np.log(w_vec))
-pdf = cdf[1:]-cdf[:-1]
+pdf = cdf[1:] - cdf[:-1]
 p_vec = pdf / pdf.sum()
 w_vec = (w_vec[1:] + w_vec[:-1])/2
 
@@ -27,14 +26,14 @@ def compute_optimal_quantities(c, tau):
     workers given c and tau.
 
     """
-    
-    mcm = McCallModel(alpha=alpha_q, 
-                     beta=beta, 
-                     gamma=gamma, 
-                     c=c-tau,         # post tax compensation
-                     sigma=sigma, 
-                     w_vec=w_vec-tau, # post tax wages
-                     p_vec=p_vec)
+
+    mcm = McCallModel(alpha=alpha_q,
+                      beta=beta,
+                      gamma=gamma,
+                      c=c-tau,          # post tax compensation
+                      sigma=sigma,
+                      w_vec=w_vec-tau,  # post tax wages
+                      p_vec=p_vec)
 
     w_bar, V, U = compute_reservation_wage(mcm, return_values=True)
     lmda = gamma * np.sum(p_vec[w_vec-tau > w_bar])
@@ -48,17 +47,17 @@ def compute_steady_state_quantities(c, tau):
 
     """
     w_bar, lmda, V, U = compute_optimal_quantities(c, tau)
-    
+
     # Compute steady state employment and unemployment rates
-    lm = LakeModel(alpha=alpha_q, lmda=lmda, b=b, d=d) 
+    lm = LakeModel(alpha=alpha_q, lmda=lmda, b=b, d=d)
     x = lm.rate_steady_state()
-    e, u = x
-    
+    u, e = x
+
     # Compute steady state welfare
     w = np.sum(V * p_vec * (w_vec - tau > w_bar)) / np.sum(p_vec * (w_vec -
-        tau > w_bar))
+               tau > w_bar))
     welfare = e * w + u * U
-    
+
     return e, u, welfare
 
 
@@ -75,42 +74,35 @@ def find_balanced_budget_tax(c):
     return tau
 
 
+# Levels of unemployment insurance we wish to study
+c_vec = np.linspace(5, 140, 60)
 
-if __name__ == '__main__':
+tax_vec = []
+unempl_vec = []
+empl_vec = []
+welfare_vec = []
 
-    # Levels of unemployment insurance we wish to study
-    c_vec = np.linspace(5, 140, 60)
+for c in c_vec:
+    t = find_balanced_budget_tax(c)
+    e_rate, u_rate, welfare = compute_steady_state_quantities(c, t)
+    tax_vec.append(t)
+    unempl_vec.append(u_rate)
+    empl_vec.append(e_rate)
+    welfare_vec.append(welfare)
 
-    tax_vec = []
-    unempl_vec = []
-    empl_vec = []
-    welfare_vec = []
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-    for c in c_vec:
-        t = find_balanced_budget_tax(c)
-        e_rate, u_rate, welfare = compute_steady_state_quantities(c, t)
-        tax_vec.append(t)
-        unempl_vec.append(u_rate)
-        empl_vec.append(e_rate)
-        welfare_vec.append(welfare)
+axes[0, 0].plot(c_vec, unempl_vec, 'b-', lw=2, alpha=0.7)
+axes[0, 0].set_title('Unemployment')
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+axes[0, 1].plot(c_vec, empl_vec, 'b-', lw=2, alpha=0.7)
+axes[0, 1].set_title('Employment')
 
-    ax = axes[0, 0]
-    ax.plot(c_vec, unempl_vec, 'b-', lw=2, alpha=0.7)
-    ax.set_title('unemployment')
+axes[1, 0].plot(c_vec, tax_vec, 'b-', lw=2, alpha=0.7)
+axes[1, 0].set_title('Tax')
 
-    ax = axes[0, 1]
-    ax.plot(c_vec, empl_vec, 'b-', lw=2, alpha=0.7)
-    ax.set_title('employment')
+axes[1, 1].plot(c_vec, welfare_vec, 'b-', lw=2, alpha=0.7)
+axes[1, 1].set_title('Welfare')
 
-    ax = axes[1, 0]
-    ax.plot(c_vec, tax_vec, 'b-', lw=2, alpha=0.7)
-    ax.set_title('tax')
-
-    ax = axes[1, 1]
-    ax.plot(c_vec, welfare_vec, 'b-', lw=2, alpha=0.7)
-    ax.set_title('welfare')
-
-    plt.tight_layout()
-    plt.show()
+plt.tight_layout()
+plt.show()

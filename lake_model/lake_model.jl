@@ -35,8 +35,8 @@ function LakeModel(;lambda::AbstractFloat=0.283,
                     d::AbstractFloat=0.00822)
 
     g = b - d
-    A = [ (1-d) * (1-alpha)  (1-d) * lambda;
-          (1-d) * alpha + b (1-lambda) * (1-d) + b]
+    A = [(1-lambda) * (1-d) + b  (1-d) * alpha + b;
+         (1-d) * lambda          (1-d) * (1-alpha)]
     A_hat = A ./ (1 + g)
 
     return LakeModel(lambda, alpha, b, d, g, A, A_hat)

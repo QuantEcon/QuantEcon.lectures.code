@@ -18,11 +18,7 @@ class LakeModel:
     
     """
     def __init__(self, lmda=0.283, alpha=0.013, b=0.0124, d=0.00822):
-        self._lmda = lmda
-        self._alpha = alpha
-        self._b = b
-        self._d = d
-
+        self._lmda, self._alpha, self._b, self._d = lmda, alpha, b, d
         self.compute_derived_values()
 
     def compute_derived_values(self):
@@ -30,8 +26,8 @@ class LakeModel:
         lmda, alpha, b, d = self._lmda, self._alpha, self._b, self._d
 
         self._g = b - d
-        self._A = np.array([ [(1-d) * (1-alpha), (1-d) * lmda],
-                             [(1-d) * alpha + b, (1-lmda) * (1-d) + b]])
+        self._A = np.array([[(1-d) * (1-lmda) + b, (1-d) * alpha + b],
+                            [(1-d) * lmda,         (1-d) * (1-alpha)]])
 
         self._A_hat = self._A / (1 + self._g)
         
@@ -117,7 +113,7 @@ class LakeModel:
             Contains sequence of employment and unemployment stocks
         """
 
-        X = np.atleast_1d(X0) # recast as array just in case
+        X = np.atleast_1d(X0)  # Recast as array just in case
         for t in range(T):
             yield X
             X = self.A @ X
@@ -139,7 +135,7 @@ class LakeModel:
             Contains sequence of employment and unemployment rates
 
         """
-        x = np.atleast_1d(x0) # recast as array just in case
+        x = np.atleast_1d(x0)  # Recast as array just in case
         for t in range(T):
             yield x
             x = self.A_hat @ x
