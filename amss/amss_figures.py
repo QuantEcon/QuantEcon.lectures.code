@@ -1,14 +1,4 @@
-"""
-
-@author: dgevans
-
-"""
 import matplotlib.pyplot as plt
-import numpy as np
-import lucas_stokey as LS
-from BGP import M1
-from CES import M1 as M_convergence
-from CES import M_time_example
 
 #initialize mugrid for value function iteration
 muvec = np.linspace(-0.7,0.01,200)
@@ -19,7 +9,7 @@ Time Varying Example
 '''
 
 M_time_example.transfers = True #Government can use transfers
-PP_seq_time = LS.Planners_Allocation_Sequential(M_time_example) #solve sequential problem
+PP_seq_time = Planners_Allocation_Sequential(M_time_example) #solve sequential problem
 PP_im_time = Planners_Allocation_Bellman(M_time_example,muvec)
 
 sHist_h = np.array([0,1,2,3,5,5,5])
@@ -70,8 +60,7 @@ plt.plot(M_time_example.Theta[sHist_l]*sim_im_l[1],'-or')
 plt.plot(M_time_example.Theta[sHist_h]*sim_seq_h[1],'-^k')
 plt.plot(M_time_example.Theta[sHist_h]*sim_im_h[1],'-^r')
 plt.tight_layout()
-plt.savefig('TaxSequence_time_varying_AMSS.png')
-
+plt.show()
 
 
 
@@ -80,8 +69,8 @@ BGP Example
 '''
 
 M1.transfers = False #Government can use transfers
-PP_seq = LS.Planners_Allocation_Sequential(M1) #solve sequential problem
-PP_bel = LS.Planners_Allocation_Bellman(M1,muvec) #solve recursive problem
+PP_seq = Planners_Allocation_Sequential(M1) #solve sequential problem
+PP_bel = Planners_Allocation_Bellman(M1,muvec) #solve recursive problem
 PP_im = Planners_Allocation_Bellman(M1,muvec)
 
 T = 20
@@ -126,8 +115,9 @@ plt.title('Output')
 plt.plot(M1.Theta[sHist]*sim_seq[1],'-ok')
 #plt.plot(M1.Theta[sHist]*sim_bel[1],'-xk')
 plt.plot(M1.Theta[sHist]*sim_im[1],'-^k')
-plt.savefig('TaxSequence_AMSS.png')
 plt.tight_layout()
+plt.show()
+
 
 
 #Now long simulations
@@ -164,7 +154,7 @@ plt.title('Output')
 plt.plot(M1.Theta[sHist_long]*sim_seq_long[1],'-k')
 plt.plot(M1.Theta[sHist_long]*sim_im_long[1],'-.k')
 plt.tight_layout()
-plt.savefig('Long_SimulationAMSS.png')
+plt.show()
 
 '''
 Show Convergence example
@@ -211,5 +201,4 @@ plt.subplot(3,2,6)
 plt.title('Output')
 plt.plot(M_convergence.Theta[sHist_long]*sim_seq_convergence[1],'-k')
 plt.tight_layout()
-plt.savefig('Convergence_SimulationAMSS.png')
-
+plt.show()
