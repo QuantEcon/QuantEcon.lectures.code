@@ -15,10 +15,10 @@ for (i, c) in enumerate(c_vals)
 end
 
 plot(c_vals, 
-    w_bar_vals, 
-    lw=2, 
-    alpha=0.7, 
-    xlabel="unemployment compensation",
-    ylabel="reservation wage",
-    label=L"$\bar w$ as a function of $c$")
+     w_bar_vals, 
+     lw=2, 
+     α=0.7, 
+     xlabel="unemployment compensation",
+     ylabel="reservation wage",
+     label=L"$\bar w$ as a function of $c$")
 

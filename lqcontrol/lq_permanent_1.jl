@@ -1,5 +1,6 @@
 using QuantEcon
 using Plots
+using Plots.PlotMeasures
 pyplot()
 
 # == Model parameters == #

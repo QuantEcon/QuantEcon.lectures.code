@@ -2,9 +2,9 @@ using Distributions
 
 # A default utility function
 
-function u(c::Real, sigma::Real)
+function u(c::Real, σ::Real)
     if c > 0
-        return (c^(1 - sigma) - 1) / (1 - sigma)
+        return (c^(1 - σ) - 1) / (1 - σ)
     else
         return -10e6
     end
@@ -21,22 +21,22 @@ const default_p_vec = pdf(dist)
 mutable struct McCallModel{TF <: AbstractFloat,
                            TAV <: AbstractVector{TF},
                            TAV2 <: AbstractVector{TF}}
-    alpha::TF        # Job separation rate
-    beta::TF         # Discount rate
-    gamma::TF        # Job offer rate
+    α::TF        # Job separation rate
+    β::TF         # Discount rate
+    γ::TF        # Job offer rate
     c::TF            # Unemployment compensation
-    sigma::TF        # Utility parameter
+    σ::TF        # Utility parameter
     w_vec::TAV # Possible wage values
     p_vec::TAV2 # Probabilities over w_vec
 
-    McCallModel(alpha::TF=0.2,
-                beta::TF=0.98,
-                gamma::TF=0.7,
+    McCallModel(α::TF=0.2,
+                β::TF=0.98,
+                γ::TF=0.7,
                 c::TF=6.0,
-                sigma::TF=2.0,
+                σ::TF=2.0,
                 w_vec::TAV=default_w_vec,
                 p_vec::TAV2=default_p_vec) where {TF, TAV, TAV2} =
-        new{TF, TAV, TAV2}(alpha, beta, gamma, c, sigma, w_vec, p_vec)
+        new{TF, TAV, TAV2}(α, β, γ, c, σ, w_vec, p_vec)
 end
 
 """
@@ -47,15 +47,15 @@ place (i.e, modified by this function).  The new value of U is returned.
 function update_bellman!(mcm::McCallModel, V::AbstractVector,
                          V_new::AbstractVector, U::Real)
     # Simplify notation
-    alpha, beta, sigma, c, gamma = mcm.alpha, mcm.beta, mcm.sigma, mcm.c, mcm.gamma
+    α, β, σ, c, γ = mcm.α, mcm.β, mcm.σ, mcm.c, mcm.γ
 
     for (w_idx, w) in enumerate(mcm.w_vec)
         # w_idx indexes the vector of possible wages
-        V_new[w_idx] = u(w, sigma) + beta * ((1 - alpha) * V[w_idx] + alpha * U)
+        V_new[w_idx] = u(w, σ) + β * ((1 - α) * V[w_idx] + α * U)
     end
 
-    U_new = u(c, sigma) + beta * (1 - gamma) * U +
-                    beta * gamma * dot(max.(U, V), mcm.p_vec)
+    U_new = u(c, σ) + β * (1 - γ) * U +
+                    β * γ * dot(max.(U, V), mcm.p_vec)
 
     return U_new
 end
