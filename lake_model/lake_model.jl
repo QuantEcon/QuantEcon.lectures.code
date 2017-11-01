@@ -6,8 +6,8 @@
 
 
 struct LakeModel{TF <: AbstractFloat}
-    lambda::TF
-    alpha::TF
+    λ::TF
+    α::TF
     b::TF
     d::TF
     g::TF
@@ -20,8 +20,8 @@ Constructor with default values for `LakeModel`
 
 ##### Fields of `LakeModel`
 
-  - lambda : job finding rate
-  - alpha : dismissal rate
+  - λ : job finding rate
+  - α : dismissal rate
   - b : entry rate into labor force
   - d : exit rate from labor force
   - g : net entry rate
@@ -29,17 +29,17 @@ Constructor with default values for `LakeModel`
   - A_hat : updates rate
 
 """
-function LakeModel(;lambda::AbstractFloat=0.283,
-                    alpha::AbstractFloat=0.013,
+function LakeModel(;λ::AbstractFloat=0.283,
+                    α::AbstractFloat=0.013,
                     b::AbstractFloat=0.0124,
                     d::AbstractFloat=0.00822)
 
     g = b - d
-    A = [(1-lambda) * (1-d) + b  (1-d) * alpha + b;
-         (1-d) * lambda          (1-d) * (1-alpha)]
+    A = [(1-λ) * (1-d) + b  (1-d) * α + b;
+         (1-d) * λ          (1-d) * (1-α)]
     A_hat = A ./ (1 + g)
 
-    return LakeModel(lambda, alpha, b, d, g, A, A_hat)
+    return LakeModel(λ, α, b, d, g, A, A_hat)
 end
 
 """

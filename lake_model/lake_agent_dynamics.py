@@ -3,10 +3,10 @@ from quantecon import MarkovChain
 lm = LakeModel(d=0, b=0)
 T = 5000  # Simulation length
 
-alpha, lmda = lm.alpha, lm.lmda
+α, λ = lm.α, lm.λ
 
-P = [[1 - lmda,   lmda],
-     [alpha, 1 - alpha]]
+P = [[1 - λ,    λ],
+     [α,    1 - α]]
 
 mc = MarkovChain(P)
 

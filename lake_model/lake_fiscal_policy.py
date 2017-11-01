@@ -2,13 +2,13 @@ from scipy.stats import norm
 from scipy.optimize import brentq
 
 # Some global variables that will stay constant
-alpha   = 0.013
-alpha_q = (1-(1-alpha)**3)   # Quarterly (alpha is monthly)
-b       = 0.0124
-d       = 0.00822
-beta    = 0.98
-gamma   = 1.0
-sigma   = 2.0
+α   = 0.013
+α_q = (1-(1-α)**3)   # Quarterly (α is monthly)
+b   = 0.0124
+d   = 0.00822
+β   = 0.98
+γ   = 1.0
+σ   = 2.0
 
 # The default wage distribution --- a discretized lognormal
 log_wage_mean, wage_grid_size, max_wage = 20, 200, 170
@@ -20,42 +20,42 @@ p_vec = pdf / pdf.sum()
 w_vec = (w_vec[1:] + w_vec[:-1])/2
 
 
-def compute_optimal_quantities(c, tau):
+def compute_optimal_quantities(c, τ):
     """
     Compute the reservation wage, job finding rate and value functions of the
-    workers given c and tau.
+    workers given c and τ.
 
     """
 
-    mcm = McCallModel(alpha=alpha_q,
-                      beta=beta,
-                      gamma=gamma,
-                      c=c-tau,          # post tax compensation
-                      sigma=sigma,
-                      w_vec=w_vec-tau,  # post tax wages
+    mcm = McCallModel(α=α_q,
+                      β=β,
+                      γ=γ,
+                      c=c-τ,          # post tax compensation
+                      σ=σ,
+                      w_vec=w_vec-τ,  # post tax wages
                       p_vec=p_vec)
 
     w_bar, V, U = compute_reservation_wage(mcm, return_values=True)
-    lmda = gamma * np.sum(p_vec[w_vec-tau > w_bar])
-    return w_bar, lmda, V, U
+    λ = γ * np.sum(p_vec[w_vec - τ > w_bar])
+    return w_bar, λ, V, U
 
-def compute_steady_state_quantities(c, tau):
+def compute_steady_state_quantities(c, τ):
     """
-    Compute the steady state unemployment rate given c and tau using optimal
+    Compute the steady state unemployment rate given c and τ using optimal
     quantities from the McCall model and computing corresponding steady state
     quantities
 
     """
-    w_bar, lmda, V, U = compute_optimal_quantities(c, tau)
+    w_bar, λ, V, U = compute_optimal_quantities(c, τ)
 
     # Compute steady state employment and unemployment rates
-    lm = LakeModel(alpha=alpha_q, lmda=lmda, b=b, d=d)
+    lm = LakeModel(α=α_q, λ=λ, b=b, d=d)
     x = lm.rate_steady_state()
     u, e = x
 
     # Compute steady state welfare
-    w = np.sum(V * p_vec * (w_vec - tau > w_bar)) / np.sum(p_vec * (w_vec -
-               tau > w_bar))
+    w = np.sum(V * p_vec * (w_vec - τ > w_bar)) / np.sum(p_vec * (w_vec -
+               τ > w_bar))
     welfare = e * w + u * U
 
     return e, u, welfare
@@ -70,8 +70,8 @@ def find_balanced_budget_tax(c):
         e, u, w = compute_steady_state_quantities(c, t)
         return t - u * c
 
-    tau = brentq(steady_state_budget, 0.0, 0.9 * c)
-    return tau
+    τ = brentq(steady_state_budget, 0.0, 0.9 * c)
+    return τ
 
 
 # Levels of unemployment insurance we wish to study
@@ -92,17 +92,12 @@ for c in c_vec:
 
 fig, axes = plt.subplots(2, 2, figsize=(12, 10))
 
-axes[0, 0].plot(c_vec, unempl_vec, 'b-', lw=2, alpha=0.7)
-axes[0, 0].set_title('Unemployment')
+plots = [unempl_vec, empl_vec, tax_vec, welfare_vec]
+titles = ['Unemployment', 'Employment', 'Tax', 'Welfare']
 
-axes[0, 1].plot(c_vec, empl_vec, 'b-', lw=2, alpha=0.7)
-axes[0, 1].set_title('Employment')
-
-axes[1, 0].plot(c_vec, tax_vec, 'b-', lw=2, alpha=0.7)
-axes[1, 0].set_title('Tax')
-
-axes[1, 1].plot(c_vec, welfare_vec, 'b-', lw=2, alpha=0.7)
-axes[1, 1].set_title('Welfare')
+for ax, plot, title in zip(axes.flatten(), plots, titles):
+    ax.plot(c_vec, plot, 'b-', lw=2, alpha=0.7)
+    ax.set_title(title)
 
 plt.tight_layout()
 plt.show()

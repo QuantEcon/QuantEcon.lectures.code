@@ -1,11 +1,11 @@
 # Some global variables that will stay constant
-alpha = 0.013
-alpha_q = (1-(1-alpha)^3)
+α = 0.013
+α_q = (1-(1-α)^3)
 b_param = 0.0124
 d_param = 0.00822
-beta = 0.98
-gamma = 1.0
-sigma = 2.0
+β = 0.98
+γ = 1.0
+σ = 2.0
 
 # The default wage distribution: a discretized log normal
 log_wage_mean, wage_grid_size, max_wage = 20, 200, 170
@@ -18,23 +18,23 @@ w_vec = (w_vec[1:end-1] + w_vec[2:end]) / 2
 
 """
 Compute the reservation wage, job finding rate and value functions of the
-workers given c and tau.
+workers given c and τ.
 
 """
-function compute_optimal_quantities(c::AbstractFloat, tau::AbstractFloat)
-    mcm = McCallModel(alpha_q,
-                      beta,
-                      gamma,
-                      c-tau,           # post-tax compensation
-                      sigma,
-                      collect(w_vec-tau),   # post-tax wages
+function compute_optimal_quantities(c::AbstractFloat, τ::AbstractFloat)
+    mcm = McCallModel(α_q,
+                      β,
+                      γ,
+                      c-τ,                # post-tax compensation
+                      σ,
+                      collect(w_vec-τ),  # post-tax wages
                       p_vec)
 
 
     w_bar, V, U = compute_reservation_wage(mcm, return_values=true)
-    lmda = gamma * sum(p_vec[w_vec-tau .> w_bar])
+    λ = γ * sum(p_vec[w_vec - τ .> w_bar])
 
-    return w_bar, lmda, V, U
+    return w_bar, λ, V, U
 end
 
 """
@@ -43,16 +43,16 @@ quantities from the McCall model and computing corresponding steady state
 quantities
 
 """
-function compute_steady_state_quantities(c::AbstractFloat, tau::AbstractFloat)
-    w_bar, lmda, V, U = compute_optimal_quantities(c, tau)
+function compute_steady_state_quantities(c::AbstractFloat, τ::AbstractFloat)
+    w_bar, λ_param, V, U = compute_optimal_quantities(c, τ)
 
     # Compute steady state employment and unemployment rates
-    lm = LakeModel(lambda=lmda, alpha=alpha_q, b=b_param, d=d_param)
+    lm = LakeModel(λ=λ_param, α=α_q, b=b_param, d=d_param)
     x = rate_steady_state(lm)
     u_rate, e_rate = x
 
     # Compute steady state welfare
-    w = sum(V .* p_vec .* (w_vec - tau .> w_bar)) / sum(p_vec .* (w_vec - tau .> w_bar))
+    w = sum(V .* p_vec .* (w_vec - τ .> w_bar)) / sum(p_vec .* (w_vec - τ .> w_bar))
     welfare = e_rate .* w + u_rate .* U
 
     return u_rate, e_rate, welfare
@@ -68,9 +68,9 @@ function find_balanced_budget_tax(c::Real)
       return t - u_rate * c
     end
 
-    tau = brent(steady_state_budget, 0.0, 0.9 * c)
+    τ = brent(steady_state_budget, 0.0, 0.9 * c)
 
-    return tau
+    return τ
 end
 
 # Levels of unemployment insurance we wish to study
@@ -93,16 +93,12 @@ end
 
 fig, axes = subplots(2, 2, figsize=(15, 10))
 
-axes[1, 1][:plot](c_vec, unempl_vec, "b-", lw=2, alpha=0.7)
-axes[1, 1][:set](title="Unemployment")
+plots = [unempl_vec, empl_vec, tax_vec, welfare_vec]
+titles = ["Unemployment", "Employment", "Tax", "Welfare"]
 
-axes[1, 2][:plot](c_vec, empl_vec, "b-", lw=2, alpha=0.7)
-axes[1, 2][:set](title="Employment")
-
-axes[2, 1][:plot](c_vec, tax_vec, "b-", lw=2, alpha=0.7)
-axes[2, 1][:set](title="Tax")
-
-axes[2, 2][:plot](c_vec, welfare_vec, "b-", lw=2, alpha=0.7)
-axes[2, 2][:set](title="Welfare")
+for (ax, plot, title) in zip(axes, plots, titles)
+    ax[:plot](c_vec, plot, "b-", lw=2, alpha=0.7)
+    ax[:set](title=title)
+end
 
 fig[:tight_layout]()

@@ -7,9 +7,9 @@ class LakeModel:
     
     Parameters:
     ------------
-    lmda: scalar
+    λ:  scalar
         The job finding rate for currently unemployed workers
-    alpha: scalar
+    α:  scalar
         The dismissal rate for currently employed workers
     b : scalar
         Entry rate into the labor force
@@ -17,17 +17,17 @@ class LakeModel:
         Exit rate from the labor force
     
     """
-    def __init__(self, lmda=0.283, alpha=0.013, b=0.0124, d=0.00822):
-        self._lmda, self._alpha, self._b, self._d = lmda, alpha, b, d
+    def __init__(self, λ=0.283, α=0.013, b=0.0124, d=0.00822):
+        self._λ, self._α, self._b, self._d = λ, α, b, d
         self.compute_derived_values()
 
     def compute_derived_values(self):
         # Unpack names to simplify expression
-        lmda, alpha, b, d = self._lmda, self._alpha, self._b, self._d
+        λ, α, b, d = self._λ, self._α, self._b, self._d
 
         self._g = b - d
-        self._A = np.array([[(1-d) * (1-lmda) + b, (1-d) * alpha + b],
-                            [(1-d) * lmda,         (1-d) * (1-alpha)]])
+        self._A = np.array([[(1-d) * (1-λ) + b, (1-d) * α + b],
+                            [(1-d) * λ,         (1-d) * (1-α)]])
 
         self._A_hat = self._A / (1 + self._g)
         
@@ -44,21 +44,21 @@ class LakeModel:
         return self._A_hat
 
     @property
-    def lmda(self):
-        return self._lmda
+    def λ(self):
+        return self._λ
 
-    @lmda.setter
-    def lmda(self, new_value):
-        self._lmda = new_value
+    @λ.setter
+    def λ(self, new_value):
+        self._α = new_value
         self.compute_derived_values()
 
     @property
-    def alpha(self):
-        return self._alpha
+    def α(self):
+        return self._α
 
-    @alpha.setter
-    def alpha(self, new_value):
-        self._alpha = new_value
+    @α.setter
+    def α(self, new_value):
+        self._α = new_value
         self.compute_derived_values()
 
     @property

@@ -4,9 +4,9 @@ srand(42)
 lm = LakeModel(d=0.0, b=0.0)
 T = 5000     # Simulation length
 
-alpha, lambda = lm.alpha, lm.lambda
-P = [(1 - lambda)     lambda; 
-     alpha       (1 - alpha)]
+α, λ = lm.α, lm.λ
+P = [(1 - λ)     λ; 
+     α       (1 - α)]
 
 mc = MarkovChain(P, [0; 1])     # 0=unemployed, 1=employed
 xbar = rate_steady_state(lm)
