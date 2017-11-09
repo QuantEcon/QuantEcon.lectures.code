@@ -1,5 +1,4 @@
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
 
 
@@ -11,7 +10,7 @@ c_grid = np.linspace(0, 1, 6)
 
 
 def Af(x):
-    return sp.interp(x, c_grid, f(c_grid))
+    return np.interp(x, c_grid, f(c_grid))
 
 f_grid = np.linspace(0, 1, 150)
 

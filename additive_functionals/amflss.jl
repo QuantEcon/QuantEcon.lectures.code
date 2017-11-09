@@ -16,7 +16,7 @@ struct AMF_LSS_VAR{TF<:AbstractFloat, TI<:Integer}
     B::Array{TF, 2}
     D::Array{TF, 2}
     F::Array{TF, 2}
-    nu::Array{TF, 2}
+    ν::Array{TF, 2}
     nx::TI
     nk::TI
     nm::TI
@@ -26,7 +26,7 @@ end
 function AMF_LSS_VAR(A::Array, B::Array,
                 D::Union{RowVector, Array},
                 F::Union{Void, Array}=nothing;
-                nu::Union{Void, Array}=nothing)
+                ν::Union{Void, Array}=nothing)
     
     if typeof(B) <: Vector
         B = reshape(B, length(B), 1)
@@ -52,36 +52,36 @@ function AMF_LSS_VAR(A::Array, B::Array,
         F = reshape(F, length(F), 1)
     end
 
-    # Set nu
-    if nu==nothing
-        nu = zeros(nm, 1)
-    elseif ndims(nu) == 1
-        nu = reshape(nu, length(nu), 1)
+    # Set ν
+    if ν==nothing
+        ν = zeros(nm, 1)
+    elseif ndims(ν) == 1
+        ν = reshape(ν, length(ν), 1)
     else
-        throw(ArgumentError("nu must be column vector!"))
+        throw(ArgumentError("ν must be column vector!"))
     end
 
-    if size(nu, 1) != size(D, 1)
-        error("The size of nu is inconsistent with D!")
+    if size(ν, 1) != size(D, 1)
+        error("The size of ν is inconsistent with D!")
     end
 
     # Construct BIG state space representation
-    lss = construct_ss(A, B, D, F, nu, nx, nk, nm)
+    lss = construct_ss(A, B, D, F, ν, nx, nk, nm)
 
-    return AMF_LSS_VAR(A, B, D, F, nu, nx, nk, nm, lss)
+    return AMF_LSS_VAR(A, B, D, F, ν, nx, nk, nm, lss)
 end
 
 AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}) = 
-    AMF_LSS_VAR(A, B, D, nothing, nu=nothing)
-AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}, F::Real, nu::Real) = 
-    AMF_LSS_VAR(A, B, D, [F], nu=[nu])
+    AMF_LSS_VAR(A, B, D, nothing, ν=nothing)
+AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}, F::Real, ν::Real) = 
+    AMF_LSS_VAR(A, B, D, [F], ν=[ν])
 
 """
 This creates the state space representation that can be passed
 into the quantecon LSS class.
 """
 function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
-                      nu, nx::TI, nk::TI, nm::TI) where TI <: Integer
+                      ν, nx::TI, nk::TI, nm::TI) where TI <: Integer
 
     H, g = additive_decomp(A, B, D, F, nx)
 
@@ -101,7 +101,7 @@ function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
     A1 = hcat(1, 0, nx0r, ny0r, ny0r)          # Transition for 1
     A2 = hcat(1, 1, nx0r, ny0r, ny0r)          # Transition for t
     A3 = hcat(nx0c, nx0c, A, nyx0m', nyx0m')   # Transition for x_{t+1}
-    A4 = hcat(nu, ny0c, D, ny1m, ny0m)         # Transition for y_{t+1}
+    A4 = hcat(ν, ny0c, D, ny1m, ny0m)          # Transition for y_{t+1}
     A5 = hcat(ny0c, ny0c, nyx0m, ny0m, ny1m)   # Transition for m_{t+1}
     Abar = vcat(A1, A2, A3, A4, A5)
 
@@ -114,7 +114,7 @@ function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
     G2 = hcat(ny0c, ny0c, nyx0m, ny1m, ny0m)          # Selector for y_{t}
     G3 = hcat(ny0c, ny0c, nyx0m, ny0m, ny1m)          # Selector for martingale
     G4 = hcat(ny0c, ny0c, -g, ny0m, ny0m)             # Selector for stationary
-    G5 = hcat(ny0c, nu, nyx0m, ny0m, ny0m)            # Selector for trend
+    G5 = hcat(ny0c, ν, nyx0m, ny0m, ny0m)             # Selector for trend
     Gbar = vcat(G1, G2, G3, G4, G5)
 
     # Build LSS type
@@ -127,7 +127,7 @@ end
 
 """
 Return values for the martingale decomposition
-    - nu        : unconditional mean difference in Y
+    - ν         : unconditional mean difference in Y
     - H         : coefficient for the (linear) martingale component (kappa_a)
     - g         : coefficient for the stationary component g(x)
     - Y_0       : it should be the function of X_0 (for now set it to 0.0)
@@ -145,15 +145,15 @@ end
 
 """
 Return values for the multiplicative decomposition (Example 5.4.4.)
-    - nu_tilde  : eigenvalue
+    - ν_tilde  : eigenvalue
     - H         : vector for the Jensen term
 """
 function multiplicative_decomp(A::Array, B::Array, D::Array, F::Union{Array, Real},
-                                nu::Union{Array, Real}, nx::Integer)
+                                ν::Union{Array, Real}, nx::Integer)
     H, g = additive_decomp(A, B, D, F, nx)
-    nu_tilde = nu + 0.5*diag(H*H')
+    ν_tilde = ν + 0.5*diag(H*H')
 
-    return H, g, nu_tilde
+    return H, g, ν_tilde
 end
 
 function loglikelihood_path(amf::AMF_LSS_VAR, x::Array, y::Array)
@@ -264,7 +264,7 @@ function plot_multiplicative(amf::AMF_LSS_VAR, T::Integer,
     # Pull out right sizes so we know how to increment
     nx, nk, nm = amf.nx, amf.nk, amf.nm
     # Matrices for the multiplicative decomposition
-    H, g, nu_tilde = multiplicative_decomp(A, B, D, F, nu, nx)
+    H, g, ν_tilde = multiplicative_decomp(A, B, D, F, ν, nx)
 
     # Allocate space (nm is the number of functionals - we want npaths for each)
     mpath_mult = Array{Real}(nm*npaths, T)
@@ -346,7 +346,7 @@ function plot_martingales(amf::AMF_LSS_VAR, T::Integer, npaths::Integer=25)
     # Pull out right sizes so we know how to increment
     nx, nk, nm = amf.nx, amf.nk, amf.nm
     # Matrices for the multiplicative decomposition
-    H, g, nu_tilde = multiplicative_decomp(amf.A, amf.B, amf.D, amf.F, amf.nu, amf.nx)
+    H, g, ν_tilde = multiplicative_decomp(amf.A, amf.B, amf.D, amf.F, amf.ν, amf.nx)
 
     # Allocate space (nm is the number of functionals - we want npaths for each)
     mpath_mult = Array{Real}(nm*npaths, T)

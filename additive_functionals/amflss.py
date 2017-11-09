@@ -18,7 +18,7 @@ class AMF_LSS_VAR:
     functional into a QuantEcon linear state space system.
     """
 
-    def __init__(self, A, B, D, F=None, nu=None):
+    def __init__(self, A, B, D, F=None, ν=None):
         # Unpack required elements
         self.nx, self.nk = B.shape
         self.A, self.B = A, B
@@ -44,18 +44,18 @@ class AMF_LSS_VAR:
         else:
             self.F = F
 
-        # Set nu
-        if not np.any(nu):
-            self.nu = np.zeros((self.nm, 1))
-        elif type(nu) == float:
-            self.nu = np.asarray([[nu]])
-        elif len(nu.shape) == 1:
-            self.nu = np.expand_dims(nu, 1)
+        # Set ν
+        if not np.any(ν):
+            self.ν = np.zeros((self.nm, 1))
+        elif type(ν) == float:
+            self.ν = np.asarray([[ν]])
+        elif len(ν.shape) == 1:
+            self.ν = np.expand_dims(ν, 1)
         else:
-            self.nu = nu
+            self.ν = ν
 
-        if self.nu.shape[0] != self.D.shape[0]:
-            raise ValueError("The dimension of nu is inconsistent with D!")
+        if self.ν.shape[0] != self.D.shape[0]:
+            raise ValueError("The dimension of ν is inconsistent with D!")
 
         # Construct BIG state space representation
         self.lss = self.construct_ss()
@@ -67,11 +67,11 @@ class AMF_LSS_VAR:
         """
         # Pull out useful info
         nx, nk, nm = self.nx, self.nk, self.nm
-        A, B, D, F, nu = self.A, self.B, self.D, self.F, self.nu
+        A, B, D, F, ν = self.A, self.B, self.D, self.F, self.ν
         if self.add_decomp:
-            nu, H, g = self.add_decomp
+            ν, H, g = self.add_decomp
         else:
-            nu, H, g = self.additive_decomp()
+            ν, H, g = self.additive_decomp()
 
         # Auxiliary blocks with 0's and 1's to fill out the lss matrices
         nx0c = np.zeros((nx, 1))
@@ -89,7 +89,7 @@ class AMF_LSS_VAR:
         A1 = np.hstack([1, 0, nx0r, ny0r, ny0r])            # Transition for 1
         A2 = np.hstack([1, 1, nx0r, ny0r, ny0r])            # Transition for t
         A3 = np.hstack([nx0c, nx0c, A, nyx0m.T, nyx0m.T])   # Transition for x_{t+1}
-        A4 = np.hstack([nu, ny0c, D, ny1m, ny0m])           # Transition for y_{t+1}
+        A4 = np.hstack([ν, ny0c, D, ny1m, ny0m])            # Transition for y_{t+1}
         A5 = np.hstack([ny0c, ny0c, nyx0m, ny0m, ny1m])     # Transition for m_{t+1}
         Abar = np.vstack([A1, A2, A3, A4, A5])
 
@@ -102,7 +102,7 @@ class AMF_LSS_VAR:
         G2 = np.hstack([ny0c, ny0c, nyx0m, ny1m, ny0m])               # Selector for y_{t}
         G3 = np.hstack([ny0c, ny0c, nyx0m, ny0m, ny1m])               # Selector for martingale
         G4 = np.hstack([ny0c, ny0c, -g, ny0m, ny0m])                  # Selector for stationary
-        G5 = np.hstack([ny0c, nu, nyx0m, ny0m, ny0m])                 # Selector for trend
+        G5 = np.hstack([ny0c, ν, nyx0m, ny0m, ny0m])                  # Selector for trend
         Gbar = np.vstack([G1, G2, G3, G4, G5])
 
         # Build H matrix for LSS
@@ -118,7 +118,7 @@ class AMF_LSS_VAR:
     def additive_decomp(self):
         """
         Return values for the martingale decomposition 
-            - nu        : unconditional mean difference in Y
+            - ν         : unconditional mean difference in Y
             - H         : coefficient for the (linear) martingale component (kappa_a)
             - g         : coefficient for the stationary component g(x)
             - Y_0       : it should be the function of X_0 (for now set it to 0.0)
@@ -128,18 +128,18 @@ class AMF_LSS_VAR:
         g = self.D @ A_res
         H = self.F + self.D @ A_res @ self.B
 
-        return self.nu, H, g
+        return self.ν, H, g
 
     def multiplicative_decomp(self):
         """
         Return values for the multiplicative decomposition (Example 5.4.4.)
-            - nu_tilde  : eigenvalue
-            - H         : vector for the Jensen term
+            - ν_tilde  : eigenvalue
+            - H        : vector for the Jensen term
         """
-        nu, H, g = self.additive_decomp()
-        nu_tilde = nu + (.5)*np.expand_dims(np.diag(H @ H.T), 1)
+        ν, H, g = self.additive_decomp()
+        ν_tilde = ν + (.5)*np.expand_dims(np.diag(H @ H.T), 1)
 
-        return nu_tilde, H, g
+        return ν_tilde, H, g
 
     def loglikelihood_path(self, x, y):
         A, B, D, F = self.A, self.B, self.D, self.F
@@ -223,7 +223,7 @@ class AMF_LSS_VAR:
         # Pull out right sizes so we know how to increment
         nx, nk, nm = self.nx, self.nk, self.nm
         # Matrices for the multiplicative decomposition
-        nu_tilde, H, g = self.multiplicative_decomp()
+        ν_tilde, H, g = self.multiplicative_decomp()
 
         # Allocate space (nm is the number of functionals - we want npaths for each)
         mpath_mult = np.empty((nm*npaths, T))
@@ -280,7 +280,7 @@ class AMF_LSS_VAR:
         # Pull out right sizes so we know how to increment
         nx, nk, nm = self.nx, self.nk, self.nm
         # Matrices for the multiplicative decomposition
-        nu_tilde, H, g = self.multiplicative_decomp()
+        ν_tilde, H, g = self.multiplicative_decomp()
 
         # Allocate space (nm is the number of functionals - we want npaths for each)
         mpath_mult = np.empty((nm*npaths, T))

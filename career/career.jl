@@ -6,11 +6,11 @@ Career/job choice model of Derek Neal (1999)
 
 ##### Fields
 
-- `beta::AbstractFloat` : Discount factor in (0, 1)
-- `N::Integer` : Number of possible realizations of both epsilon and theta
-- `B::AbstractFloat` : upper bound for both epsilon and theta
-- `theta::AbstractVector` : A grid of values on [0, B]
-- `epsilon::AbstractVector` : A grid of values on [0, B]
+- `β::AbstractFloat` : Discount factor in (0, 1)
+- `N::Integer` : Number of possible realizations of both ϵ and θ
+- `B::AbstractFloat` : upper bound for both ϵ and θ
+- `θ::AbstractVector` : A grid of values on [0, B]
+- `ϵ::AbstractVector` : A grid of values on [0, B]
 - `F_probs::AbstractVector` : The pdf of each value associated with of F
 - `G_probs::AbstractVector` : The pdf of each value associated with of G
 - `F_mean::AbstractFloat` : The mean of the distribution F
@@ -20,11 +20,11 @@ Career/job choice model of Derek Neal (1999)
 
 struct CareerWorkerProblem{TF<:AbstractFloat, TI<:Integer,
                            TAV<:AbstractVector{TF}, TAV2<:AbstractVector{TF}}
-    beta::TF
+    β::TF
     N::TI
     B::TF
-    theta::TAV
-    epsilon::TAV
+    θ::TAV
+    ϵ::TAV
     F_probs::TAV2
     G_probs::TAV2
     F_mean::TF
@@ -37,9 +37,9 @@ Constructor with default values for `CareerWorkerProblem`
 
 ##### Arguments
 
-- `beta::Real(0.95)` : Discount factor in (0, 1)
-- `B::Real(5.0)` : upper bound for both epsilon and theta
-- `N::Real(50)` : Number of possible realizations of both epsilon and theta
+- `β::Real(0.95)` : Discount factor in (0, 1)
+- `B::Real(5.0)` : upper bound for both ϵ and θ
+- `N::Real(50)` : Number of possible realizations of both ϵ and θ
 - `F_a::Real(1), F_b::Real(1)` : Parameters of the distribution F
 - `G_a::Real(1), G_b::Real(1)` : Parameters of the distribution F
 
@@ -50,16 +50,16 @@ each parameter
 """
 # use key word argument
 function CareerWorkerProblem{TF<:AbstractFloat}(;
-                             beta::TF=0.95, B::TF=5.0, N::Integer=50,
+                             β::TF=0.95, B::TF=5.0, N::Integer=50,
                              F_a::TF=1.0, F_b::TF=1.0, G_a::TF=1.0,
                              G_b::TF=1.0)
-    theta = linspace(0, B, N)
-    epsilon = copy(theta)
+    θ = linspace(0, B, N)
+    ϵ = copy(θ)
     F_probs = pdf(BetaBinomial(N-1, F_a, F_b))
     G_probs = pdf(BetaBinomial(N-1, G_a, G_b))
-    F_mean = sum(theta .* F_probs)
-    G_mean = sum(epsilon .* G_probs)
-    CareerWorkerProblem(beta, N, B, theta, epsilon, F_probs, G_probs,
+    F_mean = sum(θ .* F_probs)
+    G_mean = sum(ϵ .* G_probs)
+    CareerWorkerProblem(β, N, B, θ, ϵ, F_probs, G_probs,
                         F_mean, G_mean)
 end
 
@@ -84,16 +84,16 @@ function update_bellman!(cp::CareerWorkerProblem, v::Array, out::Array;
                            ret_policy::Bool=false)
     # new life. This is a function of the distribution parameters and is
     # always constant. No need to recompute it in the loop
-    v3 = (cp.G_mean + cp.F_mean + cp.beta .*
+    v3 = (cp.G_mean + cp.F_mean + cp.β .*
           cp.F_probs' * v * cp.G_probs)[1]  # don't need 1 element array
 
     for j=1:cp.N
         for i=1:cp.N
             # stay put
-            v1 = cp.theta[i] + cp.epsilon[j] + cp.beta * v[i, j]
+            v1 = cp.θ[i] + cp.ϵ[j] + cp.β * v[i, j]
 
             # new job
-            v2 = (cp.theta[i] .+ cp.G_mean .+ cp.beta .*
+            v2 = (cp.θ[i] .+ cp.G_mean .+ cp.β .*
                   v[i, :]'*cp.G_probs)[1]  # don't need a single element array
 
             if ret_policy

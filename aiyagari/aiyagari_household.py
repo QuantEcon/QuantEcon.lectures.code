@@ -31,18 +31,18 @@ class Household:
     def __init__(self,
                 r=0.01,       # interest rate
                 w=1.0,        # wages
-                beta=0.96,    # discount factor
+                β=0.96,       # discount factor
                 a_min=1e-10,
-                Pi = [[0.9, 0.1], [0.1, 0.9]],  # Markov chain
-                z_vals=[0.1, 1.0],              # exogenous states
+                Π = [[0.9, 0.1], [0.1, 0.9]],  # Markov chain
+                z_vals=[0.1, 1.0],             # exogenous states
                 a_max=18,
                 a_size=200):
         
         # Store values, set up grids over a and z
-        self.r, self.w, self.beta = r, w, beta
+        self.r, self.w, self.β = r, w, β
         self.a_min, self.a_max, self.a_size = a_min, a_max, a_size
     
-        self.Pi = np.asarray(Pi)
+        self.Π = np.asarray(Π)
         self.z_vals = np.asarray(z_vals)
         self.z_size = len(z_vals)
         
@@ -66,7 +66,7 @@ class Household:
         self.build_R()
 
     def build_Q(self):
-        populate_Q(self.Q, self.a_size, self.z_size, self.Pi)
+        populate_Q(self.Q, self.a_size, self.z_size, self.Π)
 
     def build_R(self):
         self.R.fill(-np.inf)
@@ -90,13 +90,13 @@ def populate_R(R, a_size, z_size, a_vals, z_vals, r, w):
                 R[s_i, new_a_i] = np.log(c)  # Utility
 
 @jit(nopython=True)
-def populate_Q(Q, a_size, z_size, Pi):
+def populate_Q(Q, a_size, z_size, Π):
     n = a_size * z_size
     for s_i in range(n):
         z_i = s_i % z_size
         for a_i in range(a_size):
             for next_z_i in range(z_size):
-                Q[s_i, a_i, a_i * z_size + next_z_i] = Pi[z_i, next_z_i]
+                Q[s_i, a_i, a_i * z_size + next_z_i] = Π[z_i, next_z_i]
 
 
 @jit(nopython=True)

@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.stats import lognorm
 from scipy.integrate import fixed_quad
-from quantecon import compute_fixed_point
 
 
 class LucasTree:
@@ -11,60 +10,57 @@ class LucasTree:
 
     Parameters
     ----------
-    gamma : scalar(float)
+    γ : scalar(float)
         The coefficient of risk aversion in the household's CRRA utility
         function
-    beta : scalar(float)
+    β : scalar(float)
         The household's discount factor
-    alpha : scalar(float)
+    α : scalar(float)
         The correlation coefficient in the shock process
-    sigma : scalar(float)
+    σ : scalar(float)
         The volatility of the shock process
     grid_size : int
         The size of the grid to use
 
     Attributes
     ----------
-    gamma, beta, alpha, sigma, grid_size : see Parameters
+    γ, β, α, σ, grid_size : see Parameters
     grid : ndarray
         Properties for grid upon which prices are evaluated
-    phi : scipy.stats.lognorm
+    ϕ : scipy.stats.lognorm
         The distribution for the shock process
 
     Examples
     --------
-    >>> tree = LucasTree(gamma=2, beta=0.95, alpha=0.90, sigma=0.1)
-    >>> price_vals = compute_lt_price(tree)
+    >>> tree = LucasTree(γ=2, β=0.95, α=0.90, σ=0.1)
+    >>> price_vals = solve_lucas_model(tree)
 
     """
 
     def __init__(self, 
-            gamma=2, 
-            beta=0.95, 
-            alpha=0.90, 
-            sigma=0.1, 
-            grid_size=100):
+                 γ=2, 
+                 β=0.95, 
+                 α=0.90, 
+                 σ=0.1, 
+                 grid_size=100):
 
-        self.gamma = gamma
-        self.beta = beta
-        self.alpha = alpha
-        self.sigma = sigma
+        self.γ, self.β, self.α, self.σ = γ, β, α, σ
 
         # == Set the grid interval to contain most of the mass of the
         # stationary distribution of the consumption endowment == #
-        ssd = self.sigma / np.sqrt(1 - self.alpha**2)
+        ssd = self.σ / np.sqrt(1 - self.α**2)
         grid_min, grid_max = np.exp(-4 * ssd), np.exp(4 * ssd)
         self.grid = np.linspace(grid_min, grid_max, grid_size)
         self.grid_size = grid_size
 
         # == set up distribution for shocks == #
-        self.phi = lognorm(sigma)
-        self.draws = self.phi.rvs(500)
+        self.ϕ = lognorm(σ)
+        self.draws = self.ϕ.rvs(500)
 
-        # == h(y) = beta * int G(y,z)^(1-gamma) phi(dz) == #
+        # == h(y) = β * int G(y,z)^(1-γ) ϕ(dz) == #
         self.h = np.empty(self.grid_size)
         for i, y in enumerate(self.grid):
-            self.h[i] = beta * np.mean((y**alpha * self.draws)**(1 - gamma))
+            self.h[i] = β * np.mean((y**α * self.draws)**(1 - γ))
 
 
 
@@ -102,7 +98,7 @@ def lucas_operator(f, tree, Tf=None):
 
     """
     grid,  h = tree.grid, tree.h
-    alpha, beta = tree.alpha, tree.beta
+    α, β = tree.α, tree.β
     z_vec = tree.draws
 
     # == turn f into a function == #
@@ -114,53 +110,49 @@ def lucas_operator(f, tree, Tf=None):
 
     # == Apply the T operator to f using Monte Carlo integration == #
     for i, y in enumerate(grid):
-        Tf[i] = h[i] + beta * np.mean(Af(y**alpha * z_vec))
+        Tf[i] = h[i] + β * np.mean(Af(y**α * z_vec))
 
     return Tf
 
-
-def compute_lt_price(tree, error_tol=1e-6, max_iter=500, verbose=0):
+def solve_lucas_model(tree, tol=1e-6, max_iter=500):
     """
     Compute the equilibrium price function associated with Lucas
-    tree lt
-
+    tree
+    
     Parameters
     ----------
     tree : An instance of LucasTree
         Contains parameters
-
-    error_tol, max_iter, verbose
-        Arguments to be passed directly to
-        `quantecon.compute_fixed_point`. See that docstring for more
-        information
-
+    tol : float
+        error tolerance
+    max_iter : int
+        the maximum number of iterations
+               
     Returns
     -------
     price : array_like(float)
-        The prices at the grid points in the attribute `grid` of the
-        object
-
+        The prices at the grid points in the attribute `grid` of the object
+    
     """
+    
     # == simplify notation == #
     grid, grid_size = tree.grid, tree.grid_size
-    gamma = tree.gamma
-
-    # == Create storage array for compute_fixed_point. Reduces  memory
+    γ = tree.γ
+    
+    # == Create storage array for lucas_operator. Reduces  memory
     # allocation and speeds code up == #
     Tf = np.empty(grid_size)
-
-    # == Initial guess, just a vector of zeros == #
-    f_init = np.zeros(grid_size)
-    f = compute_fixed_point(lucas_operator, 
-                f_init, 
-                error_tol,
-                max_iter, 
-                verbose, 
-                10,
-                'iteration',
-                tree, 
-                Tf=Tf)
-
-    price = f * grid**gamma
-
+    
+    i = 0
+    f = np.empty(grid_size)  # Initial guess of f
+    error = tol + 1
+    
+    while error > tol and i < max_iter:
+        f_new = lucas_operator(f, tree, Tf)
+        error = np.max(np.abs(f_new - f))
+        f[:] = f_new
+        i += 1
+        
+    price = f * grid**γ  # Back out price vector
+    
     return price

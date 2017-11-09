@@ -15,12 +15,12 @@ class CareerWorkerProblem:
 
     Parameters
     ----------
-    beta : scalar(float), optional(default=5.0)
+    β : scalar(float), optional(default=5.0)
         Discount factor
     B : scalar(float), optional(default=0.95)
-        Upper bound of for both epsilon and theta
+        Upper bound of for both ϵ and θ
     N : scalar(int), optional(default=50)
-        Number of possible realizations for both epsilon and theta
+        Number of possible realizations for both ϵ and θ
     F_a : scalar(int or float), optional(default=1)
         Parameter `a` from the career distribution
     F_b : scalar(int or float), optional(default=1)
@@ -32,10 +32,10 @@ class CareerWorkerProblem:
 
     Attributes
     ----------
-    beta, B, N : see Parameters
-    theta : array_like(float, ndim=1)
+    β, B, N : see Parameters
+    θ : array_like(float, ndim=1)
         A grid of values from 0 to B
-    epsilon : array_like(float, ndim=1)
+    ϵ : array_like(float, ndim=1)
         A grid of values from 0 to B
     F_probs : array_like(float, ndim=1)
         The probabilities of different values for F
@@ -48,15 +48,15 @@ class CareerWorkerProblem:
 
     """
 
-    def __init__(self, B=5.0, beta=0.95, N=50, F_a=1, F_b=1, G_a=1,
+    def __init__(self, B=5.0, β=0.95, N=50, F_a=1, F_b=1, G_a=1,
                  G_b=1):
-        self.beta, self.N, self.B = beta, N, B
-        self.theta = np.linspace(0, B, N)     # set of theta values
-        self.epsilon = np.linspace(0, B, N)   # set of epsilon values
+        self.β, self.N, self.B = β, N, B
+        self.θ = np.linspace(0, B, N)     # set of θ values
+        self.ϵ = np.linspace(0, B, N)     # set of ϵ values
         self.F_probs = BetaBinomial(N-1, F_a, F_b).pdf()
         self.G_probs = BetaBinomial(N-1, G_a, G_b).pdf()
-        self.F_mean = np.sum(self.theta * self.F_probs)
-        self.G_mean = np.sum(self.epsilon * self.G_probs)
+        self.F_mean = np.sum(self.θ * self.F_probs)
+        self.G_mean = np.sum(self.ϵ * self.G_probs)
 
         # Store these parameters for str and repr methods
         self._F_a, self._F_b = F_a, F_b
@@ -83,14 +83,14 @@ class CareerWorkerProblem:
         for i in range(self.N):
             for j in range(self.N):
                 # stay put
-                v1 = self.theta[i] + self.epsilon[j] + self.beta * v[i, j]
+                v1 = self.θ[i] + self.ϵ[j] + self.β * v[i, j]
 
                 # new job
-                v2 = (self.theta[i] + self.G_mean + self.beta *
+                v2 = (self.θ[i] + self.G_mean + self.β *
                       np.dot(v[i, :], self.G_probs))
 
                 # new life
-                v3 = (self.G_mean + self.F_mean + self.beta *
+                v3 = (self.G_mean + self.F_mean + self.β *
                       np.dot(self.F_probs, np.dot(v, self.G_probs)))
                 new_v[i, j] = max(v1, v2, v3)
         return new_v
@@ -119,10 +119,10 @@ class CareerWorkerProblem:
         policy = np.empty(v.shape, dtype=int)
         for i in range(self.N):
             for j in range(self.N):
-                v1 = self.theta[i] + self.epsilon[j] + self.beta * v[i, j]
-                v2 = (self.theta[i] + self.G_mean + self.beta *
+                v1 = self.θ[i] + self.ϵ[j] + self.β * v[i, j]
+                v2 = (self.θ[i] + self.G_mean + self.β *
                       np.dot(v[i, :], self.G_probs))
-                v3 = (self.G_mean + self.F_mean + self.beta *
+                v3 = (self.G_mean + self.F_mean + self.β *
                       np.dot(self.F_probs, np.dot(v, self.G_probs)))
                 if v1 > max(v2, v3):
                     action = 1

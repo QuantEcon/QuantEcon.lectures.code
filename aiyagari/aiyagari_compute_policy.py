@@ -16,7 +16,7 @@ w = 0.956
 am = Household(a_max=20, r=r, w=w)
 
 # Use the instance to build a discrete dynamic program
-am_ddp = DiscreteDP(am.R, am.Q, am.beta)
+am_ddp = DiscreteDP(am.R, am.Q, am.β)
 
 # Solve using policy function iteration
 results = am_ddp.solve(method='policy_iteration')

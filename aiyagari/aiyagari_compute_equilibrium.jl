@@ -8,15 +8,15 @@ Author: Victoria Gregory
 # Firms' parameters
 A = 1
 N = 1
-alpha = 0.33
-beta = 0.96
-delta = 0.05
+α = 0.33
+β = 0.96
+δ = 0.05
 
 """
 Compute wage rate given an interest rate, r
 """
 function r_to_w(r::Real)
-    return A * (1 - alpha) * (A * alpha / (r + delta)) ^ (alpha / (1 - alpha))
+    return A * (1 - α) * (A * α / (r + δ)) ^ (α / (1 - α))
 end
 
 """
@@ -24,7 +24,7 @@ Inverse demand curve for capital. The interest rate
 associated with a given demand for capital K.
 """
 function rd(K::Real)
-    return A * alpha * (N / K) ^ (1 - alpha) - delta
+    return A * α * (N / K) ^ (1 - α) - δ
 end
 
 """
@@ -42,7 +42,7 @@ function prices_to_capital_stock(am::Household, r::Real)
     # Set up problem
     w = r_to_w(r)
     setup_R!(am, r, w)
-    aiyagari_ddp = DiscreteDP(am.R, am.Q, am.beta)
+    aiyagari_ddp = DiscreteDP(am.R, am.Q, am.β)
 
     # Compute the optimal policy
     results = solve(aiyagari_ddp, PFI)
@@ -55,7 +55,7 @@ function prices_to_capital_stock(am::Household, r::Real)
 end
 
 # Create an instance of Household
-am = Household(beta=beta, a_max=20.0)
+am = Household(β=β, a_max=20.0)
 
 # Create a grid of r values at which to compute demand and supply of capital
 num_points = 20

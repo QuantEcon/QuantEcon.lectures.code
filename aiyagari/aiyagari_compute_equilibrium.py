@@ -13,23 +13,23 @@ from quantecon.markov import DiscreteDP
 
 A = 1.0
 N = 1.0
-alpha = 0.33
-beta = 0.96
-delta = 0.05
+α = 0.33
+β = 0.96
+δ = 0.05
 
 
 def r_to_w(r):
     """
     Equilibrium wages associated with a given interest rate r.
     """
-    return A * (1 - alpha) * (A * alpha / (r + delta))**(alpha / (1 - alpha))
+    return A * (1 - α) * (A * α / (r + δ))**(α / (1 - α))
 
 def rd(K):
     """
     Inverse demand curve for capital.  The interest rate associated with a
     given demand for capital K.
     """
-    return A * alpha * (N / K)**(1 - alpha) - delta
+    return A * α * (N / K)**(1 - α) - δ
 
 
 def prices_to_capital_stock(am, r):
@@ -46,7 +46,7 @@ def prices_to_capital_stock(am, r):
     """
     w = r_to_w(r)
     am.set_prices(r, w)
-    aiyagari_ddp = DiscreteDP(am.R, am.Q, beta)
+    aiyagari_ddp = DiscreteDP(am.R, am.Q, β)
     # Compute the optimal policy
     results = aiyagari_ddp.solve(method='policy_iteration')
     # Compute the stationary distribution
@@ -61,7 +61,7 @@ def prices_to_capital_stock(am, r):
 am = Household(a_max=20)
 
 # Use the instance to build a discrete dynamic program
-am_ddp = DiscreteDP(am.R, am.Q, am.beta)
+am_ddp = DiscreteDP(am.R, am.Q, am.β)
 
 # Create a grid of r values at which to compute demand and supply of capital
 num_points = 20

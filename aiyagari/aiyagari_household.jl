@@ -14,8 +14,8 @@ problem.
 
 - `r::Real` : interest rate
 - `w::Real` : wage
-- `sigma::Real` : risk aversion
-- `beta::AbstractFloat` : discount factor
+- `σ::Real` : risk aversion
+- `β::AbstractFloat` : discount factor
 - `z_chain::MarkovChain` : MarkovChain for income
 - `a_min::Real` : minimum on asset grid
 - `a_max::Real` : maximum on asset grid
@@ -31,8 +31,8 @@ problem.
 mutable struct Household{TR<:Real, TF<:AbstractFloat, TI<:Integer}
     r::TR
     w::TR
-    sigma::TR
-    beta::TF
+    σ::TR
+    β::TF
     z_chain::MarkovChain{TF, Array{TF, 2}, Array{TF, 1}}
     a_min::TR
     a_max::TR
@@ -53,7 +53,7 @@ Constructor for `Household`
 ##### Arguments
 - `r::Real(0.01)` : interest rate
 - `w::Real(1.0)` : wage
-- `beta::AbstractFloat(0.96)` : discount factor
+- `β::AbstractFloat(0.96)` : discount factor
 - `z_chain::MarkovChain` : MarkovChain for income
 - `a_min::Real(1e-10)` : minimum on asset grid
 - `a_max::Real(18.0)` : maximum on asset grid
@@ -63,8 +63,8 @@ Constructor for `Household`
 function Household{TF<:AbstractFloat}(;
                     r::Real=0.01,
                     w::Real=1.0,
-                    sigma::Real=1.0,
-                    beta::TF=0.96,
+                    σ::Real=1.0,
+                    β::TF=0.96,
                     z_chain::MarkovChain{TF,Array{TF,2},Array{TF,1}}
                         =MarkovChain([0.9 0.1; 0.1 0.9], [0.1; 1.0]),
                     a_min::Real=1e-10,
@@ -93,15 +93,15 @@ function Household{TF<:AbstractFloat}(;
         end
     end
 
-    if sigma == 1   # log utility
+    if σ == 1   # log utility
         u = x -> log(x)
     else
-        u = x -> (x^(1-sigma)-1)/(1-sigma)
+        u = x -> (x^(1-σ)-1)/(1-σ)
     end
 
     # placeholder for R
     R = fill(-Inf, n, a_size)
-    h = Household(r, w, sigma, beta, z_chain, a_min, a_max, a_size,
+    h = Household(r, w, σ, β, z_chain, a_min, a_max, a_size,
                   a_vals, z_size, n, s_vals, s_i_vals, R, Q, u)
 
     setup_R!(h, r, w)
@@ -116,7 +116,7 @@ a new interest rate and wage.
 
 ##### Arguments
 - `h::Household` : instance of Household type
-- `r::Real(0.01)` : interest rate
+- `r::Real(0.01)`: interest rate
 - `w::Real(1.0)` : wage
 """
 function setup_R!(h::Household, r::Real, w::Real)
