@@ -88,7 +88,7 @@ function solve_lucas_model(lt::LucasTree;
     
     while (error > tol) && (i < max_iter)
         f_new = lucas_operator(lt, f)
-        error = maximum(abs.(f_new - f))
+        error = maximum(abs, f_new - f)
         f = f_new
         i += 1
     end

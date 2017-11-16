@@ -6,13 +6,13 @@ Authors: Shunsuke Hori
 """
 Function to Solve Single Beliefs
 """
-function price_singlebeliefs(transition::Matrix, dividend_payoff::Vector;
-                             beta::AbstractFloat=.75)
+function price_single_beliefs(transition::Matrix, dividend_payoff::Vector;
+                              β::AbstractFloat=.75)
     # First compute inverse piece
-    imbq_inv = inv(eye(size(transition,1)) - beta*transition)
+    imbq_inv = inv(eye(size(transition, 1)) - β * transition)
 
     # Next compute prices
-    prices = beta * ((imbq_inv*transition)* dividend_payoff)
+    prices = β * ((imbq_inv * transition) * dividend_payoff)
 
     return prices
 end
