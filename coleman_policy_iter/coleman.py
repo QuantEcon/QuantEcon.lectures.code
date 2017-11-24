@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import brentq
 
-def coleman_operator(g, grid, beta, u_prime, f, f_prime, shocks, Kg=None):
+def coleman_operator(g, grid, β, u_prime, f, f_prime, shocks, Kg=None):
     """
     The approximate Coleman operator, which takes an existing guess g of the
     optimal consumption policy and computes and returns the updated function
@@ -15,7 +15,7 @@ def coleman_operator(g, grid, beta, u_prime, f, f_prime, shocks, Kg=None):
         The value of the input policy function on grid points
     grid : array_like(float, ndim=1)
         The set of grid points
-    beta : scalar
+    β : scalar
         The discount factor
     u_prime : function
         The derivative u'(c) of the utility function
@@ -41,7 +41,7 @@ def coleman_operator(g, grid, beta, u_prime, f, f_prime, shocks, Kg=None):
     for i, y in enumerate(grid):
         def h(c):
             vals = u_prime(g_func(f(y - c) * shocks)) * f_prime(y - c) * shocks
-            return u_prime(c) - beta * np.mean(vals)
+            return u_prime(c) - β * np.mean(vals)
         c_star = brentq(h, 1e-10, y - 1e-10)
         Kg[i] = c_star
 

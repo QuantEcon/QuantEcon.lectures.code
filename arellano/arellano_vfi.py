@@ -19,17 +19,17 @@ class Arellano_Economy:
 
     Parameters
     ----------
-    beta : float
+    β : float
         Time discounting parameter
-    gamma : float
+    γ : float
         Risk-aversion parameter
     r : float
         int lending rate
-    rho : float
+    ρ : float
         Persistence in the income process
-    eta : float
+    η : float
         Standard deviation of the income process
-    theta : float
+    θ : float
         Probability of re-entering financial markets in each period
     ny : int
         Number of points in y grid
@@ -42,25 +42,25 @@ class Arellano_Economy:
     """
 
     def __init__(self, 
-            beta=.953,      # time discount rate
-            gamma=2.,       # risk aversion
+            β=.953,         # time discount rate
+            γ=2.,           # risk aversion
             r=0.017,        # international interest rate
-            rho=.945,       # persistence in output 
-            eta=0.025,      # st dev of output shock
-            theta=0.282,    # prob of regaining access 
+            ρ=.945,         # persistence in output 
+            η=0.025,        # st dev of output shock
+            θ=0.282,        # prob of regaining access 
             ny=21,          # number of points in y grid
             nB=251,         # number of points in B grid
             tol=1e-8,       # error tolerance in iteration
             maxit=10000):
 
         # Save parameters
-        self.beta, self.gamma, self.r = beta, gamma, r
-        self.rho, self.eta, self.theta = rho, eta, theta
+        self.β, self.γ, self.r = β, γ, r
+        self.ρ, self.η, self.θ = ρ, η, θ
         self.ny, self.nB = ny, nB
 
         # Create grids and discretize Markov process
         self.Bgrid = np.linspace(-.45, .45, nB)
-        self.mc = qe.markov.tauchen(rho, eta, 3, ny)
+        self.mc = qe.markov.tauchen(ρ, η, 3, ny)
         self.ygrid = np.exp(self.mc.state_values)
         self.Py = self.mc.P
 
@@ -101,7 +101,7 @@ class Arellano_Economy:
             # are not modified.
             _inner_loop(self.ygrid, self.def_y, self.Bgrid, self.Vd, self.Vc, 
                     EVc, EVd, EV, self.Q, 
-                    self.beta, self.theta, self.gamma)
+                    self.β, self.θ, self.γ)
                                  
             # Update prices
             Vd_compat = np.repeat(self.Vd, self.nB).reshape(self.ny, self.nB)
@@ -132,7 +132,7 @@ class Arellano_Economy:
         EV = np.dot(self.Py, self.V) 
 
         _compute_savings_policy(self.ygrid, self.Bgrid, self.Q, EV,
-                self.gamma, self.beta, self.next_B_index)
+                self.γ, self.β, self.next_B_index)
 
 
     def simulate(self, T, y_init=None, B_init=None):
@@ -168,10 +168,10 @@ class Arellano_Economy:
             else:
                 in_default_series[t] = 1
                 Bi_next = zero_B_index
-                if random.uniform(0, 1) < self.theta:
+                if random.uniform(0, 1) < self.θ:
                     in_default = False
             B_sim_indices[t+1] = Bi_next
-            q_sim[t] = self.Q[yi, Bi_next]
+            q_sim[t] = self.Q[yi, int(Bi_next)]
 
         q_sim[-1] = q_sim[-2] # Extrapolate for the last price
         return_vecs = (self.ygrid[y_sim_indices], 
@@ -183,13 +183,13 @@ class Arellano_Economy:
 
 
 @jit(nopython=True)
-def u(c, gamma):
-    return c**(1-gamma)/(1-gamma)
+def u(c, γ):
+    return c**(1-γ)/(1-γ)
 
 
 @jit(nopython=True)
 def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc, 
-                         EVd, EV, qq, beta, theta, gamma):
+                         EVd, EV, qq, β, θ, γ):
     """
     This is a numba version of the inner loop of the solve in the
     Arellano class. It updates Vd and Vc in place.
@@ -200,8 +200,8 @@ def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc,
         y = ygrid[iy]   # Pull out current y
 
         # Compute Vd
-        Vd[iy] = u(def_y[iy], gamma) + \
-                beta * (theta * EVc[iy, zero_ind] + (1 - theta) * EVd[iy])
+        Vd[iy] = u(def_y[iy], γ) + \
+                β * (θ * EVc[iy, zero_ind] + (1 - θ) * EVd[iy])
 
         # Compute Vc
         for ib in range(nB):
@@ -210,7 +210,7 @@ def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc,
             current_max = -1e14
             for ib_next in range(nB):
                 c = max(y - qq[iy, ib_next] * Bgrid[ib_next] + B, 1e-14)
-                m = u(c, gamma) + beta * EV[iy, ib_next]
+                m = u(c, γ) + β * EV[iy, ib_next]
                 if m > current_max:
                     current_max = m
             Vc[iy, ib] = current_max
@@ -219,7 +219,7 @@ def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc,
 
 
 @jit(nopython=True)
-def _compute_savings_policy(ygrid, Bgrid, Q, EV, gamma, beta, next_B_index):
+def _compute_savings_policy(ygrid, Bgrid, Q, EV, γ, β, next_B_index):
     # Compute best index in Bgrid given iy, ib
     ny, nB = len(ygrid), len(Bgrid)
     for iy in range(ny):
@@ -229,7 +229,7 @@ def _compute_savings_policy(ygrid, Bgrid, Q, EV, gamma, beta, next_B_index):
             current_max = -1e10
             for ib_next in range(nB):
                 c = max(y - Q[iy, ib_next] * Bgrid[ib_next] + B, 1e-14)
-                m = u(c, gamma) + beta * EV[iy, ib_next]
+                m = u(c, γ) + β * EV[iy, ib_next]
                 if m > current_max:
                     current_max = m
                     current_max_index = ib_next

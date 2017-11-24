@@ -1,6 +1,6 @@
 import numpy as np
 
-def coleman_egm(g, k_grid, beta, u_prime, u_prime_inv, f, f_prime, shocks):
+def coleman_egm(g, k_grid, β, u_prime, u_prime_inv, f, f_prime, shocks):
     """
     The approximate Coleman operator, updated using the endogenous grid
     method.  
@@ -11,7 +11,7 @@ def coleman_egm(g, k_grid, beta, u_prime, u_prime_inv, f, f_prime, shocks):
         The current guess of the policy function
     k_grid : array_like(float, ndim=1)
         The set of *exogenous* grid points, for capital k = y - c
-    beta : scalar
+    β : scalar
         The discount factor
     u_prime : function
         The derivative u'(c) of the utility function
@@ -33,7 +33,7 @@ def coleman_egm(g, k_grid, beta, u_prime, u_prime_inv, f, f_prime, shocks):
     # Solve for updated consumption value
     for i, k in enumerate(k_grid):
         vals = u_prime(g(f(k) * shocks)) * f_prime(k) * shocks
-        c[i] = u_prime_inv(beta * np.mean(vals))
+        c[i] = u_prime_inv(β * np.mean(vals))
     
     # Determine endogenous grid
     y = k_grid + c  # y_i = k_i + c_i

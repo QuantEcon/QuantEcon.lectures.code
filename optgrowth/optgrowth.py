@@ -2,7 +2,7 @@ import numpy as np
 from scipy.optimize import fminbound
 
 
-def bellman_operator(w, grid, beta, u, f, shocks, Tw=None, compute_policy=0):
+def bellman_operator(w, grid, β, u, f, shocks, Tw=None, compute_policy=0):
     """
     The approximate Bellman operator, which computes and returns the
     updated value function Tw on the grid points.  An array to store
@@ -16,7 +16,7 @@ def bellman_operator(w, grid, beta, u, f, shocks, Tw=None, compute_policy=0):
         The value of the input function on different grid points
     grid : array_like(float, ndim=1)
         The set of grid points
-    beta : scalar
+    β : scalar
         The discount factor
     u : function
         The utility function
@@ -39,19 +39,19 @@ def bellman_operator(w, grid, beta, u, f, shocks, Tw=None, compute_policy=0):
         Tw = np.empty_like(w)
 
     if compute_policy:
-        sigma = np.empty_like(w)
+        σ = np.empty_like(w)
 
-    # == set Tw[i] = max_c { u(c) + beta E w(f(y  - c) z)} == #
+    # == set Tw[i] = max_c { u(c) + β E w(f(y  - c) z)} == #
     for i, y in enumerate(grid):
         def objective(c):
-            return - u(c) - beta * np.mean(w_func(f(y - c) * shocks))
+            return - u(c) - β * np.mean(w_func(f(y - c) * shocks))
         c_star = fminbound(objective, 1e-10, y)
         if compute_policy:
-            sigma[i] = c_star
+            σ[i] = c_star
         Tw[i] = - objective(c_star)
 
     if compute_policy:
-        return Tw, sigma
+        return Tw, σ
     else:
         return Tw
 

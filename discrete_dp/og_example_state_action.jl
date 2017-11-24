@@ -2,9 +2,9 @@ using QuantEcon
 
 B = 10
 M = 5
-alpha = 0.5
-beta = 0.9
-u(c) = c^alpha
+α = 0.5
+β = 0.9
+u(c) = c^α
 n = B + M + 1
 m = M + 1
 
@@ -26,5 +26,5 @@ for s in 0:(M + B)
     end
 end
 
-ddp = DiscreteDP(R, Q, beta, s_indices, a_indices);
+ddp = DiscreteDP(R, Q, β, s_indices, a_indices);
 results = solve(ddp, PFI)

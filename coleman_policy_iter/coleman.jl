@@ -9,7 +9,7 @@ using QuantEcon
 """
 g: input policy function
 grid: grid points
-beta: discount factor
+β: discount factor
 u_prime: derivative of utility function
 f: production function
 f_prime: derivative of production function
@@ -18,7 +18,7 @@ Kg: output value is stored
 """
 function coleman_operator!(g::AbstractVector,
                            grid::AbstractVector,
-                           beta::AbstractFloat,
+                           β::AbstractFloat,
                            u_prime::Function,
                            f::Function,
                            f_prime::Function,
@@ -34,7 +34,7 @@ function coleman_operator!(g::AbstractVector,
     for (i,y) in enumerate(grid)
         function h(c)
             vals = u_prime.(g_func.(f(y - c)*shocks)).*f_prime(y - c).*shocks
-            return u_prime(c) - beta * mean(vals)
+            return u_prime(c) - β * mean(vals)
         end
         Kg[i] = brent(h, 1e-10, y-1e-10)
     end
@@ -44,12 +44,12 @@ end
 # The following function does NOT require the container of the output value as argument
 function coleman_operator(g::AbstractVector,
                           grid::AbstractVector,
-                          beta::AbstractFloat,
+                          β::AbstractFloat,
                           u_prime::Function,
                           f::Function,
                           f_prime::Function,
                           shocks::AbstractVector)
 
-    return coleman_operator!(g, grid, beta, u_prime,
+    return coleman_operator!(g, grid, β, u_prime,
                              f, f_prime, shocks, similar(g))
 end

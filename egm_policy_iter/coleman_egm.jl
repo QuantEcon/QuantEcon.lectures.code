@@ -16,7 +16,7 @@ g : Function
     The current guess of the policy function
 k_grid : AbstractVector
     The set of *exogenous* grid points, for capital k = y - c
-beta : AbstractFloat
+β : AbstractFloat
     The discount factor
 u_prime : Function
     The derivative u'(c) of the utility function
@@ -33,7 +33,7 @@ shocks : AbstractVector
 
 function coleman_egm(g::Function,
                      k_grid::AbstractVector,
-                     beta::AbstractFloat,
+                     β::AbstractFloat,
                      u_prime::Function,
                      u_prime_inv::Function,
                      f::Function,
@@ -46,7 +46,7 @@ function coleman_egm(g::Function,
     # Solve for updated consumption value
     for (i, k) in enumerate(k_grid)
         vals = u_prime.(g.(f(k) * shocks)) .* f_prime(k) .* shocks
-        c[i] = u_prime_inv(beta * mean(vals))
+        c[i] = u_prime_inv(β * mean(vals))
     end
 
     # Determine endogenous grid

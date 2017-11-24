@@ -2,11 +2,11 @@
 import quantecon as qe
 import numpy as np
 
-B, M, alpha, beta = 10, 5, 0.5, 0.9
+B, M, α, β = 10, 5, 0.5, 0.9
 n = B + M + 1
 m = M + 1
 def u(c):
-    return c**alpha
+    return c**α
 
 s_indices = []
 a_indices = []
@@ -23,4 +23,4 @@ for s in range(n):
         Q.append(q)
         R.append(u(s - a))
 
-ddp = qe.markov.DiscreteDP(R, Q, beta, s_indices, a_indices)
+ddp = qe.markov.DiscreteDP(R, Q, β, s_indices, a_indices)

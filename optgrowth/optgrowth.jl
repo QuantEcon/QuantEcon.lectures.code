@@ -21,7 +21,7 @@ Tw will be overwritten.
       The value of the input function on different grid points
 `grid` : Vector
          The set of grid points
-`beta` : AbstractFloat
+`β` : AbstractFloat
          The discount factor
 `u` : Function
       The utility function
@@ -38,7 +38,7 @@ Tw will be overwritten.
 """
 function bellman_operator(w::Vector, 
                           grid::Vector,
-                          beta::AbstractFloat, 
+                          β::AbstractFloat, 
                           u::Function, 
                           f::Function, 
                           shocks::Vector, 
@@ -49,22 +49,22 @@ function bellman_operator(w::Vector,
     w_func = LinInterp(grid, w)
 
     if compute_policy
-        sigma = similar(w)
+        σ = similar(w)
     end
 
-    # == set Tw[i] = max_c { u(c) + beta E w(f(y  - c) z)} == #
+    # == set Tw[i] = max_c { u(c) + β E w(f(y  - c) z)} == #
     for (i, y) in enumerate(grid)
-        objective(c) = - u(c) - beta * mean(w_func.(f(y - c) .* shocks))
+        objective(c) = - u(c) - β * mean(w_func.(f(y - c) .* shocks))
         res = optimize(objective, 1e-10, y)
 
         if compute_policy
-            sigma[i] = res.minimizer
+            σ[i] = res.minimizer
         end
         Tw[i] = - res.minimum
     end
 
     if compute_policy
-        return Tw, sigma
+        return Tw, σ
     else
         return Tw
     end

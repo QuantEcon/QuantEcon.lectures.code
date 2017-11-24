@@ -3,22 +3,22 @@ class LogLinearOG:
     Log linear optimal growth model, with log utility, CD production and
     multiplicative lognormal shock, so that
 
-        y = f(k, z) = z k^alpha
+        y = f(k, z) = z k^α
 
-    with z ~ LN(mu, s).
+    with z ~ LN(μ, s).
 
     The class holds parameters and true value and policy functions.
     """
 
-    def __init__(self, alpha=0.4, beta=0.96, mu=0, s=0.1):
+    def __init__(self, α=0.4, β=0.96, μ=0, s=0.1):
 
-        self.alpha, self.beta, self.mu, self.s = alpha, beta, mu, s 
+        self.α, self.β, self.μ, self.s = α, β, μ, s 
 
         # == Some useful constants == #
-        self.ab = alpha * beta
-        self.c1 = np.log(1 - self.ab) / (1 - beta)
-        self.c2 = (mu + alpha * np.log(self.ab)) / (1 - alpha)
-        self.c3 = 1 / (1 - beta)
+        self.ab = α * β
+        self.c1 = np.log(1 - self.ab) / (1 - β)
+        self.c2 = (μ + α * np.log(self.ab)) / (1 - α)
+        self.c3 = 1 / (1 - β)
         self.c4 = 1 / (1 - self.ab)
 
     def u(self, c):
@@ -30,14 +30,14 @@ class LogLinearOG:
 
     def f(self, k):
         " Deterministic part of production function.  "
-        return k**self.alpha
+        return k**self.α
 
     def f_prime(self, k):
-        return self.alpha * k**(self.alpha - 1)
+        return self.α * k**(self.α - 1)
 
     def c_star(self, y):
         " True optimal policy.  "
-        return (1 - self.alpha * self.beta) * y
+        return (1 - self.α * self.β) * y
 
     def v_star(self, y):
         " True value function. "

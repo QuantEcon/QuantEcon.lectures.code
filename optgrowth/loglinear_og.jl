@@ -1,13 +1,12 @@
-alpha = 0.4
-beta = 0.96
-mu = 0
+α = 0.4
+β = 0.96
+μ = 0
 s = 0.1
 
-ab = alpha * beta
-c1 = log(1 - ab) / (1 - beta)
-c2 = (mu + alpha * log(ab)) / (1 - alpha)
-c3 = 1 / (1 - beta)
-c4 = 1 / (1 - ab)
+c1 = log(1 - α * β) / (1 - β)
+c2 = (μ + α * log(α * β)) / (1 - α)
+c3 = 1 / (1 - β)
+c4 = 1 / (1 - α * β)
 
 # Utility 
 u(c) = log(c)
@@ -15,12 +14,12 @@ u(c) = log(c)
 u_prime(c) = 1 / c
 
 # Deterministic part of production function
-f(k) = k^alpha
+f(k) = k^α
 
-f_prime(k) = alpha * k^(alpha - 1)
+f_prime(k) = α * k^(α - 1)
 
 # True optimal policy
-c_star(y) = (1 - alpha * beta) * y
+c_star(y) = (1 - α * β) * y
 
 # True value function
 v_star(y) = c1 + c2 * (c3 - c4) + c4 * log(y)

@@ -1,6 +1,5 @@
 """ 
-
-@authors: Chase Coleman, Balint Skoze, Tom Sargent
+@authors: Chase Coleman, Balint Szoke, Tom Sargent
 
 """
 

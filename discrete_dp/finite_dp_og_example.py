@@ -2,13 +2,13 @@ import numpy as np
 
 class SimpleOG:
 
-    def __init__(self, B=10, M=5, alpha=0.5, beta=0.9):
+    def __init__(self, B=10, M=5, α=0.5, β=0.9):
         """
-        Set up R, Q and beta, the three elements that define an instance of
+        Set up R, Q and β, the three elements that define an instance of
         the DiscreteDP class.
         """
 
-        self.B, self.M, self.alpha, self.beta  = B, M, alpha, beta
+        self.B, self.M, self.α, self.β  = B, M, α, β
         self.n = B + M + 1
         self.m = M + 1
 
@@ -19,7 +19,7 @@ class SimpleOG:
         self.populate_R()
 
     def u(self, c):
-        return c**self.alpha
+        return c**self.α
 
     def populate_R(self):
         """

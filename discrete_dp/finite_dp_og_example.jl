@@ -2,15 +2,15 @@ struct SimpleOG{TI <: Integer, T <: Real,
                 TR <: AbstractArray{T}, TQ <: AbstractArray{T}}
     B :: TI
     M :: TI
-    alpha :: T
-    beta :: T
+    α :: T
+    β :: T
     R :: TR
     Q :: TQ
 end
 
-function SimpleOG{T <: Real}(;B::Integer=10, M::Integer=5, alpha::T=0.5, beta::T=0.9)
+function SimpleOG{T <: Real}(;B::Integer=10, M::Integer=5, α::T=0.5, β::T=0.9)
 
-    u(c) = c^alpha
+    u(c) = c^α
     n = B + M + 1
     m = M + 1
 
@@ -24,5 +24,5 @@ function SimpleOG{T <: Real}(;B::Integer=10, M::Integer=5, alpha::T=0.5, beta::T
         end
     end
 
-    return SimpleOG(B, M, alpha, beta, R, Q)
+    return SimpleOG(B, M, α, β, R, Q)
 end
