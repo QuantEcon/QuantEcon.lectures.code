@@ -1,7 +1,7 @@
 from numpy import array
 
 # == Parameters == #
-beta = 1 / 1.05
+β = 1 / 1.05
 P = array([[0.8, 0.2, 0.0],
            [0.0, 0.5, 0.5],
            [0.0, 0.0, 1.0]])
@@ -19,13 +19,13 @@ Sd = array((0, 1, 0, 0, 0)).reshape(1, 5)
 Sb = array((0, 0, 1, 0, 0)).reshape(1, 5)
 Ss = array((0, 0, 0, 1, 0)).reshape(1, 5)
 
-economy = Economy(beta=beta,
-                           Sg=Sg,
-                           Sd=Sd,
-                           Sb=Sb,
-                           Ss=Ss,
-                           discrete=True,
-                           proc=(P, x_vals))
+economy = Economy(β=β,
+                  Sg=Sg,
+                  Sd=Sd,
+                  Sb=Sb,
+                  Ss=Ss,
+                  discrete=True,
+                  proc=(P, x_vals))
 
 T = 15
 path = compute_paths(T, economy)

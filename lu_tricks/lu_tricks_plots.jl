@@ -6,9 +6,9 @@ a_seq = sin.(linspace(0, 5*pi, n)) + 2 + 0.1 * randn(n)
 
 
 # == Model parameters == #
-gamma = 0.8
+γ = 0.8
 m = 1
-d = gamma * [1, -1]
+d = γ * [1, -1]
 h = 1.0
 
 

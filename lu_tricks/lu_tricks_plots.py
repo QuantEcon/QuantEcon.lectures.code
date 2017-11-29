@@ -7,9 +7,9 @@ n = 100
 a_seq = np.sin(np.linspace(0, 5*np.pi, n)) + 2 + 0.1 * np.random.randn(n)
 
 # == Model parameters == #
-gamma = 0.8
+γ = 0.8
 m = 1 
-d = gamma * np.asarray([1, -1])
+d = γ * np.asarray([1, -1])
 h = 1.0 
 
 # == Initial conditions == #
@@ -34,5 +34,5 @@ ax.plot(time, a_seq / h, 'k-o', ms=4, lw=2, alpha=0.6, label=r'$a_t$')
 ax.plot(time, y, 'b-o', ms=4, lw=2, alpha=0.6, label=r'$y_t$')
 ax.legend(ncol=2, **legend_args)
 ax.grid()
-s = r'dynamics with $\gamma = {}$'.format(gamma)
+s = r'dynamics with $\gamma = {}$'.format(γ)
 plt.show()

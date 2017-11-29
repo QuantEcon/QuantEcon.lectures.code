@@ -10,7 +10,7 @@ import scipy.linalg as la
 
 class LQFilter:
     
-    def __init__(self, d, h, y_m, r=None, h_eps=None, beta=None):
+    def __init__(self, d, h, y_m, r=None, h_eps=None, β=None):
         """
         
         Parameters
@@ -25,7 +25,7 @@ class LQFilter:
             r : list or numpy.array (1-D or a 2-D column vector)
                     The order of the coefficients: [r_0, r_1, ..., r_k] 
                     (optional, if not defined -> deterministic problem)
-            beta : scalar
+            β : scalar
                     Discount factor (optional, default value is one)
             
         """
@@ -42,42 +42,42 @@ class LQFilter:
             raise ValueError("y_m must be of length m = {:d}".format(self.m))
         
         #---------------------------------------------
-        # Define the coefficients of phi up front
+        # Define the coefficients of ϕ up front
         #---------------------------------------------
-        phi = np.zeros(2 * self.m + 1)
+        ϕ = np.zeros(2 * self.m + 1)
         for i in range(- self.m, self.m + 1):
-            phi[self.m - i] = np.sum(np.diag(self.d.reshape(self.m + 1, 1) @ \
+            ϕ[self.m - i] = np.sum(np.diag(self.d.reshape(self.m + 1, 1) @ \
                                                   self.d.reshape(1, self.m + 1), k = -i))
-        phi[self.m] = phi[self.m] + self.h
-        self.phi = phi
+        ϕ[self.m] = ϕ[self.m] + self.h
+        self.ϕ = ϕ
 
         #-----------------------------------------------------
-        # If r is given calculate the vector phi_r
+        # If r is given calculate the vector ϕ_r
         #-----------------------------------------------------
         if r is None:
             pass
         else:
             self.r = np.asarray(r)
             self.k = self.r.shape[0] - 1
-            phi_r = np.zeros(2 * self.k + 1)
+            ϕ_r = np.zeros(2 * self.k + 1)
             for i in range(- self.k, self.k + 1):
-                phi_r[self.k - i] = np.sum(np.diag(self.r.reshape(self.k + 1, 1) @ \
+                ϕ_r[self.k - i] = np.sum(np.diag(self.r.reshape(self.k + 1, 1) @ \
                                                    self.r.reshape(1, self.k + 1), k = -i))
             if h_eps is None:
-                self.phi_r = phi_r
+                self.ϕ_r = ϕ_r
             else:
-                phi_r[self.k] = phi_r[self.k] + h_eps
-                self.phi_r = phi_r        
+                ϕ_r[self.k] = ϕ_r[self.k] + h_eps
+                self.ϕ_r = ϕ_r        
         
         #-----------------------------------------------------
-        # If beta is given, define the transformed variables
+        # If β is given, define the transformed variables
         #-----------------------------------------------------
-        if beta is None:
-            self.beta = 1
+        if β is None:
+            self.β = 1
         else:
-            self.beta = beta
-            self.d = self.beta**(np.arange(self.m + 1)/2) * self.d
-            self.y_m = self.y_m * (self.beta**(- np.arange(1, self.m + 1)/2)).reshape(self.m, 1)
+            self.β = β
+            self.d = self.β**(np.arange(self.m + 1)/2) * self.d
+            self.y_m = self.y_m * (self.β**(- np.arange(1, self.m + 1)/2)).reshape(self.m, 1)
         
         
     def construct_W_and_Wm(self, N):
@@ -116,19 +116,19 @@ class LQFilter:
         #----------------------------------------------
         # Euler equations for t = 0, 1, ..., N-(m+1)  
         #----------------------------------------------
-        phi = self.phi
+        ϕ = self.ϕ
         
         W[:(m + 1), :(m + 1)] = D_m1 + self.h * np.eye(m + 1)
         W[:(m + 1), (m + 1):(2 * m + 1)] = M
 
         for i, row in enumerate(np.arange(m + 1, N + 1 - m)):
-            W[row, (i + 1):(2 * m + 2 + i)] = phi
+            W[row, (i + 1):(2 * m + 2 + i)] = ϕ
     
         for i in range(1, m + 1):
-            W[N - m + i, -(2 * m + 1 - i):] = phi[:-i]
+            W[N - m + i, -(2 * m + 1 - i):] = ϕ[:-i]
 
         for i in range(m):
-            W_m[N - i, :(m - i)] = phi[(m + 1 + i):]
+            W_m[N - i, :(m - i)] = ϕ[(m + 1 + i):]
         
         return W, W_m
         
@@ -147,19 +147,19 @@ class LQFilter:
         
         """
         m = self.m
-        phi = self.phi
+        ϕ = self.ϕ
         
         # Calculate the roots of the 2m-polynomial
-        roots = np.roots(phi)
+        roots = np.roots(ϕ)
         # sort the roots according to their length (in descending order) 
         roots_sorted = roots[np.argsort(abs(roots))[::-1]]    
 
-        z_0 = phi.sum() / np.poly1d(roots, True)(1)
+        z_0 = ϕ.sum() / np.poly1d(roots, True)(1)
         z_1_to_m = roots_sorted[:m]     # we need only those outside the unit circle
         
-        lambdas = 1 / z_1_to_m
+        λ = 1 / z_1_to_m
 
-        return z_1_to_m, z_0, lambdas
+        return z_1_to_m, z_0, λ
 
     
     def coeffs_of_c(self):
@@ -180,18 +180,18 @@ class LQFilter:
         
     def solution(self):
         """
-        This function calculates {lambda_j, j=1,...,m} and {A_j, j=1,...,m}
+        This function calculates {λ_j, j=1,...,m} and {A_j, j=1,...,m}
         of the expression (1.15)
         """
-        lambdas = self.roots_of_characteristic()[2]
+        λ = self.roots_of_characteristic()[2]
         c_0 = self.coeffs_of_c()[-1]
         
         A = np.zeros(self.m, dtype = complex)
         for j in range(self.m):
-            denom = 1 - lambdas/lambdas[j]
+            denom = 1 - λ/λ[j]
             A[j] = c_0**(-2) / np.prod(denom[np.arange(self.m) != j])
         
-        return lambdas, A
+        return λ, A
     
     
     def construct_V(self, N):
@@ -200,12 +200,12 @@ class LQFilter:
         for a given period N
         '''
         V = np.zeros((N, N))
-        phi_r = self.phi_r
+        ϕ_r = self.ϕ_r
         
         for i in range(N):
             for j in range(N):
                 if abs(i-j) <= self.k:
-                    V[i, j] = phi_r[self.k + abs(i-j)]
+                    V[i, j] = ϕ_r[self.k + abs(i-j)]
                     
         return V
     
@@ -272,24 +272,24 @@ class LQFilter:
             a_hist = J @ np.asarray(a_hist).reshape(N + 1, 1)
 
             #--------------------------------------------
-            # Transform the a sequence if beta is given
+            # Transform the a sequence if β is given
             #--------------------------------------------
-            if self.beta != 1:
-                a_hist =  a_hist * (self.beta**(np.arange(N + 1) / 2))[::-1].reshape(N + 1, 1) 
+            if self.β != 1:
+                a_hist =  a_hist * (self.β**(np.arange(N + 1) / 2))[::-1].reshape(N + 1, 1) 
             
-            a_bar = a_hist - W_m @ self.y_m           # a_bar from the lecutre
-            Uy = np.linalg.solve(L, a_bar)            # U @ y_bar = L^{-1}a_bar from the lecture
-            y_bar = np.linalg.solve(U, Uy)            # y_bar = U^{-1}L^{-1}a_bar
+            a_bar = a_hist - W_m @ self.y_m               # a_bar from the lecutre
+            Uy = np.linalg.solve(L, a_bar)                # U @ y_bar = L^{-1}a_bar from the lecture
+            y_bar = np.linalg.solve(U, Uy)                # y_bar = U^{-1}L^{-1}a_bar
         
             # Reverse the order of y_bar with the matrix J
             J = np.fliplr(np.eye(N + self.m + 1))
             y_hist = J @ np.vstack([y_bar, self.y_m])     # y_hist : concatenated y_m and y_bar
         
             #--------------------------------------------
-            # Transform the optimal sequence back if beta is given
+            # Transform the optimal sequence back if β is given
             #--------------------------------------------
-            if self.beta != 1:
-                y_hist = y_hist * (self.beta**(- np.arange(-self.m, N + 1)/2)).reshape(N + 1 + self.m, 1) 
+            if self.β != 1:
+                y_hist = y_hist * (self.β**(- np.arange(-self.m, N + 1)/2)).reshape(N + 1 + self.m, 1) 
         
         
             return y_hist, L, U, y_bar
@@ -299,9 +299,9 @@ class LQFilter:
             Ea_hist = self.predict(a_hist, t).reshape(N + 1, 1)
             Ea_hist = J @ Ea_hist
                         
-            a_bar = Ea_hist - W_m @ self.y_m           # a_bar from the lecutre
-            Uy = np.linalg.solve(L, a_bar)            # U @ y_bar = L^{-1}a_bar from the lecture
-            y_bar = np.linalg.solve(U, Uy)            # y_bar = U^{-1}L^{-1}a_bar
+            a_bar = Ea_hist - W_m @ self.y_m              # a_bar from the lecutre
+            Uy = np.linalg.solve(L, a_bar)                # U @ y_bar = L^{-1}a_bar from the lecture
+            y_bar = np.linalg.solve(U, Uy)                # y_bar = U^{-1}L^{-1}a_bar
         
             # Reverse the order of y_bar with the matrix J
             J = np.fliplr(np.eye(N + self.m + 1))

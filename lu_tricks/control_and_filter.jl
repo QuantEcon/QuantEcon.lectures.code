@@ -11,9 +11,9 @@ struct LQFilter{TR<:Real, TI<:Integer, TF<:AbstractFloat}
     h::TR
     y_m::Vector{TF}
     m::TI
-    phi::Vector{TF}
-    beta::TR
-    phi_r::Union{Vector{TF},Void}
+    ϕ::Vector{TF}
+    β::TR
+    ϕ_r::Union{Vector{TF},Void}
     k::Union{TI,Void}
 end
 
@@ -31,7 +31,7 @@ y_m : Vector
 r : Vector
         The order of the coefficients: [r_0, r_1, ..., r_k]
         (optional, if not defined -> deterministic problem)
-beta : Real or nothing
+β : Real or nothing
         Discount factor (optional, default value is one)
 h_eps : 
 """
@@ -39,7 +39,7 @@ function LQFilter{TR<:Real}(d::Vector{TR},
                    h::TR,
                    y_m::Vector{TR};
                    r::Union{Vector{TR},Void}=nothing,
-                   beta::Union{TR,Void}=nothing,
+                   β::Union{TR,Void}=nothing,
                    h_eps::Union{TR,Void}=nothing,
                    )
 
@@ -50,46 +50,46 @@ function LQFilter{TR<:Real}(d::Vector{TR},
         throw(ArgumentError("y_m and d must be of same length = $m"))
 
     #---------------------------------------------
-    # Define the coefficients of phi up front
+    # Define the coefficients of ϕ up front
     #---------------------------------------------
 
-    phi = Vector{TR}(2m + 1)
+    ϕ = Vector{TR}(2m + 1)
     for i in -m:m
-        phi[m-i+1] = sum(diag(d*d', -i))
+        ϕ[m-i+1] = sum(diag(d*d', -i))
     end
-    phi[m+1] = phi[m+1] + h
+    ϕ[m+1] = ϕ[m+1] + h
 
     #-----------------------------------------------------
-    # If r is given calculate the vector phi_r
+    # If r is given calculate the vector ϕ_r
     #-----------------------------------------------------
     
     if r == nothing
         k=nothing
-        phi_r = nothing
+        ϕ_r = nothing
     else
-        k = size(r,1) - 1
-        phi_r = Vector{TR}(2k + 1)
+        k = size(r, 1) - 1
+        ϕ_r = Vector{TR}(2k + 1)
 
         for i = -k:k
-            phi_r[k-i+1] = sum(diag(r*r', -i))
+            ϕ_r[k-i+1] = sum(diag(r*r', -i))
         end
 
         if h_eps != nothing
-            phi_r[k+1] = phi_r[k+1] + h_eps
+            ϕ_r[k+1] = ϕ_r[k+1] + h_eps
         end
     end
 
     #-----------------------------------------------------
-    # If beta is given, define the transformed variables
+    # If β is given, define the transformed variables
     #-----------------------------------------------------
-    if beta == nothing
-        beta = 1.0
+    if β == nothing
+        β = 1.0
     else
-        d = beta.^(collect(0:m)/2) * d
-        y_m = y_m * beta.^(- collect(1:m)/2)
+        d = β.^(collect(0:m)/2) * d
+        y_m = y_m * β.^(- collect(1:m)/2)
     end
 
-    return LQFilter(d,h,y_m,m,phi,beta,phi_r,k)
+    return LQFilter(d, h, y_m, m, ϕ, β, ϕ_r, k)
 end
 
 """
@@ -113,7 +113,7 @@ function construct_W_and_Wm(lqf::LQFilter, N::Integer)
 
     for j in 1:(m+1)
         for k in j:(m+1)
-            D_m1[j, k] = dot(d[1:j,1], d[k-j+1:k,1])
+            D_m1[j, k] = dot(d[1:j, 1], d[k-j+1:k, 1])
         end
     end
 
@@ -132,21 +132,21 @@ function construct_W_and_Wm(lqf::LQFilter, N::Integer)
     #----------------------------------------------
     # Euler equations for t = 0, 1, ..., N-(m+1)
     #----------------------------------------------
-    phi, h = lqf.phi, lqf.h
+    ϕ, h = lqf.ϕ, lqf.h
 
     W[1:(m + 1), 1:(m + 1)] = D_m1 + h * eye(m + 1)
     W[1:(m + 1), (m + 2):(2m + 1)] = M
 
     for (i, row) in enumerate((m + 2):(N + 1 - m))
-        W[row, (i + 1):(2m + 1 + i)] = phi'
+        W[row, (i + 1):(2m + 1 + i)] = ϕ'
     end
 
     for i in 1:m
-        W[N - m + i + 1 , end-(2m + 1 - i)+1:end] = phi[1:end-i]
+        W[N - m + i + 1 , end-(2m + 1 - i)+1:end] = ϕ[1:end-i]
     end
 
     for i in 1:m
-        W_m[N - i + 2, 1:(m - i)+1] = phi[(m + 1 + i):end]
+        W_m[N - i + 2, 1:(m - i)+1] = ϕ[(m + 1 + i):end]
     end
 
     return W, W_m
@@ -163,17 +163,17 @@ evaluated at any point by `polyval(Poly,x)`. If x_1, x_2, ... , x_m are the root
     polyval(poly(roots),x) = (x - x_1)(x - x_2)...(x - x_m)
 """
 function roots_of_characteristic(lqf::LQFilter)
-    m, phi = lqf.m, lqf.phi
+    m, ϕ = lqf.m, lqf.ϕ
     
     # Calculate the roots of the 2m-polynomial
-    phi_poly=Poly(phi[end:-1:1])
-    proots = roots(phi_poly)
+    ϕ_poly=Poly(ϕ[end:-1:1])
+    proots = roots(ϕ_poly)
     # sort the roots according to their length (in descending order)
     roots_sorted = sort(proots, by=abs)[end:-1:1]
-    z_0 = sum(phi) / polyval(poly(proots), 1.0)
+    z_0 = sum(ϕ) / polyval(poly(proots), 1.0)
     z_1_to_m = roots_sorted[1:m]     # we need only those outside the unit circle
-    lambdas = 1 ./ z_1_to_m
-    return z_1_to_m, z_0, lambdas
+    λ = 1 ./ z_1_to_m
+    return z_1_to_m, z_0, λ
 end
 
 """
@@ -184,25 +184,25 @@ Based on the expression (1.9). The order is
 """
 function coeffs_of_c(lqf::LQFilter)
     m = lqf.m
-    z_1_to_m, z_0, lambdas = roots_of_characteristic(lqf)
+    z_1_to_m, z_0, λ = roots_of_characteristic(lqf)
     c_0 = (z_0 * prod(z_1_to_m) * (-1.0)^m)^(0.5)
     c_coeffs = coeffs(poly(z_1_to_m)) * z_0 / c_0
     return c_coeffs
 end
 
 """
-This function calculates {lambda_j, j=1,...,m} and {A_j, j=1,...,m}
+This function calculates {λ_j, j=1,...,m} and {A_j, j=1,...,m}
 of the expression (1.15)
 """
 function solution(lqf::LQFilter)
-    z_1_to_m, z_0, lambdas = roots_of_characteristic(lqf)
+    z_1_to_m, z_0, λ = roots_of_characteristic(lqf)
     c_0 = coeffs_of_c(lqf)[end]
     A = zeros(lqf.m)
     for j in 1:m
-        denom = 1 - lambdas/lambdas[j]
+        denom = 1 - λ/λ[j]
         A[j] = c_0^(-2) / prod(denom[1:m .!= j])
     end
-    return lambdas, A
+    return λ, A
 end
 
 """
@@ -217,12 +217,12 @@ function construct_V(lqf::LQFilter; N::Integer=nothing)
         throw(ArgumentError("N must be Integer!"))
     end
         
-    phi_r, k = lqf.phi_r, lqf.k
+    ϕ_r, k = lqf.ϕ_r, lqf.k
     V = zeros(N, N)
     for i in 1:N
         for j in 1:N
             if abs(i-j) <= k
-                V[i, j] = phi_r[k + abs(i-j)+1]
+                V[i, j] = ϕ_r[k + abs(i-j)+1]
             end
         end
     end
@@ -274,7 +274,7 @@ matrix D which renormalizes L and U
 """
 
 function optimal_y(lqf::LQFilter, a_hist::Vector, t = nothing)
-    beta, y_m, m = lqf.beta, lqf.y_m, lqf.m
+    β, y_m, m = lqf.β, lqf.y_m, lqf.m
 
     N = length(a_hist) - 1
     W, W_m = construct_W_and_Wm(lqf, N)
@@ -288,36 +288,36 @@ function optimal_y(lqf::LQFilter, a_hist::Vector, t = nothing)
 
     J = flipdim(eye(N + 1), 2)
 
-    if t == nothing   # if the problem is deterministic
+    if t == nothing                      # if the problem is deterministic
         a_hist = J * a_hist
 
         #--------------------------------------------
-        # Transform the a sequence if beta is given
+        # Transform the a sequence if β is given
         #--------------------------------------------
-        if beta != 1
-            a_hist =  reshape(a_hist * (beta^(collect(N:0)/ 2)),N + 1, 1)
+        if β != 1
+            a_hist =  reshape(a_hist * (β^(collect(N:0)/ 2)), N + 1, 1)
         end
 
-        a_bar = a_hist - W_m * y_m           # a_bar from the lecutre
-        Uy = \(L, a_bar)            # U @ y_bar = L^{-1}a_bar from the lecture
-        y_bar = \(U, Uy)            # y_bar = U^{-1}L^{-1}a_bar
+        a_bar = a_hist - W_m * y_m        # a_bar from the lecutre
+        Uy = \(L, a_bar)                  # U @ y_bar = L^{-1}a_bar from the lecture
+        y_bar = \(U, Uy)                  # y_bar = U^{-1}L^{-1}a_bar
         # Reverse the order of y_bar with the matrix J
         J = flipdim(eye(N + m + 1), 2)
         y_hist = J * vcat(y_bar, y_m)     # y_hist : concatenated y_m and y_bar
         #--------------------------------------------
-        # Transform the optimal sequence back if beta is given
+        # Transform the optimal sequence back if β is given
         #--------------------------------------------
-        if beta != 1
-            y_hist = y_hist .* beta.^(- collect(-m:N)/2)
+        if β != 1
+            y_hist = y_hist .* β.^(- collect(-m:N)/2)
         end
 
-    else           # if the problem is stochastic and we look at it
+    else                                  # if the problem is stochastic and we look at it
         Ea_hist = reshape(predict(a_hist, t), N + 1, 1)
         Ea_hist = J * Ea_hist
 
-        a_bar = Ea_hist - W_m * y_m           # a_bar from the lecutre
-        Uy = \(L, a_bar)            # U @ y_bar = L^{-1}a_bar from the lecture
-        y_bar = \(U, Uy)            # y_bar = U^{-1}L^{-1}a_bar
+        a_bar = Ea_hist - W_m * y_m       # a_bar from the lecutre
+        Uy = \(L, a_bar)                  # U @ y_bar = L^{-1}a_bar from the lecture
+        y_bar = \(U, Uy)                  # y_bar = U^{-1}L^{-1}a_bar
 
         # Reverse the order of y_bar with the matrix J
         J = flipdim(eye(N + m + 1), 2)

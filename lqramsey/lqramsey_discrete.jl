@@ -5,7 +5,7 @@
 =#
 
 # Parameters
-bet = 1 / 1.05
+β = 1 / 1.05
 P = [0.8 0.2 0.0
      0.0 0.5 0.5
      0.0 0.0 1.0]
@@ -24,7 +24,7 @@ Ss = [0.0 0.0 0.0 1.0 0.0]
 discrete = true
 proc = DiscreteStochProcess(P, x_vals)
 
-econ = Economy(bet, Sg, Sd, Sb, Ss, discrete, proc)
+econ = Economy(β, Sg, Sd, Sb, Ss, discrete, proc)
 T = 15
 
 path = compute_paths(econ, T)

@@ -1,16 +1,9 @@
-#=
-
-Author: Victoria Gregory
-
-=#
-
-
 # Firms' parameters
-A = 1
-N = 1
-α = 0.33
-β = 0.96
-δ = 0.05
+const A = 1
+const N = 1
+const α = 0.33
+const β = 0.96
+const δ = 0.05
 
 """
 Compute wage rate given an interest rate, r

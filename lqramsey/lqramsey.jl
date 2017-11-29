@@ -23,7 +23,7 @@ end
 
 
 struct Economy{TF <: AbstractFloat, SP <: AbstractStochProcess}
-    bet::TF
+    β::TF
     Sg::Matrix{TF}
     Sd::Matrix{TF}
     Sb::Matrix{TF}
@@ -41,13 +41,13 @@ struct Path{TF <: AbstractFloat}
     c::Vector{TF}
     l::Vector{TF}
     p::Vector{TF}
-    tau::Vector{TF}
+    τ::Vector{TF}
     rvn::Vector{TF}
     B::Vector{TF}
     R::Vector{TF}
-    pi::Vector{TF}
-    Pi::Vector{TF}
-    xi::Vector{TF}
+    π::Vector{TF}
+    Π::Vector{TF}
+    ξ::Vector{TF}
 end
 
 
@@ -57,8 +57,8 @@ function compute_exog_sequences(econ::Economy, x)
     g, d, b, s = [squeeze(S * x, 1) for S in (Sg, Sd, Sb, Ss)]
 
     #= Solve for Lagrange multiplier in the govt budget constraint
-    In fact we solve for nu = lambda / (1 + 2*lambda).  Here nu is the
-    solution to a quadratic equation a(nu^2 - nu) + b = 0 where
+    In fact we solve for ν = λ / (1 + 2*λ).  Here ν is the
+    solution to a quadratic equation a(ν^2 - ν) + b = 0 where
     a and b are expected discounted sums of quadratic forms of the state. =#
     Sm = Sb - Sd - Ss
 
@@ -66,54 +66,54 @@ function compute_exog_sequences(econ::Economy, x)
 end
 
 
-function compute_allocation(econ::Economy, Sm::Array, nu::AbstractFloat,
+function compute_allocation(econ::Economy, Sm::Array, ν::AbstractFloat,
                             x::Array, b::Array)
     Sg, Sd, Sb, Ss = econ.Sg, econ.Sd, econ.Sb, econ.Ss
 
-    # Solve for the allocation given nu and x
-    Sc = 0.5 .* (Sb + Sd - Sg - nu .* Sm)
-    Sl = 0.5 .* (Sb - Sd + Sg - nu .* Sm)
+    # Solve for the allocation given ν and x
+    Sc = 0.5 .* (Sb + Sd - Sg - ν .* Sm)
+    Sl = 0.5 .* (Sb - Sd + Sg - ν .* Sm)
     c = squeeze(Sc * x, 1)
     l = squeeze(Sl * x, 1)
     p = squeeze((Sb - Sc) * x, 1)  # Price without normalization
-    tau = 1 .- l ./ (b .- c)
-    rvn = l .* tau
+    τ = 1 .- l ./ (b .- c)
+    rvn = l .* τ
 
-    return Sc, Sl, c, l, p, tau, rvn
+    return Sc, Sl, c, l, p, τ, rvn
 end
 
 
-function compute_nu(a0::AbstractFloat, b0::AbstractFloat)
+function compute_ν(a0::AbstractFloat, b0::AbstractFloat)
     disc = a0^2 - 4a0*b0
 
     if disc >= 0
-        nu = 0.5 *(a0 - sqrt(disc)) / a0
+        ν = 0.5 *(a0 - sqrt(disc)) / a0
     else
         println("There is no Ramsey equilibrium for these parameters.")
         error("Government spending (economy.g) too low")
     end
 
     # Test that the Lagrange multiplier has the right sign
-    if nu * (0.5 - nu) < 0
+    if ν * (0.5 - ν) < 0
         print("Negative multiplier on the government budget constraint.")
         error("Government spending (economy.g) too low")
     end
 
-    return nu
+    return ν
 end
 
 
-function compute_Pi(B::Vector, R::Vector, rvn::Vector, g::Vector, xi::Vector)
-    pi = B[2:end] - R[1:end-1] .* B[1:end-1] - rvn[1:end-1] + g[1:end-1]
-    Pi = cumsum(pi .* xi)
-    return pi, Pi
+function compute_Π(B::Vector, R::Vector, rvn::Vector, g::Vector, ξ::Vector)
+    π = B[2:end] - R[1:end-1] .* B[1:end-1] - rvn[1:end-1] + g[1:end-1]
+    Π = cumsum(π .* ξ)
+    return π, Π
 end
 
 
 function compute_paths{TF <: AbstractFloat}(econ::Economy{TF, DiscreteStochProcess{TF}},
                                             T::Integer)
     # simplify notation
-    bet, Sg, Sd, Sb, Ss = econ.bet, econ.Sg, econ.Sd, econ.Sb, econ.Ss
+    β, Sg, Sd, Sb, Ss = econ.β, econ.Sg, econ.Sd, econ.Sb, econ.Ss
     P, x_vals = econ.proc.P, econ.proc.x_vals
 
     mc = MarkovChain(P)
@@ -125,37 +125,37 @@ function compute_paths{TF <: AbstractFloat}(econ::Economy{TF, DiscreteStochProce
 
     # compute a0, b0
     ns = size(P, 1)
-    F = eye(ns) - bet.*P
+    F = eye(ns) - β.*P
     a0 = (F \ ((Sm * x_vals)'.^2))[1] ./ 2
     H = ((Sb - Sd + Sg) * x_vals) .* ((Sg - Ss)*x_vals)
     b0 = (F \ H')[1] ./ 2
 
     # compute lagrange multiplier
-    nu = compute_nu(a0, b0)
+    ν = compute_ν(a0, b0)
 
-    # Solve for the allocation given nu and x
-    Sc, Sl, c, l, p, tau, rvn = compute_allocation(econ, Sm, nu, x, b)
+    # Solve for the allocation given ν and x
+    Sc, Sl, c, l, p, τ, rvn = compute_allocation(econ, Sm, ν, x, b)
 
     # compute remaining variables
     H = ((Sb - Sc)*x_vals) .* ((Sl - Sg)*x_vals) - (Sl*x_vals).^2
     temp = squeeze(F*H', 2)
     B = temp[state] ./ p
     H = squeeze(P[state, :] * ((Sb - Sc)*x_vals)', 2)
-    R = p ./ (bet .* H)
+    R = p ./ (β .* H)
     temp = squeeze(P[state, :] *((Sb - Sc) * x_vals)', 2)
-    xi = p[2:end] ./ temp[1:end-1]
+    ξ = p[2:end] ./ temp[1:end-1]
 
-    # compute pi
-    pi, Pi = compute_Pi(B, R, rvn, g, xi)
+    # compute π
+    π, Π = compute_Π(B, R, rvn, g, ξ)
 
-    Path(g, d, b, s, c, l, p, tau, rvn, B, R, pi, Pi, xi)
+    Path(g, d, b, s, c, l, p, τ, rvn, B, R, π, Π, ξ)
 end
 
 
 function compute_paths{TF<:AbstractFloat}(
                 econ::Economy{TF, ContStochProcess{TF}}, T::Integer)
     # simplify notation
-    bet, Sg, Sd, Sb, Ss = econ.bet, econ.Sg, econ.Sd, econ.Sb, econ.Ss
+    β, Sg, Sd, Sb, Ss = econ.β, econ.Sg, econ.Sd, econ.Sb, econ.Ss
     A, C = econ.proc.A, econ.proc.C
 
     # Generate an initial condition x0 satisfying x0 = A x0
@@ -179,34 +179,34 @@ function compute_paths{TF<:AbstractFloat}(
 
     # compute a0 and b0
     H = Sm'Sm
-    a0 = 0.5 * var_quadratic_sum(A, C, H, bet, x0)
+    a0 = 0.5 * var_quadratic_sum(A, C, H, β, x0)
     H = (Sb - Sd + Sg)'*(Sg + Ss)
-    b0 = 0.5 * var_quadratic_sum(A, C, H, bet, x0)
+    b0 = 0.5 * var_quadratic_sum(A, C, H, β, x0)
 
     # compute lagrange multiplier
-    nu = compute_nu(a0, b0)
+    ν = compute_ν(a0, b0)
 
-    # Solve for the allocation given nu and x
-    Sc, Sl, c, l, p, tau, rvn = compute_allocation(econ, Sm, nu, x, b)
+    # Solve for the allocation given ν and x
+    Sc, Sl, c, l, p, τ, rvn = compute_allocation(econ, Sm, ν, x, b)
 
     # compute remaining variables
     H = Sl'Sl - (Sb - Sc)' *(Sl - Sg)
     L = Vector{TF}(T)
     for t=1:T
-        L[t] = var_quadratic_sum(A, C, H, bet, x[:, t])
+        L[t] = var_quadratic_sum(A, C, H, β, x[:, t])
     end
     B = L ./ p
-    Rinv = squeeze(bet .* (Sb- Sc)*A*x, 1) ./ p
+    Rinv = squeeze(β .* (Sb- Sc)*A*x, 1) ./ p
     R = 1 ./ Rinv
     AF1 = (Sb - Sc) * x[:, 2:end]
     AF2 = (Sb - Sc) * A * x[:, 1:end-1]
-    xi =  AF1 ./ AF2
-    xi = squeeze(xi, 1)
+    ξ =  AF1 ./ AF2
+    ξ = squeeze(ξ, 1)
 
-    # compute pi
-    pi, Pi = compute_Pi(B, R, rvn, g, xi)
+    # compute π
+    π, Π = compute_Π(B, R, rvn, g, ξ)
 
-    Path(g, d, b, s, c, l, p, tau, rvn, B, R, pi, Pi, xi)
+    Path(g, d, b, s, c, l, p, τ, rvn, B, R, π, Π, ξ)
 end
 
 function gen_fig_1(path::Path)
@@ -236,7 +236,7 @@ function gen_fig_1(path::Path)
     ax4=subplot(2, 2, 4)
     ax4[:plot](path.rvn)
     ax4[:plot](path.g)
-    ax4[:plot](path.pi)
+    ax4[:plot](path.π)
     ax4[:set_xlabel]("Time")
     ax4[:legend]([L"$\tau_t \ell_t$",L"$g_t$",L"$\pi_{t+1}$"])
 end
@@ -245,10 +245,10 @@ function gen_fig_2(path::Path)
     #T = length(path.c)
 
     # Plot adjustment factor
-    #p1 = plot(scatter(; x = 2:T, y = path.xi, name = L"$\xi_t$"))
+    #p1 = plot(scatter(; x = 2:T, y = path.ξ, name = L"$\xi_t$"))
 
     # Plot adjusted cumulative return
-    #p2 = plot(scatter(; x = 2:T, y = path.Pi, name = L"$\Pi_t$"), Layout(; xaxis_title = "Time"))
+    #p2 = plot(scatter(; x = 2:T, y = path.Π, name = L"$\Pi_t$"), Layout(; xaxis_title = "Time"))
 
     #p = [p1; p2]
     #relayout!(p, height = 600)
@@ -260,12 +260,12 @@ function gen_fig_2(path::Path)
     figure(figsize=(12,7))
 
     ax1=subplot(2, 1, 1)
-    ax1[:plot](2:T, path.xi)
+    ax1[:plot](2:T, path.ξ)
     ax1[:set_xlabel]("Time")
     ax1[:legend]([L"$\xi_t$"])
 
     ax2=subplot(2, 1, 2)
-    ax2[:plot](2:T,path.Pi)
+    ax2[:plot](2:T,path.Π)
     ax2[:set_xlabel]("Time")
     ax2[:legend]([L"$\Pi_t$"])
 end

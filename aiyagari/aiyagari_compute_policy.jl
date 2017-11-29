@@ -1,9 +1,3 @@
-#=
-
-Author: Victoria Gregory
-
-=#
-
 using LaTeXStrings
 using Plots
 pyplot()
