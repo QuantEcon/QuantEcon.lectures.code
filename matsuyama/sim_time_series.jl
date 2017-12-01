@@ -1,13 +1,13 @@
 function plot_timeseries(n1_0::Real, n2_0::Real,
-                         s1::Real=0.5, theta::Real=2.5,
-                         delta::Real=0.7, rho::Real=0.2;
+                         s1::Real=0.5, θ::Real=2.5,
+                         δ::Real=0.7, ρ::Real=0.2;
                          ax::PyCall.PyObject=subplots()[2])
     """
     Plot a single time series with initial conditions
     """
 
     # Create the MSG Model and simulate with initial conditions
-    model = MSGSync(s1, theta, delta, rho)
+    model = MSGSync(s1, θ, δ, ρ)
     n1, n2 = simulate_n(model, n1_0, n2_0, 25)
 
     ax[:plot](0:24, n1, label=L"$n_1$", lw=2)

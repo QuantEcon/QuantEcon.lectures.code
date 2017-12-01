@@ -6,7 +6,7 @@ from numba import jit, vectorize
 
 
 @jit(nopython=True)
-def _hj(j, nk, s1, s2, theta, delta, rho):
+def _hj(j, nk, s1, s2, θ, δ, ρ):
     """
     If we expand the implicit function for h_j(n_k) then we find that
     it is a quadratic. We know that h_j(n_k) > 0 so we can get its
@@ -22,70 +22,70 @@ def _hj(j, nk, s1, s2, theta, delta, rho):
 
     # Coefficients on the quadratic a x^2 + b x + c = 0
     a = 1.0
-    b = ((rho + 1/rho)*nk - sj - sk)
-    c = (nk*nk - (sj*nk)/rho - sk*rho*nk)
+    b = ((ρ + 1 / ρ) * nk - sj - sk)
+    c = (nk * nk - (sj * nk) / ρ - sk * ρ * nk)
 
     # Positive solution of quadratic form
-    root = (-b + np.sqrt(b*b - 4*a*c))/(2*a)
+    root = (-b + np.sqrt(b * b - 4 * a * c)) / (2 * a)
 
     return root
 
 @jit(nopython=True)
-def DLL(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def DLL(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     "Determine whether (n1, n2) is in the set DLL"
-    return (n1 <= s1_rho) and (n2 <= s2_rho)
+    return (n1 <= s1_ρ) and (n2 <= s2_ρ)
 
 @jit(nopython=True)
-def DHH(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def DHH(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     "Determine whether (n1, n2) is in the set DHH"
-    return (n1 >= _hj(1, n2, s1, s2, theta, delta, rho)) and (n2 >= _hj(2, n1, s1, s2, theta, delta, rho))
+    return (n1 >= _hj(1, n2, s1, s2, θ, δ, ρ)) and (n2 >= _hj(2, n1, s1, s2, θ, δ, ρ))
 
 @jit(nopython=True)
-def DHL(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def DHL(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     "Determine whether (n1, n2) is in the set DHL"
-    return (n1 >= s1_rho) and (n2 <= _hj(2, n1, s1, s2, theta, delta, rho))
+    return (n1 >= s1_ρ) and (n2 <= _hj(2, n1, s1, s2, θ, δ, ρ))
 
 @jit(nopython=True)
-def DLH(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def DLH(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     "Determine whether (n1, n2) is in the set DLH"
-    return (n1 <= _hj(1, n2, s1, s2, theta, delta, rho)) and (n2 >= s2_rho)
+    return (n1 <= _hj(1, n2, s1, s2, θ, δ, ρ)) and (n2 >= s2_ρ)
 
 @jit(nopython=True)
-def one_step(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def one_step(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     """
     Takes a current value for (n_{1, t}, n_{2, t}) and returns the
     values (n_{1, t+1}, n_{2, t+1}) according to the law of motion.
     """
     # Depending on where we are, evaluate the right branch
-    if DLL(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
-        n1_tp1 = delta*(theta*s1_rho + (1-theta)*n1)
-        n2_tp1 = delta*(theta*s2_rho + (1-theta)*n2)
-    elif DHH(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
-        n1_tp1 = delta*n1
-        n2_tp1 = delta*n2
-    elif DHL(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
-        n1_tp1 = delta*n1
-        n2_tp1 = delta*(theta*_hj(2, n1, s1, s2, theta, delta, rho) + (1-theta)*n2)
-    elif DLH(n1, n2, s1_rho, s2_rho, s1, s2, theta, delta, rho):
-        n1_tp1 = delta*(theta*_hj(1, n2, s1, s2, theta, delta, rho) + (1-theta)*n1)
-        n2_tp1 = delta*n2
+    if DLL(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
+        n1_tp1 = δ * (θ * s1_ρ + (1 - θ) * n1)
+        n2_tp1 = δ * (θ * s2_ρ + (1 - θ) * n2)
+    elif DHH(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
+        n1_tp1 = δ * n1
+        n2_tp1 = δ * n2
+    elif DHL(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
+        n1_tp1 = δ * n1
+        n2_tp1 = δ * (θ * _hj(2, n1, s1, s2, θ, δ, ρ) + (1 - θ) * n2)
+    elif DLH(n1, n2, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
+        n1_tp1 = δ * (θ * _hj(1, n2, s1, s2, θ, δ, ρ) + (1 - θ) * n1)
+        n2_tp1 = δ * n2
 
     return n1_tp1, n2_tp1
 
 @jit(nopython=True)
-def n_generator(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho):
+def n_generator(n1_0, n2_0, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ):
     """
     Given an initial condition, continues to yield new values of
     n1 and n2
     """
     n1_t, n2_t = n1_0, n2_0
     while True:
-        n1_tp1, n2_tp1 = one_step(n1_t, n2_t, s1_rho, s2_rho, s1, s2, theta, delta, rho)
+        n1_tp1, n2_tp1 = one_step(n1_t, n2_t, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ)
         yield (n1_tp1, n2_tp1)
         n1_t, n2_t = n1_tp1, n2_tp1
 
 @jit(nopython=True)
-def _pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho, maxiter, npers):
+def _pers_till_sync(n1_0, n2_0, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ, maxiter, npers):
     """
     Takes initial values and iterates forward to see whether
     the histories eventually end up in sync.
@@ -121,7 +121,7 @@ def _pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho, maxit
     iters = 0
 
     # Initialize generator
-    n_gen = n_generator(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho)
+    n_gen = n_generator(n1_0, n2_0, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ)
 
     # Will use a counter to determine how many times in a row
     # the firm measures are the same
@@ -148,7 +148,7 @@ def _pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho, maxit
     return synchronized, pers_2_sync
 
 @jit(nopython=True)
-def _create_attraction_basis(s1_rho, s2_rho, s1, s2, theta, delta, rho, maxiter, npers, npts):
+def _create_attraction_basis(s1_ρ, s2_ρ, s1, s2, θ, δ, ρ, maxiter, npers, npts):
     # Create unit range with npts
     synchronized, pers_2_sync = False, 0
     unit_range = np.linspace(0.0, 1.0, npts)
@@ -158,8 +158,8 @@ def _create_attraction_basis(s1_rho, s2_rho, s1, s2, theta, delta, rho, maxiter,
     # Iterate over initial conditions
     for (i, n1_0) in enumerate(unit_range):
         for (j, n2_0) in enumerate(unit_range):
-            synchronized, pers_2_sync = _pers_till_sync(n1_0, n2_0, s1_rho, s2_rho,
-                                                        s1, s2, theta, delta, rho,
+            synchronized, pers_2_sync = _pers_till_sync(n1_0, n2_0, s1_ρ, s2_ρ,
+                                                        s1, s2, θ, δ, ρ,
                                                         maxiter, npers)
             time_2_sync[i, j] = pers_2_sync
 
@@ -185,32 +185,32 @@ class MSGSync:
     ----------
     s1 : scalar(Float)
         Amount of total labor in country 1 relative to total worldwide labor
-    theta : scalar(Float)
+    θ : scalar(Float)
         A measure of how mcuh more of the competitive variety is used in
         production of final goods
-    delta : scalar(Float)
+    δ : scalar(Float)
         Percentage of firms that are not exogenously destroyed every period
-    rho : scalar(Float)
+    ρ : scalar(Float)
         Measure of how expensive it is to trade between countries
     """
-    def __init__(self, s1=0.5, theta=2.5, delta=0.7, rho=0.2):
+    def __init__(self, s1=0.5, θ=2.5, δ=0.7, ρ=0.2):
         # Store model parameters
-        self.s1, self.theta, self.delta, self.rho = s1, theta, delta, rho
+        self.s1, self.θ, self.δ, self.ρ = s1, θ, δ, ρ
 
         # Store other cutoffs and parameters we use
         self.s2 = 1 - s1
-        self.s1_rho = self._calc_s1_rho()
-        self.s2_rho = 1 - self.s1_rho
+        self.s1_ρ = self._calc_s1_ρ()
+        self.s2_ρ = 1 - self.s1_ρ
 
     def _unpack_params(self):
-        return self.s1, self.s2, self.theta, self.delta, self.rho
+        return self.s1, self.s2, self.θ, self.δ, self.ρ
 
-    def _calc_s1_rho(self):
+    def _calc_s1_ρ(self):
         # Unpack params
-        s1, s2, theta, delta, rho = self._unpack_params()
+        s1, s2, θ, δ, ρ = self._unpack_params()
 
-        # s_1(rho) = min(val, 1)
-        val = (s1 - rho*s2) / (1 - rho)
+        # s_1(ρ) = min(val, 1)
+        val = (s1 - ρ * s2) / (1 - ρ)
         return min(val, 1)
 
     def simulate_n(self, n1_0, n2_0, T):
@@ -234,8 +234,8 @@ class MSGSync:
             A history of normalized measures of firms in country two
         """
         # Unpack parameters
-        s1, s2, theta, delta, rho = self._unpack_params()
-        s1_rho, s2_rho = self.s1_rho, self.s2_rho
+        s1, s2, θ, δ, ρ = self._unpack_params()
+        s1_ρ, s2_ρ = self.s1_ρ, self.s2_ρ
 
         # Allocate space
         n1 = np.empty(T)
@@ -243,7 +243,7 @@ class MSGSync:
 
         # Create the generator
         n1[0], n2[0] = n1_0, n2_0
-        n_gen = n_generator(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho)
+        n_gen = n_generator(n1_0, n2_0, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ)
 
         # Simulate for T periods
         for t in range(1, T):
@@ -287,20 +287,20 @@ class MSGSync:
             The number of periods required until they synchronized
         """
         # Unpack parameters
-        s1, s2, theta, delta, rho = self._unpack_params()
-        s1_rho, s2_rho = self.s1_rho, self.s2_rho
+        s1, s2, θ, δ, ρ = self._unpack_params()
+        s1_ρ, s2_ρ = self.s1_ρ, self.s2_ρ
     
-        return _pers_till_sync(n1_0, n2_0, s1_rho, s2_rho, s1, s2, theta, delta, rho, maxiter, npers)
+        return _pers_till_sync(n1_0, n2_0, s1_ρ, s2_ρ, s1, s2, θ, δ, ρ, maxiter, npers)
 
     def create_attraction_basis(self, maxiter=250, npers=3, npts=50):
         """
         Creates an attraction basis for values of n on [0, 1] X [0, 1] with npts in each dimension
         """
         # Unpack parameters
-        s1, s2, theta, delta, rho = self._unpack_params()
-        s1_rho, s2_rho = self.s1_rho, self.s2_rho
+        s1, s2, θ, δ, ρ = self._unpack_params()
+        s1_ρ, s2_ρ = self.s1_ρ, self.s2_ρ
 
-        ab = _create_attraction_basis(s1_rho, s2_rho, s1, s2, theta, delta,
-                                      rho, maxiter, npers, npts)
+        ab = _create_attraction_basis(s1_ρ, s2_ρ, s1, s2, θ, δ,
+                                      ρ, maxiter, npers, npts)
 
         return ab

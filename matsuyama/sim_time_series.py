@@ -1,4 +1,4 @@
-def plot_timeseries(n1_0, n2_0, s1=0.5, theta=2.5, delta=0.7, rho=0.2, ax=None):
+def plot_timeseries(n1_0, n2_0, s1=0.5, θ=2.5, δ=0.7, ρ=0.2, ax=None):
     """
     Plot a single time series with initial conditions
     """
@@ -6,7 +6,7 @@ def plot_timeseries(n1_0, n2_0, s1=0.5, theta=2.5, delta=0.7, rho=0.2, ax=None):
         fig, ax = plt.subplots()
 
     # Create the MSG Model and simulate with initial conditions
-    model = MSGSync(s1, theta, delta, rho)
+    model = MSGSync(s1, θ, δ, ρ)
     n1, n2 = model.simulate_n(n1_0, n2_0, 25)
 
     ax.plot(np.arange(25), n1, label=r"$n_1$", lw=2)
