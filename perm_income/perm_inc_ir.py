@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-r       = 0.05
-beta    = 1 / (1 + r)
-T       = 20  # Time horizon
-S       = 5   # Impulse date
-sigma1  = sigma2 = 0.15
+r = 0.05
+β = 1 / (1 + r)
+T = 20  # Time horizon
+S = 5   # Impulse date
+σ1 = σ2 = 0.15
 
 
 def time_path(permanent=False):
@@ -19,8 +19,8 @@ def time_path(permanent=False):
     else:
         w2[S+1] = 1.0
     for t in range(1, T):
-        b[t+1] = b[t] - sigma2 * w2[t]
-        c[t+1] = c[t] + sigma1 * w1[t+1] + (1 - beta) * sigma2 * w2[t+1]
+        b[t+1] = b[t] - σ2 * w2[t]
+        c[t+1] = c[t] + σ1 * w1[t+1] + (1 - β) * σ2 * w2[t+1]
     return b, c
 
 

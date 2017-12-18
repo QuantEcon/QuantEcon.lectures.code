@@ -27,9 +27,9 @@ x0 = [0.0; 1.0]
 xp, up, wp = compute_sequence(lq, x0)
 
 # == Convert back to assets, consumption and income == #
-assets = vec(xp[1, :])           # a_t
-c = vec(up + c_bar)              # c_t
-income = vec(wp[1, 2:end] + μ)   # y_t
+assets = vec(xp[1, :])               # a_t
+c = vec(up + c_bar)                  # c_t
+income = vec(σ * wp[1, 2:end] + μ)   # y_t
 
 # == Plot results == #
 p=plot(Vector[assets, c, zeros(T + 1), income, cumsum(income - μ)],

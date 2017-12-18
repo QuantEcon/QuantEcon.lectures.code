@@ -13,17 +13,17 @@ rc('font', **{'family': 'serif', 'serif': ['Palatino']})
 rc('text', usetex=True)
 
 # == Set parameters == #
-n = 250     # Choice of n
-k = 100000  # Number of draws of Y_n
-distribution = expon(2)  # Exponential distribution, lambda = 1/2
-mu, s = distribution.mean(), distribution.std()
+n = 250                  # Choice of n
+k = 100000               # Number of draws of Y_n
+distribution = expon(2)  # Exponential distribution, λ = 1/2
+μ, s = distribution.mean(), distribution.std()
 
 # == Draw underlying RVs. Each row contains a draw of X_1,..,X_n == #
 data = distribution.rvs((k, n))
 # == Compute mean of each row, producing k draws of \bar X_n == #
 sample_means = data.mean(axis=1)
 # == Generate observations of Y_n == #
-Y = np.sqrt(n) * (sample_means - mu)
+Y = np.sqrt(n) * (sample_means - μ)
 
 # == Plot == #
 fig, ax = plt.subplots()

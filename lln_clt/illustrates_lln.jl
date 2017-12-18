@@ -14,9 +14,9 @@ srand(42)  # reproducible results
 
 # == Arbitrary collection of distributions == #
 distributions = Dict("student's t with 10 degrees of freedom" => TDist(10),
-                 "beta(2, 2)" => Beta(2.0, 2.0),
+                 "β(2, 2)" => Beta(2.0, 2.0),
                  "lognormal LN(0, 1/2)" => LogNormal(0.5),
-                 "gamma(5, 1/2)" => Gamma(5.0, 2.0),
+                 "γ(5, 1/2)" => Gamma(5.0, 2.0),
                  "poisson(4)" => Poisson(4),
                  "exponential with lambda = 1" => Exponential(1))
 
@@ -44,14 +44,14 @@ for i = 1:num_plots
 
     dist_data[i, :] = data'
     push!(sample_means, sample_mean)
-    push!(dist_means, m*ones(n))
+    push!(dist_means, m * ones(n))
     push!(titles, name)
 
 end
 
 # == Plot == #
-N = repmat(reshape(repmat(1:n, 1, num_plots)', 1, n*num_plots), 2, 1)
-heights = [zeros(1,n*num_plots); reshape(dist_data, 1, n*num_plots)]
+N = repmat(reshape(repmat(1:n, 1, num_plots)', 1, n * num_plots), 2, 1)
+heights = [zeros(1, n * num_plots); reshape(dist_data, 1, n * num_plots)]
 plot(N, heights, layout=(3, 1), label="", color=:grey, alpha=0.5)
 plot!(1:n, dist_data', layout=(3, 1), color=:grey, markershape=:circle,
         alpha=0.5, label="", linewidth=0)

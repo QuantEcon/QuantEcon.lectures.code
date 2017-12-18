@@ -12,48 +12,48 @@ import quantecon as qe
 
 # == model parameters == #
 
-a_0     = 100
-a_1     = 0.5
-rho     = 0.9
-sigma_d = 0.05
-beta    = 0.95
-c       = 2
-gamma   = 50.0
+a_0 = 100
+a_1 = 0.5
+ρ = 0.9
+σ_d = 0.05
+β = 0.95
+c = 2
+γ = 50.0
 
-theta = 0.002
-ac    = (a_0 - c) / 2.0
+θ = 0.002
+ac = (a_0 - c) / 2.0
 
 # == Define LQ matrices == #
 
-R = np.array([[0.,  ac,  0.],
-              [ac, -a_1, 0.5],
-              [0., 0.5,  0.]])
+R = np.array([[0.,   ac,   0.],
+              [ac, -a_1,  0.5],
+              [0.,  0.5,  0.]])
 
 R = -R  # For minimization
-Q = gamma / 2
+Q = γ / 2
 
 A = np.array([[1., 0., 0.],
               [0., 1., 0.],
-              [0., 0., rho]])
+              [0., 0., ρ]])
 B = np.array([[0.],
               [1.],
               [0.]])
 C = np.array([[0.],
               [0.],
-              [sigma_d]])
+              [σ_d]])
 
 # -------------------------------------------------------------------------- #
 #                                 Functions
 # -------------------------------------------------------------------------- #
 
 
-def evaluate_policy(theta, F):
+def evaluate_policy(θ, F):
     """
-    Given theta (scalar, dtype=float) and policy F (array_like), returns the
+    Given θ (scalar, dtype=float) and policy F (array_like), returns the
     value associated with that policy under the worst case path for {w_t}, as
     well as the entropy level.
     """
-    rlq = qe.robustlq.RBLQ(Q, R, A, B, C, beta, theta)
+    rlq = qe.robustlq.RBLQ(Q, R, A, B, C, β, θ)
     K_F, P_F, d_F, O_F, o_F = rlq.evaluate_F(F)
     x0 = np.array([[1.], [0.], [0.]])
     value = - x0.T.dot(P_F.dot(x0)) - d_F
@@ -63,7 +63,7 @@ def evaluate_policy(theta, F):
 
 def value_and_entropy(emax, F, bw, grid_size=1000):
     """
-    Compute the value function and entropy levels for a theta path
+    Compute the value function and entropy levels for a θ path
     increasing until it reaches the specified target entropy value.
 
     Parameters
@@ -88,15 +88,15 @@ def value_and_entropy(emax, F, bw, grid_size=1000):
 
     """
     if bw == 'worst':
-        thetas = 1 / np.linspace(1e-8, 1000, grid_size)
+        θs = 1 / np.linspace(1e-8, 1000, grid_size)
     else:
-        thetas = -1 / np.linspace(1e-8, 1000, grid_size)
+        θs = -1 / np.linspace(1e-8, 1000, grid_size)
 
-    df = pd.DataFrame(index=thetas, columns=('value', 'entropy'))
+    df = pd.DataFrame(index=θs, columns=('value', 'entropy'))
 
-    for theta in thetas:
-        df.ix[theta] = evaluate_policy(theta, F)
-        if df.ix[theta, 'entropy'] >= emax:
+    for θ in θs:
+        df.loc[θ] = evaluate_policy(θ, F)
+        if df.loc[θ, 'entropy'] >= emax:
             break
 
     df = df.dropna(how='any')
@@ -109,18 +109,18 @@ def value_and_entropy(emax, F, bw, grid_size=1000):
 
 
 # == Compute the optimal rule == #
-optimal_lq = qe.lqcontrol.LQ(Q, R, A, B, C, beta)
+optimal_lq = qe.lqcontrol.LQ(Q, R, A, B, C, β)
 Po, Fo, do = optimal_lq.stationary_values()
 
-# == Compute a robust rule given theta == #
-baseline_robust = qe.robustlq.RBLQ(Q, R, A, B, C, beta, theta)
+# == Compute a robust rule given θ == #
+baseline_robust = qe.robustlq.RBLQ(Q, R, A, B, C, β, θ)
 Fb, Kb, Pb = baseline_robust.robust_rule()
 
 # == Check the positive definiteness of worst-case covariance matrix to == #
-# == ensure that theta exceeds the breakdown point == #
-test_matrix = np.identity(Pb.shape[0]) - np.dot(C.T, Pb.dot(C)) / theta
+# == ensure that θ exceeds the breakdown point == #
+test_matrix = np.identity(Pb.shape[0]) - np.dot(C.T, Pb.dot(C)) / θ
 eigenvals, eigenvecs = eig(test_matrix)
-assert (eigenvals >= 0).all(), 'theta below breakdown point.'
+assert (eigenvals >= 0).all(), 'θ below breakdown point.'
 
 
 emax = 1.6e6

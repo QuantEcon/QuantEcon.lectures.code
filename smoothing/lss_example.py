@@ -4,7 +4,7 @@ import seaborn as sb
 
 N_simul = 150
 
-def complete_ss(beta, b0, x0, A, C, S_y, T=12):
+def complete_ss(β, b0, x0, A, C, S_y, T=12):
     """
     Computes the path of consumption and debt for the previously described
     complete markets model where exogenous income follows a linear
@@ -24,16 +24,16 @@ def complete_ss(beta, b0, x0, A, C, S_y, T=12):
     # Add extra state to initial condition
     # x0 = np.hstack([x0, np.zeros(1)])
 
-    # Compute the (I - beta*A)^{-1}
-    rm = la.inv(np.eye(A.shape[0]) - beta*A)
+    # Compute the (I - β * A)^{-1}
+    rm = la.inv(np.eye(A.shape[0]) - β * A)
 
     # Constant level of consumption
-    cbar = (1-beta) * (S_y @ rm @ x0 - b0)
-    c_hist = np.ones(T)*cbar
+    cbar = (1 - β) * (S_y @ rm @ x0 - b0)
+    c_hist = np.ones(T) * cbar
 
     # Debt
     x_hist, y_hist = lss.simulate(T)
-    b_hist = np.squeeze(S_y @ rm @ x_hist - cbar/(1-beta))
+    b_hist = np.squeeze(S_y @ rm @ x_hist - cbar / (1 - β))
     
 
     return c_hist, b_hist, np.squeeze(y_hist), x_hist
@@ -42,22 +42,22 @@ def complete_ss(beta, b0, x0, A, C, S_y, T=12):
 if __name__ == '__main__':
 
     # Define parameters
-    alpha, rho1, rho2 = 10.0, 0.9, 0.0
-    sigma = 1.0
+    α, ρ1, ρ2 = 10.0, 0.9, 0.0
+    σ = 1.0
     # N_simul = 1
     # T = N_simul
     A = np.array([[1., 0., 0.],
-                  [alpha, rho1, rho2],
+                  [ α, ρ1, ρ2],
                   [0., 1., 0.]])
-    C = np.array([[0.], [sigma], [0.]])
+    C = np.array([[0.], [σ], [0.]])
     S_y = np.array([[1,  1.0, 0.]])
-    beta, b0 = 0.95, -10.0
-    x0 = np.array([1.0, alpha/(1-rho1), alpha/(1-rho1)])
+    β, b0 = 0.95, -10.0
+    x0 = np.array([1.0, α / (1 - ρ1), α / (1 - ρ1)])
 
     # Do simulation for complete markets
     s = np.random.randint(0, 10000)
     np.random.seed(s)  # Seeds get set the same for both economies
-    out = complete_ss(beta, b0, x0, A, C, S_y, 150)
+    out = complete_ss(β, b0, x0, A, C, S_y, 150)
     c_hist_com, b_hist_com, y_hist_com, x_hist_com = out
 
 

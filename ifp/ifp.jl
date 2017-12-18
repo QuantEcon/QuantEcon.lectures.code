@@ -12,9 +12,9 @@ Income fluctuation problem
 
 - `r::Real` : Strictly positive interest rate
 - `R::Real` : The interest rate plus 1 (strictly greater than 1)
-- `bet::Real` : Discount rate in (0, 1)
+- `β::Real` : Discount rate in (0, 1)
 - `b::Real` :  The borrowing constraint
-- `Pi::Matrix{T} where T<:Real` : Transition matrix for `z`
+- `Π::Matrix{T} where T<:Real` : Transition matrix for `z`
 - `z_vals::Vector{T} where T<:Real` : Levels of productivity
 - `asset_grid::AbstractArray` : Grid of asset values
 
@@ -22,16 +22,16 @@ Income fluctuation problem
 struct ConsumerProblem{T <: Real}
     r::T
     R::T
-    bet::T
+    β::T
     b::T
-    Pi::Matrix{T}
+    Π::Matrix{T}
     z_vals::Vector{T}
     asset_grid::AbstractArray
 end
 
 function ConsumerProblem(;r=0.01, 
-                         bet=0.96, 
-                         Pi=[0.6 0.4; 0.05 0.95],
+                         β=0.96, 
+                         Π=[0.6 0.4; 0.05 0.95],
                          z_vals=[0.5, 1.0], 
                          b=0.0, 
                          grid_max=16, 
@@ -39,7 +39,7 @@ function ConsumerProblem(;r=0.01,
     R = 1 + r
     asset_grid = linspace(-b, grid_max, grid_size)
 
-    ConsumerProblem(r, R, bet, b, Pi, z_vals, asset_grid)
+    ConsumerProblem(r, R, β, b, Π, z_vals, asset_grid)
 end
 
 
@@ -60,12 +60,12 @@ policy function, otherwise the value function is stored in `out`.
 
 """
 function bellman_operator!(cp::ConsumerProblem, 
-                          V::Matrix, 
-                          out::Matrix;
-                          ret_policy::Bool=false)
+                           V::Matrix, 
+                           out::Matrix;
+                           ret_policy::Bool=false)
 
     # simplify names, set up arrays
-    R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
+    R, Π, β, b = cp.R, cp.Π, cp.β, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     z_idx = 1:length(z_vals)
     
@@ -79,10 +79,10 @@ function bellman_operator!(cp::ConsumerProblem,
         for (i_a, a) in enumerate(asset_grid)
 
             function obj(c)
-                EV = dot(vf.(R*a+z-c, z_idx), Pi[i_z, :]) # compute expectation
-                return -u(c)  - bet * EV
+                EV = dot(vf.(R * a + z - c, z_idx), Π[i_z, :]) # compute expectation
+                return -u(c)  - β * EV
             end
-            res = optimize(obj, opt_lb, R.*a.+z.+b)
+            res = optimize(obj, opt_lb, R .* a .+ z .+ b)
             c_star = Optim.minimizer(res)
 
             if ret_policy
@@ -141,10 +141,10 @@ None, `out` is updated in place to hold the policy function
 """
 function coleman_operator!(cp::ConsumerProblem, c::Matrix, out::Matrix)
     # simplify names, set up arrays
-    R, Pi, bet, b = cp.R, cp.Pi, cp.bet, cp.b
+    R, Π, β, b = cp.R, cp.Π, cp.β, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     z_idx = 1:length(z_vals)
-    gam = R * bet
+    gam = R * β
     
     # policy function when the shock index is z_i
     cf = interp(asset_grid, c)
@@ -155,9 +155,9 @@ function coleman_operator!(cp::ConsumerProblem, c::Matrix, out::Matrix)
     for (i_z, z) in enumerate(z_vals)
         for (i_a, a) in enumerate(asset_grid)
             function h(t)
-                cps = cf.(R*a+z-t, z_idx) # c' for each z'
-                expectation = dot(du.(cps), Pi[i_z, :])
-                return abs(du(t) - max(gam * expectation, du(R*a+z+b)))
+                cps = cf.(R * a + z - t, z_idx) # c' for each z'
+                expectation = dot(du.(cps), Π[i_z, :])
+                return abs(du(t) - max(gam * expectation, du(R * a + z + b)))
             end
             opt_ub = R*a + z + b  # addresses issue #8 on github
             res = optimize(h, min(opt_lb, opt_ub - 1e-2), opt_ub,
@@ -180,7 +180,7 @@ coleman_operator(cp::ConsumerProblem, c::Matrix) =
 
 function initialize(cp::ConsumerProblem)
     # simplify names, set up arrays
-    R, bet, b = cp.R, cp.bet, cp.b
+    R, β, b = cp.R, cp.β, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     shape = length(asset_grid), length(z_vals)
     V, c = Array{Float64}(shape...), Array{Float64}(shape...)
@@ -188,9 +188,9 @@ function initialize(cp::ConsumerProblem)
     # Populate V and c
     for (i_z, z) in enumerate(z_vals)
         for (i_a, a) in enumerate(asset_grid)
-            c_max = R*a + z + b
+            c_max = R * a + z + b
             c[i_a, i_z] = c_max
-            V[i_a, i_z] = u(c_max) ./ (1 - bet)
+            V[i_a, i_z] = u(c_max) ./ (1 - β)
         end
     end
 

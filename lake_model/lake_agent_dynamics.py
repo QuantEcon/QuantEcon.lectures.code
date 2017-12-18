@@ -5,8 +5,8 @@ T = 5000  # Simulation length
 
 α, λ = lm.α, lm.λ
 
-P = [[1 - λ,    λ],
-     [α,    1 - α]]
+P = [[1 - λ,        λ],
+     [    α,    1 - α]]
 
 mc = MarkovChain(P)
 

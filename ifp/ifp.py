@@ -10,9 +10,9 @@ class ConsumerProblem:
     ----------
     r : scalar(float), optional(default=0.01)
         A strictly positive scalar giving the interest rate
-    beta : scalar(float), optional(default=0.96)
-        The discount factor, must satisfy (1 + r) * beta < 1
-    Pi : array_like(float), optional(default=((0.60, 0.40),(0.05, 0.95))
+    β : scalar(float), optional(default=0.96)
+        The discount factor, must satisfy (1 + r) * β < 1
+    Π : array_like(float), optional(default=((0.60, 0.40),(0.05, 0.95))
         A 2D NumPy array giving the Markov matrix for {z_t}
     z_vals : array_like(float), optional(default=(0.5, 0.95))
         The state space of {z_t}
@@ -29,27 +29,27 @@ class ConsumerProblem:
 
     Attributes
     ----------
-    r, beta, Pi, z_vals, b, u, du : see Parameters
+    r, β, Π, z_vals, b, u, du : see Parameters
     asset_grid : np.ndarray
         One dimensional grid for assets
 
     """
 
     def __init__(self, 
-            r=0.01, 
-            beta=0.96, 
-            Pi=((0.6, 0.4), (0.05, 0.95)),
-            z_vals=(0.5, 1.0), 
-            b=0, 
-            grid_max=16, 
-            grid_size=50,
-            u=np.log, 
-            du=lambda x: 1/x):
+                 r=0.01, 
+                 β=0.96, 
+                 Π=((0.6, 0.4), (0.05, 0.95)),
+                 z_vals=(0.5, 1.0), 
+                 b=0, 
+                 grid_max=16, 
+                 grid_size=50,
+                 u=np.log, 
+                 du=lambda x: 1/x):
 
         self.u, self.du = u, du
         self.r, self.R = r, 1 + r
-        self.beta, self.b = beta, b
-        self.Pi, self.z_vals = np.array(Pi), tuple(z_vals)
+        self.β, self.b = β, b
+        self.Π, self.z_vals = np.array(Π), tuple(z_vals)
         self.asset_grid = np.linspace(-b, grid_max, grid_size)
 
 
@@ -77,7 +77,7 @@ def bellman_operator(V, cp, return_policy=False):
 
     """
     # === Simplify names, set up arrays === #
-    R, Pi, beta, u, b = cp.R, cp.Pi, cp.beta, cp.u, cp.b
+    R, Π, β, u, b = cp.R, cp.Π, cp.β, cp.u, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     new_V = np.empty(V.shape)
     new_c = np.empty(V.shape)
@@ -90,8 +90,8 @@ def bellman_operator(V, cp, return_policy=False):
     for i_a, a in enumerate(asset_grid):
         for i_z, z in enumerate(z_vals):
             def obj(c):  # objective function to be *minimized*
-                y = sum(vf(R * a + z - c, j) * Pi[i_z, j] for j in z_idx)
-                return - u(c) - beta * y
+                y = sum(vf(R * a + z - c, j) * Π[i_z, j] for j in z_idx)
+                return - u(c) - β * y
             c_star = fminbound(obj, 1e-8, R * a + z + b)
             new_c[i_a, i_z], new_V[i_a, i_z] = c_star, -obj(c_star)
 
@@ -125,10 +125,10 @@ def coleman_operator(c, cp):
 
     """
     # === simplify names, set up arrays === #
-    R, Pi, beta, du, b = cp.R, cp.Pi, cp.beta, cp.du, cp.b
+    R, Π, β, du, b = cp.R, cp.Π, cp.β, cp.du, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     z_size = len(z_vals)
-    gamma = R * beta
+    γ = R * β
     vals = np.empty(z_size)
 
     # === linear interpolation to get consumption function === #
@@ -148,8 +148,8 @@ def coleman_operator(c, cp):
     for i_a, a in enumerate(asset_grid):
         for i_z, z in enumerate(z_vals):
             def h(t):
-                expectation = np.dot(du(cf(R * a + z - t)), Pi[i_z, :])
-                return du(t) - max(gamma * expectation, du(R * a + z + b))
+                expectation = np.dot(du(cf(R * a + z - t)), Π[i_z, :])
+                return du(t) - max(γ * expectation, du(R * a + z + b))
             Kc[i_a, i_z] = brentq(h, 1e-8, R * a + z + b)
 
     return Kc
@@ -173,7 +173,7 @@ def initialize(cp):
 
     """
     # === Simplify names, set up arrays === #
-    R, beta, u, b = cp.R, cp.beta, cp.u, cp.b
+    R, β, u, b = cp.R, cp.β, cp.u, cp.b
     asset_grid, z_vals = cp.asset_grid, cp.z_vals
     shape = len(asset_grid), len(z_vals)
     V, c = np.empty(shape), np.empty(shape)
@@ -183,6 +183,6 @@ def initialize(cp):
         for i_z, z in enumerate(z_vals):
             c_max = R * a + z + b
             c[i_a, i_z] = c_max
-            V[i_a, i_z] = u(c_max) / (1 - beta)
+            V[i_a, i_z] = u(c_max) / (1 - β)
 
     return V, c

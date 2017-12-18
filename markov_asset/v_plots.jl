@@ -5,13 +5,13 @@ using LaTeXStrings
 pyplot()
 
 n = 25  # size of state space
-beta = 0.9
+β = 0.9
 mc = tauchen(n, 0.96, 0.02)
 
 K = mc.p .* exp.(mc.state_values)'
 
 I = eye(n)
-v = (I - beta * K) \  (beta * K * ones(n, 1))
+v = (I - β * K) \  (β * K * ones(n, 1))
 
 plot(mc.state_values,
     v,

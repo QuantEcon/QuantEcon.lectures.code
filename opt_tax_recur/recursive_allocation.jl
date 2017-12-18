@@ -10,7 +10,7 @@ struct RecursiveAllocation{TP <: Model, TI <: Integer,
     mc::MarkovChain
     S::TI
     T::BellmanEquation
-    mugrid::TVg
+    μgrid::TVg
     xgrid::TVg
     Vf::TVv
     policies::TVp
@@ -19,30 +19,30 @@ end
 """
 Initializes the class from the calibration `Model`
 """
-function RecursiveAllocation(model::Model, mugrid::AbstractArray)
-    mc = MarkovChain(model.Pi)
+function RecursiveAllocation(model::Model, μgrid::AbstractArray)
+    mc = MarkovChain(model.Π)
     G = model.G
-    S = size(model.Pi, 1) # number of states
-    # now find the first best allocation
-    Vf, policies, T, xgrid = solve_time1_bellman(model, mugrid)
-    T.time_0 = true #Bellman equation now solves time 0 problem
-    return RecursiveAllocation(model, mc, S, T, mugrid, xgrid, Vf, policies)
+    S = size(model.Π, 1) # Number of states
+    # Now find the first best allocation
+    Vf, policies, T, xgrid = solve_time1_bellman(model, μgrid)
+    T.time_0 = true      # Bellman equation now solves time 0 problem
+    return RecursiveAllocation(model, mc, S, T, μgrid, xgrid, Vf, policies)
 end
 
 """
-Solve the time 1 Bellman equation for calibration `Model` and initial grid `mugrid0`
+Solve the time 1 Bellman equation for calibration `Model` and initial grid `μgrid0`
 """
-function solve_time1_bellman{TF <: AbstractFloat}(model::Model{TF}, mugrid::AbstractArray)
-    mugrid0 = mugrid
-    S = size(model.Pi, 1)
-    #First get initial fit
+function solve_time1_bellman{TF <: AbstractFloat}(model::Model{TF}, μgrid::AbstractArray)
+    μgrid0 = μgrid
+    S = size(model.Π, 1)
+    # First get initial fit
     PP = SequentialAllocation(model)
-    c = Matrix{TF}(length(mugrid), 2)
-    n = Matrix{TF}(length(mugrid), 2)
-    x = Matrix{TF}(length(mugrid), 2)
-    V = Matrix{TF}(length(mugrid), 2)
-    for (i, mu) in enumerate(mugrid0)
-        c[i, :], n[i, :], x[i, :], V[i, :] = time1_value(PP, mu)
+    c = Matrix{TF}(length(μgrid), 2)
+    n = Matrix{TF}(length(μgrid), 2)
+    x = Matrix{TF}(length(μgrid), 2)
+    V = Matrix{TF}(length(μgrid), 2)
+    for (i, μ) in enumerate(μgrid0)
+        c[i, :], n[i, :], x[i, :], V[i, :] = time1_value(PP, μ)
     end
     Vf = Vector{LinInterp}(2)
     cf = Vector{LinInterp}(2)
@@ -57,10 +57,10 @@ function solve_time1_bellman{TF <: AbstractFloat}(model::Model{TF}, mugrid::Abst
         end
     end
     policies = [cf, nf, xprimef]
-    #create xgrid
+    # Create xgrid
     xbar = [maximum(minimum(x, 1)), minimum(maximum(x, 1))]
-    xgrid = linspace(xbar[1], xbar[2], length(mugrid0))
-    #Now iterate on bellman equation
+    xgrid = linspace(xbar[1], xbar[2], length(μgrid0))
+    # Now iterate on bellman equation
     T = BellmanEquation(model, xgrid, policies)
     diff = 1.0
     while diff > 1e-6
@@ -82,7 +82,7 @@ function solve_time1_bellman{TF <: AbstractFloat}(model::Model{TF}, mugrid::Abst
         print("diff = $diff \n")
         Vf = Vfnew
     end
-    # store value function policies and Bellman Equations
+    # Store value function policies and Bellman Equations
     return Vf, policies, T, xgrid
 end
 
@@ -135,32 +135,32 @@ function simulate(pab::RecursiveAllocation,
                 B_::AbstractFloat, s_0::Integer, T::Integer,
                 sHist::Vector=QuantEcon.simulate(mc, s_0, T))
     model, S, policies = pab.model, pab.S, pab.policies
-    beta, Pi, Uc = model.beta, model.Pi, model.Uc
+    β, Π, Uc = model.β, model.Π, model.Uc
     cf, nf, xprimef = policies[1], policies[2], policies[3]
     TF = typeof(model).parameters[1]
     cHist = Vector{TF}(T)
     nHist = Vector{TF}(T)
     Bhist = Vector{TF}(T)
-    TauHist = Vector{TF}(T)
-    muHist = Vector{TF}(T)
+    ΤHist = Vector{TF}(T)
+    μHist = Vector{TF}(T)
     RHist = Vector{TF}(T-1)
-    #time0
+    # time 0
     cHist[1], nHist[1], xprime = time0_allocation(pab, B_, s_0)
-    TauHist[1] = Tau(pab.model, cHist[1], nHist[1])[s_0]
+    ΤHist[1] = Τ(pab.model, cHist[1], nHist[1])[s_0]
     Bhist[1] = B_
-    muHist[1] = 0.0
-    #time 1 onward
+    μHist[1] = 0.0
+    # time 1 onward
     for t in 2:T
         s, x = sHist[t], xprime[sHist[t]]
         n = nf[s](x)
         c = [cf[shat](x) for shat in 1:S]
         xprime = [xprimef[s, sprime](x) for sprime in 1:S]
-        TauHist[t] = Tau(pab.model, c, n)[s]
+        ΤHist[t] = Τ(pab.model, c, n)[s]
         u_c = Uc(c, n)
-        Eu_c = dot(Pi[sHist[t-1], :], u_c)
-        muHist[t] = pab.Vf[s](x)
-        RHist[t-1] = Uc(cHist[t-1], nHist[t-1])/(beta*Eu_c)
-        cHist[t], nHist[t], Bhist[t] = c[s], n, x/u_c[s]
+        Eu_c = dot(Π[sHist[t-1], :], u_c)
+        μHist[t] = pab.Vf[s](x)
+        RHist[t-1] = Uc(cHist[t-1], nHist[t-1]) / (β * Eu_c)
+        cHist[t], nHist[t], Bhist[t] = c[s], n, x / u_c[s]
     end
-    return cHist, nHist, Bhist, TauHist, sHist, muHist, RHist
+    return cHist, nHist, Bhist, ΤHist, sHist, μHist, RHist
 end

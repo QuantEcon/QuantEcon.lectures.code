@@ -13,11 +13,11 @@ n = 100
 
 # == Arbitrary collection of distributions == #
 distributions = {"student's t with 10 degrees of freedom": t(10),
-                 "beta(2, 2)": beta(2, 2),
+                 "β(2, 2)": beta(2, 2),
                  "lognormal LN(0, 1/2)": lognorm(0.5),
-                 "gamma(5, 1/2)": gamma(5, scale=2),
+                 "γ(5, 1/2)": gamma(5, scale=2),
                  "poisson(4)": poisson(4),
-                 "exponential with lambda = 1": expon(1)}
+                 "exponential with λ = 1": expon(1)}
 
 # == Create a figure and some axes == #
 num_plots = 3

@@ -7,9 +7,9 @@ class LakeModel:
     
     Parameters:
     ------------
-    λ:  scalar
+    λ : scalar
         The job finding rate for currently unemployed workers
-    α:  scalar
+    α : scalar
         The dismissal rate for currently employed workers
     b : scalar
         Entry rate into the labor force
@@ -26,8 +26,8 @@ class LakeModel:
         λ, α, b, d = self._λ, self._α, self._b, self._d
 
         self._g = b - d
-        self._A = np.array([[(1-d) * (1-λ) + b, (1-d) * α + b],
-                            [(1-d) * λ,         (1-d) * (1-α)]])
+        self._A = np.array([[(1-d) * (1-λ) + b,      (1 - d) * α + b],
+                            [        (1-d) * λ,   (1 - d) * (1 - α)]])
 
         self._A_hat = self._A / (1 + self._g)
         

@@ -19,7 +19,7 @@ else:
     # python 3
     method = "COBYLA"
 
-epsilon = 1e-4  # A small number, used in the optimization routine
+ϵ = 1e-4  # A small number, used in the optimization routine
 
 
 class JvWorker:
@@ -29,39 +29,39 @@ class JvWorker:
 
     .. math::
 
-        V(x) = \max_{\phi, s} w(x, \phi, s)
+        V(x) = \max_{ϕ, s} w(x, ϕ, s)
 
     for
 
     .. math::
 
-        w(x, \phi, s) := x(1 - \phi - s)
-                        + \beta (1 - \pi(s)) V(G(x, \phi))
-                        + \beta \pi(s) E V[ \max(G(x, \phi), U)]
+        w(x, ϕ, s) := x(1 - ϕ - s)
+                        + β (1 - π(s)) V(G(x, ϕ))
+                        + β π(s) E V[ \max(G(x, ϕ), U)]
 
     Here
 
     * x = human capital
     * s = search effort
-    * :math:`\phi` = investment in human capital
-    * :math:`\pi(s)` = probability of new offer given search level s
-    * :math:`x(1 - \phi - s)` = wage
-    * :math:`G(x, \phi)` = new human capital when current job retained
+    * :math:`ϕ` = investment in human capital
+    * :math:`π(s)` = probability of new offer given search level s
+    * :math:`x(1 - ϕ - s)` = wage
+    * :math:`G(x, ϕ)` = new human capital when current job retained
     * U = RV with distribution F -- new draw of human capital
 
     Parameters
     ----------
     A : scalar(float), optional(default=1.4)
         Parameter in human capital transition function
-    alpha : scalar(float), optional(default=0.6)
+    α : scalar(float), optional(default=0.6)
         Parameter in human capital transition function
-    beta : scalar(float), optional(default=0.96)
+    β : scalar(float), optional(default=0.96)
         Discount factor
     grid_size : scalar(int), optional(default=50)
         Grid size for discretization
-    G : function, optional(default=lambda x, phi: A * (x * phi)**alpha)
+    G : function, optional(default=lambda x, ϕ: A * (x * ϕ)**α)
         Transition function for human captial
-    pi : function, optional(default=sqrt)
+    π : function, optional(default=sqrt)
         Function mapping search effort (:math:`s \in (0,1)`) to
         probability of getting new job offer
     F : distribution, optional(default=Beta(2,2))
@@ -69,42 +69,42 @@ class JvWorker:
 
     Attributes
     ----------
-    A, alpha, beta : see Parameters
+    A, α, β : see Parameters
     x_grid : array_like(float)
         The grid over the human capital
 
     """
 
-    def __init__(self, A=1.4, alpha=0.6, beta=0.96, grid_size=50,
-                 G=None, pi=np.sqrt, F=stats.beta(2, 2)):
-        self.A, self.alpha, self.beta = A, alpha, beta
+    def __init__(self, A=1.4, α=0.6, β=0.96, grid_size=50,
+                 G=None, π=np.sqrt, F=stats.beta(2, 2)):
+        self.A, self.α, self.β = A, α, β
 
-        # === set defaults for G, pi and F === #
-        self.G = G if G is not None else lambda x, phi: A * (x * phi)**alpha
-        self.pi = pi
+        # === set defaults for G, π and F === #
+        self.G = G if G is not None else lambda x, ϕ: A * (x * ϕ)**α
+        self.π = π
         self.F = F
 
         # === Set up grid over the state space for DP === #
         # Max of grid is the max of a large quantile value for F and the
         # fixed point y = G(y, 1).
-        grid_max = max(A**(1 / (1 - alpha)), self.F.ppf(1 - epsilon))
-        self.x_grid = np.linspace(epsilon, grid_max, grid_size)
+        grid_max = max(A**(1 / (1 - α)), self.F.ppf(1 - ϵ))
+        self.x_grid = np.linspace(ϵ, grid_max, grid_size)
 
     def __repr__(self):
-        m = "JvWorker(A={a:g}, alpha={al:g}, beta={b:g}, grid_size={gs})"
-        return m.format(a=self.A, al=self.alpha, b=self.beta,
+        m = "JvWorker(A={a:g}, α={al:g}, β={b:g}, grid_size={gs})"
+        return m.format(a=self.A, al=self.α, b=self.β,
                         gs=self.x_grid.size)
 
     def __str__(self):
         m = """\
         Jovanovic worker (on the job search):
           - A (parameter in human capital transition function)     : {a:g}
-          - alpha (parameter in human capital transition function) : {al:g}
-          - beta (parameter in human capital transition function)  : {b:g}
+          - α (parameter in human capital transition function)     : {al:g}
+          - β (parameter in human capital transition function)     : {b:g}
           - grid_size (number of grid points for human capital)    : {gs}
           - grid_max (maximum of grid for human capital)           : {gm:g}
         """
-        return dedent(m.format(a=self.A, al=self.alpha, b=self.beta,
+        return dedent(m.format(a=self.A, al=self.α, b=self.β,
                                gs=self.x_grid.size, gm=self.x_grid.max()))
 
     def bellman_operator(self, V, brute_force=False, return_policies=False):
@@ -112,7 +112,7 @@ class JvWorker:
         Returns the approximate value function TV by applying the
         Bellman operator associated with the model to the function V.
 
-        Returns TV, or the V-greedy policies s_policy and phi_policy when
+        Returns TV, or the V-greedy policies s_policy and ϕ_policy when
         return_policies=True.  In the function, the array V is replaced below
         with a function Vf that implements linear interpolation over the
         points (V(x), x) for x in x_grid.
@@ -141,14 +141,14 @@ class JvWorker:
 
         """
         # === simplify names, set up arrays, etc. === #
-        G, pi, F, beta = self.G, self.pi, self.F, self.beta
+        G, π, F, β = self.G, self.π, self.F, self.β
         Vf = lambda x: np.interp(x, self.x_grid, V)
         N = len(self.x_grid)
-        new_V, s_policy, phi_policy = np.empty(N), np.empty(N), np.empty(N)
-        a, b = F.ppf(0.005), F.ppf(0.995)  # Quantiles, for integration
-        c1 = lambda z: 1.0 - sum(z)          # used to enforce s + phi <= 1
-        c2 = lambda z: z[0] - epsilon      # used to enforce s >= epsilon
-        c3 = lambda z: z[1] - epsilon      # used to enforce phi >= epsilon
+        new_V, s_policy, ϕ_policy = np.empty(N), np.empty(N), np.empty(N)
+        a, b = F.ppf(0.005), F.ppf(0.995)           # Quantiles, for integration
+        c1 = lambda z: 1.0 - sum(z)                 # used to enforce s + ϕ <= 1
+        c2 = lambda z: z[0] - ϵ                     # used to enforce s >= ϵ
+        c3 = lambda z: z[1] - ϵ                     # used to enforce ϕ >= ϵ
         guess = (0.2, 0.2)
         constraints = [{"type": "ineq", "fun": i} for i in [c1, c2, c3]]
 
@@ -157,35 +157,35 @@ class JvWorker:
 
             # === set up objective function === #
             def w(z):
-                s, phi = z
-                h = lambda u: Vf(np.maximum(G(x, phi), u)) * F.pdf(u)
+                s, ϕ = z
+                h = lambda u: Vf(np.maximum(G(x, ϕ), u)) * F.pdf(u)
                 integral, err = integrate(h, a, b)
-                q = pi(s) * integral + (1.0 - pi(s)) * Vf(G(x, phi))
+                q = π(s) * integral + (1.0 - π(s)) * Vf(G(x, ϕ))
                 # == minus because we minimize == #
-                return - x * (1.0 - phi - s) - beta * q
+                return - x * (1.0 - ϕ - s) - β * q
 
             # === either use SciPy solver === #
             if not brute_force:
-                max_s, max_phi = minimize(w, guess, constraints=constraints,
+                max_s, max_ϕ = minimize(w, guess, constraints=constraints,
                                           options={"disp": 0},
                                           method=method)["x"]
-                max_val = -w((max_s, max_phi))
+                max_val = -w((max_s, max_ϕ))
 
             # === or search on a grid === #
             else:
-                search_grid = np.linspace(epsilon, 1.0, 15)
+                search_grid = np.linspace(ϵ, 1.0, 15)
                 max_val = -1.0
                 for s in search_grid:
-                    for phi in search_grid:
-                        current_val = -w((s, phi)) if s + phi <= 1.0 else -1.0
+                    for ϕ in search_grid:
+                        current_val = -w((s, ϕ)) if s + ϕ <= 1.0 else -1.0
                         if current_val > max_val:
-                            max_val, max_s, max_phi = current_val, s, phi
+                            max_val, max_s, max_ϕ = current_val, s, ϕ
 
             # === store results === #
             new_V[i] = max_val
-            s_policy[i], phi_policy[i] = max_s, max_phi
+            s_policy[i], ϕ_policy[i] = max_s, max_ϕ
 
         if return_policies:
-            return s_policy, phi_policy
+            return s_policy, ϕ_policy
         else:
             return new_V

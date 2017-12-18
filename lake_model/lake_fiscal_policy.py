@@ -2,13 +2,13 @@ from scipy.stats import norm
 from scipy.optimize import brentq
 
 # Some global variables that will stay constant
-α   = 0.013
+α = 0.013
 α_q = (1-(1-α)**3)   # Quarterly (α is monthly)
-b   = 0.0124
-d   = 0.00822
-β   = 0.98
-γ   = 1.0
-σ   = 2.0
+b = 0.0124
+d = 0.00822
+β = 0.98
+γ = 1.0
+σ = 2.0
 
 # The default wage distribution --- a discretized lognormal
 log_wage_mean, wage_grid_size, max_wage = 20, 200, 170
@@ -17,7 +17,7 @@ w_vec = np.linspace(0, max_wage, wage_grid_size + 1)
 cdf = logw_dist.cdf(np.log(w_vec))
 pdf = cdf[1:] - cdf[:-1]
 p_vec = pdf / pdf.sum()
-w_vec = (w_vec[1:] + w_vec[:-1])/2
+w_vec = (w_vec[1:] + w_vec[:-1]) / 2
 
 
 def compute_optimal_quantities(c, τ):

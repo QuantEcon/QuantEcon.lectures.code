@@ -37,7 +37,7 @@ xp, up, wp = lq.compute_sequence(x0)
 # == Convert back to assets, consumption and income == #
 assets = xp[0, :]           # a_t
 c = up.flatten() + c_bar    # c_t
-income = wp[0, 1:] + μ      # y_t
+income = σ * wp[0, 1:] + μ      # y_t
 
 # == Plot results == #
 n_rows = 2
