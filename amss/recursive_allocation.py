@@ -2,12 +2,12 @@ from scipy.optimize import fmin_slsqp
 
 
 class RecursiveAllocation:
-        
-    def __init__(self, model, mugrid):
 
-        self.beta, self.pi, self.G = model.beta, model.pi, model.G
-        self.mc, self.S = MarkovChain(self.pi), len(model.pi)  # Number of states
-        self.Theta, self.model, self.mugrid = model.Theta, model, mugrid
+    def __init__(self, model, μgrid):
+
+        self.β, self.π, self.G = model.β, model.π, model.G
+        self.mc, self.S = MarkovChain(self.π), len(model.π)  # Number of states
+        self.Θ, self.model, self.μgrid = model.Θ, model, μgrid
 
         # Find the first best allocation
         self.solve_time1_bellman()
@@ -15,24 +15,25 @@ class RecursiveAllocation:
 
     def solve_time1_bellman(self):
         '''
-        Solve the time  1 Bellman equation for calibration model and initial grid mugrid0
+        Solve the time  1 Bellman equation for calibration model and
+        initial grid μgrid0
         '''
-        model, mugrid0 = self.model, self.mugrid
-        pi = model.pi
-        S = len(model.pi)
+        model, μgrid0 = self.model, self.μgrid
+        π = model.π
+        S = len(model.π)
 
         # First get initial fit from Lucas Stokey solution.
         # Need to change things to be ex ante
         PP = SequentialAllocation(model)
         interp = interpolator_factory(2, None)
 
-        def incomplete_allocation(mu_, s_):
-            c, n, x, V = PP.time1_value(mu_)
-            return c, n, pi[s_].dot(x), pi[s_].dot(V)
+        def incomplete_allocation(μ_, s_):
+            c, n, x, V = PP.time1_value(μ_)
+            return c, n, π[s_].dot(x), π[s_].dot(V)
         cf, nf, xgrid, Vf, xprimef = [], [], [], [], []
         for s_ in range(S):
             c, n, x, V = zip(
-                *map(lambda mu: incomplete_allocation(mu, s_), mugrid0))
+                *map(lambda μ: incomplete_allocation(μ, s_), μgrid0))
             c, n = np.vstack(c).T, np.vstack(n).T
             x, V = np.hstack(x), np.hstack(V)
             xprimes = np.vstack([x] * S)
@@ -48,12 +49,12 @@ class RecursiveAllocation:
         # Create xgrid
         x = np.vstack(xgrid).T
         xbar = [x.min(0).max(), x.max(0).min()]
-        xgrid = np.linspace(xbar[0], xbar[1], len(mugrid0))
+        xgrid = np.linspace(xbar[0], xbar[1], len(μgrid0))
         self.xgrid = xgrid
 
         # Now iterate on Bellman equation
         T = BellmanEquation(model, xgrid, policies)
-        diff = 1.
+        diff = 1
         while diff > 1e-4:
             PF = T(Vf)
 
@@ -72,7 +73,7 @@ class RecursiveAllocation:
         '''
         Fits the policy functions
         '''
-        S, xgrid = len(self.pi), self.xgrid
+        S, xgrid = len(self.π), self.xgrid
         interp = interpolator_factory(3, 0)
         cf, nf, xprimef, Tf, Vf = [], [], [], [], []
         for s_ in range(S):
@@ -87,21 +88,21 @@ class RecursiveAllocation:
         Vf = fun_hstack(Vf)
         return Vf, policies
 
-    def Tau(self, c, n):
+    def Τ(self, c, n):
         '''
-        Computes Tau given c and n
+        Computes Τ given c and n
         '''
         model = self.model
         Uc, Un = model.Uc(c, n), model.Un(c, n)
 
-        return 1 + Un / (self.Theta * Uc)
+        return 1 + Un / (self.Θ * Uc)
 
     def time0_allocation(self, B_, s0):
         '''
-        Finds the optimal allocation given initial government debt B_ and state s_0
+        Finds the optimal allocation given initial government debt B_ and
+        state s_0
         '''
         PF = self.T(self.Vf)
-
         z0 = PF(B_, s0)
         c0, n0, xprime0, T0 = z0[1:]
         return c0, n0, xprime0, T0
@@ -110,19 +111,19 @@ class RecursiveAllocation:
         '''
         Simulates planners policies for T periods
         '''
-        model, pi = self.model, self.pi
+        model, π = self.model, self.π
         Uc = model.Uc
         cf, nf, xprimef, Tf = self.policies
 
         if sHist is None:
-            sHist = simulate_markov(pi, s_0, T)
+            sHist = simulate_markov(π, s_0, T)
 
-        cHist, nHist, Bhist, xHist, TauHist, THist, muHist = np.zeros((7, T))
-        # time0
+        cHist, nHist, Bhist, xHist, ΤHist, THist, μHist = np.zeros((7, T))
+        # time 0
         cHist[0], nHist[0], xHist[0], THist[0] = self.time0_allocation(B_, s_0)
-        TauHist[0] = self.Tau(cHist[0], nHist[0])[s_0]
+        ΤHist[0] = self.Τ(cHist[0], nHist[0])[s_0]
         Bhist[0] = B_
-        muHist[0] = self.Vf[s_0](xHist[0])
+        μHist[0] = self.Vf[s_0](xHist[0])
 
         # time 1 onward
         for t in range(1, T):
@@ -130,15 +131,15 @@ class RecursiveAllocation:
             c, n, xprime, T = cf[s_, :](x), nf[s_, :](
                 x), xprimef[s_, :](x), Tf[s_, :](x)
 
-            Tau = self.Tau(c, n)[s]
+            Τ = self.Τ(c, n)[s]
             u_c = Uc(c, n)
-            Eu_c = pi[s_, :].dot(u_c)
+            Eu_c = π[s_, :].dot(u_c)
 
-            muHist[t] = self.Vf[s](xprime[s])
+            μHist[t] = self.Vf[s](xprime[s])
 
-            cHist[t], nHist[t], Bhist[t], TauHist[t] = c[s], n[s], x / Eu_c, Tau
+            cHist[t], nHist[t], Bhist[t], ΤHist[t] = c[s], n[s], x / Eu_c, Τ
             xHist[t], THist[t] = xprime[s], T[s]
-        return np.array([cHist, nHist, Bhist, TauHist, THist, muHist, sHist, xHist])
+        return np.array([cHist, nHist, Bhist, ΤHist, THist, μHist, sHist, xHist])
 
 
 class BellmanEquation:
@@ -147,10 +148,10 @@ class BellmanEquation:
     '''
 
     def __init__(self, model, xgrid, policies0):
-        
-        self.beta, self.pi, self.G = model.beta, model.pi, model.G
-        self.S = len(model.pi)  # Number of states
-        self.Theta, self.model = model.Theta, model
+
+        self.β, self.π, self.G = model.β, model.π, model.G
+        self.S = len(model.π)  # Number of states
+        self.Θ, self.model = model.Θ, model
 
         self.xbar = [min(xgrid), max(xgrid)]
         self.time_0 = False
@@ -170,13 +171,13 @@ class BellmanEquation:
         Find the first best allocation
         '''
         model = self.model
-        S, Theta, Uc, Un, G = self.S, self.Theta, model.Uc, model.Un, self.G
+        S, Θ, Uc, Un, G = self.S, self.Θ, model.Uc, model.Un, self.G
 
         def res(z):
             c = z[:S]
             n = z[S:]
             return np.hstack(
-                [Theta * Uc(c, n) + Un(c, n), Theta * n - c - G]
+                [Θ * Uc(c, n) + Un(c, n), Θ * n - c - G]
             )
         res = root(res, 0.5 * np.ones(2 * S))
         if not res.success:
@@ -187,12 +188,12 @@ class BellmanEquation:
         IFB = Uc(self.cFB, self.nFB) * self.cFB + \
             Un(self.cFB, self.nFB) * self.nFB
 
-        self.xFB = np.linalg.solve(np.eye(S) - self.beta * self.pi, IFB)
+        self.xFB = np.linalg.solve(np.eye(S) - self.β * self.π, IFB)
 
         self.zFB = {}
         for s in range(S):
             self.zFB[s] = np.hstack(
-                [self.cFB[s], self.nFB[s], self.pi[s].dot(self.xFB), 0.])
+                [self.cFB[s], self.nFB[s], self.π[s].dot(self.xFB), 0.])
 
     def __call__(self, Vf):
         '''
@@ -209,7 +210,7 @@ class BellmanEquation:
         '''
         Finds the optimal policies 
         '''
-        model, beta, Theta, G, S, pi = self.model, self.beta, self.Theta, self.G, self.S, self.pi
+        model, β, Θ, G, S, π = self.model, self.β, self.Θ, self.G, self.S, self.π
         U, Uc, Un = model.U, model.Uc, model.Un
 
         def objf(z):
@@ -219,15 +220,15 @@ class BellmanEquation:
             for s in range(S):
                 Vprime[s] = Vf[s](xprime[s])
 
-            return -pi[s_].dot(U(c, n) + beta * Vprime)
+            return -π[s_].dot(U(c, n) + β * Vprime)
 
         def cons(z):
             c, n, xprime, T = z[:S], z[S:2 * S], z[2 * S:3 * S], z[3 * S:]
             u_c = Uc(c, n)
-            Eu_c = pi[s_].dot(u_c)
+            Eu_c = π[s_].dot(u_c)
             return np.hstack([
-                x * u_c / Eu_c - u_c * (c - T) - Un(c, n) * n - beta * xprime,
-                Theta * n - c - G
+                x * u_c / Eu_c - u_c * (c - T) - Un(c, n) * n - β * xprime,
+                Θ * n - c - G
             ])
 
         if model.transfers:
@@ -249,19 +250,19 @@ class BellmanEquation:
         '''
         Finds the optimal policies 
         '''
-        model, beta, Theta, G = self.model, self.beta, self.Theta, self.G
+        model, β, Θ, G = self.model, self.β, self.Θ, self.G
         U, Uc, Un = model.U, model.Uc, model.Un
 
         def objf(z):
             c, n, xprime = z[:-1]
 
-            return -(U(c, n) + beta * Vf[s0](xprime))
+            return -(U(c, n) + β * Vf[s0](xprime))
 
         def cons(z):
             c, n, xprime, T = z
             return np.hstack([
-                -Uc(c, n) * (c - B_ - T) - Un(c, n) * n - beta * xprime,
-                (Theta * n - c - G)[s0]
+                -Uc(c, n) * (c - B_ - T) - Un(c, n) * n - β * xprime,
+                (Θ * n - c - G)[s0]
             ])
 
         if model.transfers:

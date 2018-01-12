@@ -78,7 +78,7 @@ AMF_LSS_VAR(A::Array, B::Array, D::Union{RowVector, Array}, F::Real, ν::Real) =
 
 """
 This creates the state space representation that can be passed
-into the quantecon LSS class.
+into the quantecon LSS {{ class_word }}.
 """
 function construct_ss(A::Array, B::Array, D::Union{RowVector, Array}, F::Array,
                       ν, nx::TI, nk::TI, nm::TI) where TI <: Integer

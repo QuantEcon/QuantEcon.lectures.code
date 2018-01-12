@@ -81,7 +81,7 @@ function consumption_incomplete(cp::ConsumptionProblem;
                                 N_simul::Integer=150)
 
     β, P, y, b0 = cp.β, cp.P, cp.y, cp.b0  # Unpack
-    # For the simulation define a quantecon MC class
+    # For the simulation define a quantecon MC {{ class_word }}
     mc = MarkovChain(P)
 
     # Useful variables

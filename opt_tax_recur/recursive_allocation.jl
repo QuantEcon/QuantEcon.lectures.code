@@ -17,7 +17,7 @@ struct RecursiveAllocation{TP <: Model, TI <: Integer,
 end
 
 """
-Initializes the class from the calibration `Model`
+Initializes the {{ class_word }} from the calibration `Model`
 """
 function RecursiveAllocation(model::Model, μgrid::AbstractArray)
     mc = MarkovChain(model.Π)

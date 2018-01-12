@@ -21,7 +21,7 @@ mutable struct Model{TF <: AbstractFloat,
 end
 
 """
-Class returns planner's allocation as a function of the multiplier
+{{ class_word }} returns planner's allocation as a function of the multiplier
 on the implementability constraint μ
 """
 struct SequentialAllocation{TP <: Model,
@@ -37,7 +37,7 @@ struct SequentialAllocation{TP <: Model,
 end
 
 """
-Initializes the class from the calibration model
+Initializes the {{ class_word }} from the calibration model
 """
 function SequentialAllocation(model::Model)
     β, Π, G, Θ = model.β, model.Π, model.G, model.Θ
@@ -220,7 +220,7 @@ mutable struct BellmanEquation{TP <: Model,
 end
 
 """
-Initializes the class from the calibration `model`
+Initializes the {{ class_word }} from the calibration `model`
 """
 function BellmanEquation(model::Model, xgrid::AbstractVector, policies0::Vector)
     S = size(model.Π, 1) # Number of states

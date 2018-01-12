@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
 n = 500
 x = np.random.randn(n)        # N(0, 1)
 x = np.exp(x)                 # Map x to lognormal

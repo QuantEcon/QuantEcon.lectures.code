@@ -10,19 +10,19 @@ class Solow:
     
     """
 
-    def __init__(self, n, s, d, alpha, z, k):
+    def __init__(self, n, s, d, α, z, k):
         """ 
         Solow growth model with Cobb Douglas production function.  All
         parameters are scalars.  See http://quant-econ.net/py/python_oop.html
         for interpretation.
         """
-        self.n, self.s, self.d, self.alpha, self.z = n, s, d, alpha, z
+        self.n, self.s, self.d, self.α, self.z = n, s, d, α, z
         self.k = k
         
 
     def h(self):
         "Evaluate the h function"
-        temp = self.s * self.z * self.k**self.alpha + self.k * (1 - self.d)
+        temp = self.s * self.z * self.k**self.α + self.k * (1 - self.d)
         return temp / (1 + self.n)
 
     def update(self):
@@ -31,7 +31,7 @@ class Solow:
         
     def steady_state(self):
          "Compute the steady state value of capital."
-         return ((self.s * self.z) / (self.n + self.d))**(1 / (1 - self.alpha))
+         return ((self.s * self.z) / (self.n + self.d))**(1 / (1 - self.α))
      
     def generate_sequence(self, t):
         "Generate and return a time series of length t"

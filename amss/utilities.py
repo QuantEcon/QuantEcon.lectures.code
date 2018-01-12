@@ -56,12 +56,12 @@ def fun_hstack(fun_list):
     return interpolate_wrapper(np.hstack(Fs))
 
 
-def simulate_markov(pi, s_0, T):
+def simulate_markov(π, s_0, T):
 
     sHist = np.empty(T, dtype=int)
     sHist[0] = s_0
-    S = len(pi)
+    S = len(π)
     for t in range(1, T):
-        sHist[t] = np.random.choice(np.arange(S), p=pi[sHist[t - 1]])
+        sHist[t] = np.random.choice(np.arange(S), p=π[sHist[t - 1]])
 
     return sHist

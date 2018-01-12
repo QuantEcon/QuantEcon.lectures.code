@@ -28,7 +28,7 @@ mutable struct Para{TF <: AbstractFloat,
 end
 
 """
-Class returns planner's allocation as a function of the multiplier
+{{ class_word }} returns planner's allocation as a function of the multiplier
 on the implementability constraint mu
 """
 struct Planners_Allocation_Sequential{TP <: Para,
@@ -44,7 +44,7 @@ struct Planners_Allocation_Sequential{TP <: Para,
 end
 
 """
-Initializes the class from the calibration Para
+Initializes the {{ class_word }} from the calibration Para
 """
 function Planners_Allocation_Sequential(para::Para)
     beta, Pi, G, Theta =
@@ -228,7 +228,7 @@ mutable struct BellmanEquation{TP <: Para,
 end
 
 """
-Initializes the class from the calibration `Para`
+Initializes the {{ class_word }} from the calibration `Para`
 """
 function BellmanEquation(para::Para, xgrid::AbstractVector, policies0::Vector)
     S = size(para.Pi, 1) # number of states
@@ -342,7 +342,7 @@ struct Planners_Allocation_Bellman{TP <: Para, TI <: Integer,
 end
 
 """
-Initializes the class from the calibration `Para`
+Initializes the {{ class_word }} from the calibration `Para`
 """
 function Planners_Allocation_Bellman(para::Para, mugrid::AbstractArray)
     mc = MarkovChain(para.Pi)

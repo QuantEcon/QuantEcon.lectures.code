@@ -6,7 +6,7 @@ from matplotlib import cm
 
 xmin, xmax = -4, 12
 x = 10
-alpha = 0.5
+α = 0.5
 
 m, v = x, 10
 
@@ -22,13 +22,13 @@ ax.spines['bottom'].set_position(('data', 0))
 
 ax.set_ylim(-0.05, 0.5)
 ax.set_xticks((x,))
-ax.set_xticklabels((r'$x$',), fontsize=18)
+ax.set_xticklabels((r'$x$', ), fontsize=18)
 ax.set_yticks(())
 
 K = 3
 for i in range(K):
-    m = alpha * m
-    v = alpha * alpha * v + 1
+    m = α * m
+    v = α * α * v + 1
     f = norm(loc=m, scale=np.sqrt(v))
     k = (i + 0.5) / K
     ax.plot(xgrid, f.pdf(xgrid), lw=1, color='black', alpha=0.4)

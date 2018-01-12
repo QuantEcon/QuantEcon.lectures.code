@@ -4,11 +4,11 @@ import numpy as np
 np.random.seed(1234)
 
 # Generate random graph
-p = dict((i,(np.random.uniform(0,1),np.random.uniform(0,1))) for i in range(200))
+p = dict((i,(np.random.uniform(0, 1),np.random.uniform(0, 1))) for i in range(200))
 G = nx.random_geometric_graph(200, 0.12, pos=p)  
 pos = nx.get_node_attributes(G, 'pos')    
 
-# find node nearest the center point (0.5,0.5)
+# find node nearest the center point (0.5, 0.5)
 dists = [(x - 0.5)**2 + (y - 0.5)**2 for x, y in list(pos.values())]
 ncenter = np.argmin(dists)
 
