@@ -11,9 +11,9 @@ from quantecon.matrix_eqn import solve_discrete_lyapunov
 from scipy.optimize import root
 
 
-def computeG(A0, A1, d, Q0, tau0, beta, mu):
+def computeG(A0, A1, d, Q0, τ0, β, μ):
     """
-    Compute government income given mu and return tax revenues and
+    Compute government income given μ and return tax revenues and
     policy matrixes for the planner.
 
     Parameters
@@ -26,11 +26,11 @@ def computeG(A0, A1, d, Q0, tau0, beta, mu):
         A constant parameter for quadratic adjustment cost of production
     Q0 : float
         An initial condition for production
-    tau0 : float
+    τ0 : float
         An initial condition for taxes
-    beta : float
+    β : float
         A constant parameter for discounting
-    mu : float
+    μ : float
         Lagrange multiplier
 
     Returns
@@ -47,28 +47,28 @@ def computeG(A0, A1, d, Q0, tau0, beta, mu):
         Value function matrix
     """
     # Create Matrices for solving Ramsey problem
-    R = np.array([[0, -A0/2, 0, 0],
-                 [-A0/2, A1/2, -mu/2, 0],
-                 [0, -mu/2, 0, 0],
-                 [0, 0, 0, d/2]])
+    R = np.array([[     0,  -A0 / 2,      0,      0],
+                 [-A0 / 2,   A1 / 2, -μ / 2,      0],
+                 [      0,   -μ / 2,      0,      0],
+                 [      0,        0,      0,  d / 2]])
 
-    A = np.array([[1, 0, 0, 0],
-                 [0, 1, 0, 1],
-                 [0, 0, 0, 0],
-                 [-A0/d, A1/d, 0, A1/d+1/beta]])
+    A = np.array([[     1,      0,   0,              0],
+                 [      0,      1,   0,              1],
+                 [      0,      0,   0,              0],
+                 [-A0 / d, A1 / d,   0, A1 / d + 1 / β]])
 
     B = np.array([0, 0, 1, 1/d]).reshape(-1, 1)
 
     Q = 0
 
     # Use LQ to solve the Ramsey Problem.
-    lq = LQ(Q, -R, A, B, beta=beta)
+    lq = LQ(Q, -R, A, B, beta=β)
     P, F, d = lq.stationary_values()
 
     # Need y_0 to compute government tax revenue.
     P21 = P[3, :3]
     P22 = P[3, 3]
-    z0 = np.array([1, Q0, tau0]).reshape(-1, 1)
+    z0 = np.array([1, Q0, τ0]).reshape(-1, 1)
     u0 = -P22**(-1) * P21.dot(z0)
     y0 = np.vstack([z0, u0])
 
@@ -77,57 +77,58 @@ def computeG(A0, A1, d, Q0, tau0, beta, mu):
     S = np.array([0, 1, 0, 0]).reshape(-1, 1).dot(np.array([[0, 0, 1, 0]]))
 
     # Solves equation (25)
-    temp = beta * AF.T.dot(S).dot(AF)
-    Omega = solve_discrete_lyapunov(np.sqrt(beta) * AF.T, temp)
-    T0 = y0.T.dot(Omega).dot(y0)
+    temp = β * AF.T.dot(S).dot(AF)
+    Ω = solve_discrete_lyapunov(np.sqrt(β) * AF.T, temp)
+    T0 = y0.T.dot(Ω).dot(y0)
 
     return T0, A, B, F, P
 
 
 # == Primitives == #
-T    = 20
-A0   = 100.0
-A1   = 0.05
-d    = 0.20
-beta = 0.95
+T = 20
+A0 = 100.0
+A1 = 0.05
+d = 0.20
+β = 0.95
 
 # == Initial conditions == #
-mu0  = 0.0025
-Q0   = 1000.0
-tau0 = 0.0
+μ0 = 0.0025
+Q0 = 1000.0
+τ0 = 0.0
 
 
-def gg(mu):
+def gg(μ):
     """
     Computes the tax revenues for the government given Lagrangian
-    multiplier mu.
+    multiplier μ.
     """
-    return computeG(A0, A1, d, Q0, tau0, beta, mu)
+    return computeG(A0, A1, d, Q0, τ0, β, μ)
 
 # == Solve the Ramsey problem and associated government revenue == #
-G0, A, B, F, P = gg(mu0)
+G0, A, B, F, P = gg(μ0)
 
 # == Compute the optimal u0 == #
 P21 = P[3, :3]
 P22 = P[3, 3]
-z0 = np.array([1, Q0, tau0]).reshape(-1, 1)
+z0 = np.array([1, Q0, τ0]).reshape(-1, 1)
 u0 = -P22**(-1) * P21.dot(z0)
 
 
 # == Initialize vectors == #
 y = np.zeros((4, T))
-uhat       = np.zeros(T)
-uhatdif    = np.zeros(T)
-tauhat     = np.zeros(T)
-tauhatdif  = np.zeros(T-1)
-mu         = np.zeros(T)
-G          = np.zeros(T)
-GPay       = np.zeros(T)
+uhat = np.zeros(T)
+uhatdif = np.zeros(T)
+τhat = np.zeros(T)
+τhatdif = np.zeros(T)
+μ = np.zeros(T)
+G = np.zeros(T)
+GPay = np.zeros(T)
 
 # == Initial conditions == #
 G[0] = G0
-mu[0] = mu0
+μ[0] = μ0
 uhatdif[0] = 0
+τhatdif[0] = 0
 uhat[0] = u0
 y[:, 0] = np.vstack([z0, u0]).flatten()
 
@@ -136,32 +137,25 @@ for t in range(1, T):
     y[:, t] = (A-B.dot(F)).dot(y[:, t-1])
 
     # update G
-    G[t] = (G[t-1] - beta*y[1, t]*y[2, t])/beta
-    GPay[t] = beta*y[1, t]*y[2, t]
+    G[t] = (G[t-1] - β * y[1, t] * y[2, t]) / β
+    GPay[t] = β * y[1, t] * y[2, t]
 
-    # Compute the mu if the government were able to reset its plan
+    # Compute the μ if the government were able to reset its plan
     # ff is the tax revenues the government would receive if they reset the
-    # plan with Lagrange multiplier mu minus current G
+    # plan with Lagrange multiplier μ minus current G
 
-    ff = lambda mu: (gg(mu)[0]-G[t]).flatten()
+    ff = lambda μ: (gg(μ)[0] - G[t]).flatten()
 
     # find ff = 0
-    mu[t] = root(ff, mu[t-1]).x
-    temp, Atemp, Btemp, Ftemp, Ptemp = gg(mu[t])
+    μ[t] = root(ff, μ[t-1]).x
+    temp, Atemp, Btemp, Ftemp, Ptemp = gg(μ[t])
 
     # Compute alternative decisions
     P21temp = Ptemp[3, :3]
     P22temp = P[3, 3]
-    uhat[t] = -P22temp**(-1)*P21temp.dot(y[:3, t])
+    uhat[t] = -P22temp**(-1) * P21temp.dot(y[:3, t])
 
     yhat = (Atemp-Btemp.dot(Ftemp)).dot(np.hstack([y[0:3, t-1], uhat[t-1]]))
-    tauhat[t] = yhat[3]
-    tauhatdif[t-1] = tauhat[t]-y[3, t]
-    uhatdif[t] = uhat[t]-y[3, t]
-
-
-if __name__ == '__main__':
-    print("1 Q tau u")
-    print(y)
-    print("-F")
-    print(-F)
+    τhat[t] = yhat[3]
+    τhatdif[t-1] = τhat[t] - y[3, t]
+    uhatdif[t] = uhat[t] - y[3, t]
