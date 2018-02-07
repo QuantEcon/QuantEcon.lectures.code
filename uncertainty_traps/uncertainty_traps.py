@@ -1,61 +1,61 @@
-from __future__ import division
 import numpy as np
+
 
 class UncertaintyTrapEcon:
 
     def __init__(self,
-                a=1.5,          # Risk aversion
-                gx=0.5,         # Production shock precision
-                rho=0.99,       # Correlation coefficient for theta
-                sig_theta=0.5,  # Std dev of theta shock
-                num_firms=100,  # Number of firms
-                sig_F=1.5,      # Std dev of fixed costs
-                c=-420,         # External opportunity cost
-                mu_init=0,      # Initial value for mu
-                gamma_init=4,   # Initial value for gamma
-                theta_init=0):  # Initial value for theta
+                 a=1.5,          # Risk aversion
+                 γ_x=0.5,        # Production shock precision
+                 ρ=0.99,         # Correlation coefficient for θ
+                 σ_θ=0.5,        # Standard dev of θ shock
+                 num_firms=100,  # Number of firms
+                 σ_F=1.5,        # Standard dev of fixed costs
+                 c=-420,         # External opportunity cost
+                 μ_init=0,       # Initial value for μ
+                 γ_init=4,       # Initial value for γ
+                 θ_init=0):      # Initial value for θ
 
         # == Record values == #
-        self.a, self.gx, self.rho, self.sig_theta = a, gx, rho, sig_theta
-        self.num_firms, self.sig_F, self.c, = num_firms, sig_F, c
-        self.sd_x = np.sqrt(1/ gx)
+        self.a, self.γ_x, self.ρ, self.σ_θ = a, γ_x, ρ, σ_θ
+        self.num_firms, self.σ_F, self.c, = num_firms, σ_F, c
+        self.σ_x = np.sqrt(1/γ_x)
 
         # == Initialize states == #
-        self.gamma, self.mu, self.theta =  gamma_init, mu_init, theta_init
+        self.γ, self.μ, self.θ = γ_init, μ_init, θ_init
 
-    def psi(self, F):
-        temp1 = -self.a * (self.mu - F) 
-        temp2 = self.a**2 * (1/self.gamma + 1/self.gx) / 2
+    def ψ(self, F):
+        temp1 = -self.a * (self.μ - F)
+        temp2 = self.a**2 * (1/self.γ + 1/self.γ_x) / 2
         return (1 / self.a) * (1 - np.exp(temp1 + temp2)) - self.c
 
     def update_beliefs(self, X, M):
         """
-        Update beliefs (mu, gamma) based on aggregates X and M.
+        Update beliefs (μ, γ) based on aggregates X and M.
         """
         # Simplify names
-        gx, rho, sig_theta = self.gx, self.rho, self.sig_theta
-        # Update mu
-        temp1 = rho * (self.gamma * self.mu + M * gx * X)
-        temp2 = self.gamma + M * gx
-        self.mu =  temp1 / temp2
-        # Update gamma
-        self.gamma = 1 / (rho**2 / (self.gamma + M * gx) + sig_theta**2)
+        γ_x, ρ, σ_θ = self.γ_x, self.ρ, self.σ_θ
+        # Update μ
+        temp1 = ρ * (self.γ * self.μ + M * γ_x * X)
+        temp2 = self.γ + M * γ_x
+        self.μ = temp1 / temp2
+        # Update γ
+        self.γ = 1 / (ρ**2 / (self.γ + M * γ_x) + σ_θ**2)
 
-    def update_theta(self, w):
+    def update_θ(self, w):
         """
-        Update the fundamental state theta given shock w.
+        Update the fundamental state θ given shock w.
         """
-        self.theta = self.rho * self.theta + self.sig_theta * w
+        self.θ = self.ρ * self.θ + self.σ_θ * w
 
     def gen_aggregates(self):
         """
-        Generate aggregates based on current beliefs (mu, gamma).  This 
+        Generate aggregates based on current beliefs (μ, γ). This
         is a simulation step that depends on the draws for F.
         """
-        F_vals = self.sig_F * np.random.randn(self.num_firms)
-        M = np.sum(self.psi(F_vals) > 0)  # Counts number of active firms
+        F_vals = self.σ_F * np.random.randn(self.num_firms)
+        M = np.sum(self.ψ(F_vals) > 0)  # Counts number of active firms
         if M > 0:
-            x_vals = self.theta + self.sd_x * np.random.randn(M)
+            x_vals = self.θ + self.σ_x * np.random.randn(M)
             X = x_vals.mean()
         else:
             X = 0

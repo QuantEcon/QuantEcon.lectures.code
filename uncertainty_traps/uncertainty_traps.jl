@@ -1,64 +1,64 @@
 mutable struct UncertaintyTrapEcon{TF<:AbstractFloat, TI<:Integer}
     a::TF          # Risk aversion
-    gx::TF         # Production shock precision
-    rho::TF        # Correlation coefficient for theta
-    sig_theta::TF  # Std dev of theta shock
-    num_firms::TI      # Number of firms
-    sig_F::TF      # Std dev of fixed costs
+    γ_x::TF        # Production shock precision
+    ρ::TF          # Correlation coefficient for θ
+    σ_θ::TF        # Standard dev of θ shock
+    num_firms::TI  # Number of firms
+    σ_F::TF        # Std dev of fixed costs
     c::TF          # External opportunity cost
-    mu::TF         # Initial value for mu
-    gamma::TF      # Initial value for gamma
-    theta::TF      # Initial value for theta
-    sd_x::TF       # standard deviation of shock
+    μ::TF          # Initial value for μ
+    γ::TF          # Initial value for γ
+    θ::TF          # Initial value for θ
+    σ_x::TF        # Standard deviation of shock
 end
 
-function UncertaintyTrapEcon(;a::AbstractFloat=1.5, gx::AbstractFloat=0.5,
-                             rho::AbstractFloat=0.99, sig_theta::AbstractFloat=0.5,
-                             num_firms::Integer=100, sig_F::AbstractFloat=1.5,
-                             c::AbstractFloat=-420.0, mu_init::AbstractFloat=0.0,
-                             gamma_init::AbstractFloat=4.0,
-                             theta_init::AbstractFloat=0.0)
-    sd_x = sqrt(a/gx)
-    UncertaintyTrapEcon(a, gx, rho, sig_theta, num_firms, sig_F, c, mu_init,
-                        gamma_init, theta_init, sd_x)
+function UncertaintyTrapEcon(;a::AbstractFloat=1.5, γ_x::AbstractFloat=0.5,
+                             ρ::AbstractFloat=0.99, σ_θ::AbstractFloat=0.5,
+                             num_firms::Integer=100, σ_F::AbstractFloat=1.5,
+                             c::AbstractFloat=-420.0, μ_init::AbstractFloat=0.0,
+                             γ_init::AbstractFloat=4.0,
+                             θ_init::AbstractFloat=0.0)
+    σ_x = sqrt(a / γ_x)
+    UncertaintyTrapEcon(a, γ_x, ρ, σ_θ, num_firms, σ_F, c, μ_init,
+                        γ_init, θ_init, σ_x)
 
 end
 
-function psi(uc::UncertaintyTrapEcon, F::Real)
-    temp1 = -uc.a * (uc.mu - F)
-    temp2 = 0.5 * uc.a^2 * (1/uc.gamma + 1/uc.gx)
-    return (1/uc.a) * (1 - exp(temp1 + temp2)) - uc.c
+function ψ(uc::UncertaintyTrapEcon, F::Real)
+    temp1 = -uc.a * (uc.μ - F)
+    temp2 = 0.5 * uc.a^2 * (1 / uc.γ + 1 / uc.γ_x)
+    return (1 / uc.a) * (1 - exp(temp1 + temp2)) - uc.c
 end
 
 """
-Update beliefs (mu, gamma) based on aggregates X and M.
+Update beliefs (μ, γ) based on aggregates X and M.
 """
 function update_beliefs!(uc::UncertaintyTrapEcon, X::Real, M::Real)
     # Simplify names
-    gx, rho, sig_theta = uc.gx, uc.rho, uc.sig_theta
+    γ_x, ρ, σ_θ = uc.γ_x, uc.ρ, uc.σ_θ
 
-    # Update mu
-    temp1 = rho * (uc.gamma*uc.mu + M*gx*X)
-    temp2 = uc.gamma + M*gx
-    uc.mu =  temp1 / temp2
+    # Update μ
+    temp1 = ρ * (uc.γ * uc.μ + M * γ_x * X)
+    temp2 = uc.γ + M * γ_x
+    uc.μ =  temp1 / temp2
 
-    # Update gamma
-    uc.gamma = 1 / (rho^2 / (uc.gamma + M * gx) + sig_theta^2)
+    # Update γ
+    uc.γ = 1 / (ρ^2 / (uc.γ + M * γ_x) + σ_θ^2)
 end
 
-update_theta!(uc::UncertaintyTrapEcon, w::Real) =
-    (uc.theta = uc.rho*uc.theta + uc.sig_theta*w)
+update_θ!(uc::UncertaintyTrapEcon, w::Real) =
+    (uc.θ = uc.ρ * uc.θ + uc.σ_θ * w)
 
 """
-Generate aggregates based on current beliefs (mu, gamma).  This
+Generate aggregates based on current beliefs (μ, γ).  This
 is a simulation step that depends on the draws for F.
 """
 function gen_aggregates(uc::UncertaintyTrapEcon)
-    F_vals = uc.sig_F * randn(uc.num_firms)
+    F_vals = uc.σ_F * randn(uc.num_firms)
 
-    M = sum(psi.(uc, F_vals) .> 0)  # Counts number of active firms
+    M = sum(ψ.(uc, F_vals) .> 0)  # Counts number of active firms
     if M > 0
-        x_vals = uc.theta + uc.sd_x * randn(M)
+        x_vals = uc.θ + uc.σ_x * randn(M)
         X = mean(x_vals)
     else
         X = 0.0
