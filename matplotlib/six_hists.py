@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from random import uniform
 num_rows, num_cols = 3, 2
-fig, axes = plt.subplots(num_rows, num_cols, figsize=(8, 12))
+fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 12))
 for i in range(num_rows):
     for j in range(num_cols):
         m, s = uniform(-1, 1), uniform(1, 2)
