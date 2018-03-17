@@ -6,7 +6,6 @@
 
 using QuantEcon
 using Interpolations
-using Distributions
 
 """
 Unemployment/search problem where offer distribution is unknown

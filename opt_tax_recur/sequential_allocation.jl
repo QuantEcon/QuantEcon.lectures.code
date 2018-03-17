@@ -58,7 +58,7 @@ function find_first_best(model::Model, S::Integer, version::Integer)
     end
     β, Θ, Uc, Un, G, Π =
         model.β, model.Θ, model.Uc, model.Un, model.G, model.Π
-    function res!(z, out)
+    function res!(out, z)
         c = z[1:S]
         n = z[S+1:end]
         out[1:S] = Θ .* Uc(c, n) + Un(c, n)
@@ -94,7 +94,7 @@ function time1_allocation(pas::SequentialAllocation, μ::Real)
     Θ, β, Π, G, Uc, Ucc, Un, Unn =
         model.Θ, model.β, model.Π, model.G,
         model.Uc, model.Ucc, model.Un, model.Unn
-    function FOC!(z::Vector, out)
+    function FOC!(out, z::Vector)
         c = z[1:S]
         n = z[S+1:2S]
         Ξ = z[2S+1:end]
@@ -127,7 +127,7 @@ function time0_allocation(pas::SequentialAllocation,
     Uc, Ucc, Un, Unn =
         model.Uc, model.Ucc, model.Un, model.Unn
     # First order conditions of planner's problem
-    function FOC!(z, out)
+    function FOC!(out, z)
         μ, c, n, Ξ = z[1], z[2], z[3], z[4]
         xprime = time1_allocation(pas, μ)[3]
         out .= vcat(

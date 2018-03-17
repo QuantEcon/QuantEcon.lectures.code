@@ -6,7 +6,7 @@ w_bar_vals = np.empty_like(γ_vals)
 
 mcm = McCallModel()
 
-fig, ax = plt.subplots(figsize=(9, 6))
+fig, ax = plt.subplots(figsize=(10, 6))
 
 for i, γ in enumerate(γ_vals):
     mcm.γ = γ

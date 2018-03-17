@@ -4,7 +4,6 @@
 
 =#
 
-using QuantEcon
 using Optim
 
 

@@ -1,6 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
 r = 0.05
 β = 1 / (1 + r)
 T = 20  # Time horizon
@@ -24,29 +21,23 @@ def time_path(permanent=False):
     return b, c
 
 
-fig, axes = plt.subplots(2, 1)
-plt.subplots_adjust(hspace=0.5)
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 p_args = {'lw': 2, 'alpha': 0.7}
+titles = ['transitory', 'permanent']
 
 L = 0.175
 
-for ax in axes:
-    ax.grid(alpha=0.5)
-    ax.set_xlabel(r'Time')
-    ax.set_ylim(-L, L)
+for ax, truefalse, title in zip(axes, (True, False), titles):
+    b, c = time_path(permanent=truefalse)
+    ax.set_title(str('Impulse reponse: ' + title + ' income shock'))
+    ax.plot(list(range(T+1)), c, 'g-', label="consumption", **p_args)
+    ax.plot(list(range(T+1)), b, 'b-', label="debt", **p_args)
     ax.plot((S, S), (-L, L), 'k-', lw=0.5)
+    ax.grid(alpha=0.5)
+    ax.set(xlabel=r'Time', ylim=(-L, L))
 
-ax = axes[0]
-b, c = time_path(permanent=0)
-ax.set_title('impulse-response, transitory income shock')
-ax.plot(list(range(T+1)), c, 'g-', label="consumption", **p_args)
-ax.plot(list(range(T+1)), b, 'b-', label="debt", **p_args)
-ax.legend(loc='upper right')
+axes[0].legend(loc='lower right')
 
-ax = axes[1]
-b, c = time_path(permanent=1)
-ax.set_title('impulse-response, permanent income shock')
-ax.plot(list(range(T+1)), c, 'g-', label="consumption", **p_args)
-ax.plot(list(range(T+1)), b, 'b-', label="debt", **p_args)
-ax.legend(loc='lower right')
+
+plt.tight_layout()
 plt.show()

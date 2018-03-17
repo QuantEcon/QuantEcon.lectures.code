@@ -72,7 +72,7 @@ function find_first_best(para::Para, S::Integer, version::Integer)
         out[1:S] = Theta.*Uc(c, n)+Un(c, n)
         out[S+1:end] = Theta.*n - c - G
     end
-    res = nlsolve(res!, 0.5*ones(2*S))
+    res = nlsolve(0.5*ones(2*S), res!)
 
     if converged(res) == false
         error("Could not find first best")

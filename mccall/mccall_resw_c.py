@@ -4,7 +4,7 @@ w_bar_vals = np.empty_like(c_vals)
 
 mcm = McCallModel()
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 6))
 
 for i, c in enumerate(c_vals):
     mcm.c = c

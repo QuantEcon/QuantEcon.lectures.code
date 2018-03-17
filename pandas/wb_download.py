@@ -13,7 +13,7 @@ govt_debt = pd.read_excel('gd.xls', sheetname='Data', skiprows=3, index_col=1)
 
 # == Take desired values and plot == #
 govt_debt = govt_debt.transpose()
-govt_debt = govt_debt[['AUS', 'DEU', 'FRA', 'USA']]
+govt_debt = govt_debt[['AUS', 'USA']]
 govt_debt = govt_debt[38:]
 govt_debt.plot(lw=2)
 plt.show()

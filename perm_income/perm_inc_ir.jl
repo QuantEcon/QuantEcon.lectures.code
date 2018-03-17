@@ -1,13 +1,3 @@
-#=
-
-@author : Spencer Lyon
-          Victoria Gregory
-
-=#
-
-using Plots
-pyplot()
-
 const r = 0.05
 const β = 1.0 / (1.0 + r)
 const T = 20  # Time horizon

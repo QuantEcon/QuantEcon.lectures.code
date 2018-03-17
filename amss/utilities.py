@@ -39,6 +39,7 @@ class interpolator_factory:
         shape, m = Fs.shape[:-1], Fs.shape[-1]
         Fs = Fs.reshape((-1, m))
         F = []
+        xgrid = np.sort(xgrid)  # Sort xgrid
         for Fhat in Fs:
             F.append(UnivariateSpline(xgrid, Fhat, k=self.k, s=self.s))
         return interpolate_wrapper(np.array(F).reshape(shape))

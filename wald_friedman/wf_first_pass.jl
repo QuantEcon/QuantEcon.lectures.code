@@ -1,7 +1,5 @@
 using Distributions
 using QuantEcon.compute_fixed_point, QuantEcon.DiscreteRV, QuantEcon.draw, QuantEcon.LinInterp
-using Plots
-pyplot()
 using LaTeXStrings
 
 """
@@ -70,9 +68,9 @@ end
 # We are using a discretized beta distribution
 
 p_m1 = linspace(0, 1, 50)
-f0 = clamp.(pdf(Beta(1, 1), p_m1), 1e-8, Inf)
+f0 = clamp.(pdf.(Beta(1, 1), p_m1), 1e-8, Inf)
 f0 = f0 / sum(f0)
-f1 = clamp.(pdf(Beta(9, 9), p_m1), 1e-8, Inf)
+f1 = clamp.(pdf.(Beta(9, 9), p_m1), 1e-8, Inf)
 f1 = f1 / sum(f1)
 
 # To solve

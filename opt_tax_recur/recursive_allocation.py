@@ -34,6 +34,8 @@ class RecursiveAllocation:
 
         Vf, cf, nf, xprimef = {}, {}, {}, {}
         for s in range(2):
+            ind = np.argsort(x[:, s])                    # Sort x
+            c, n, x, V = c[ind], n[ind], x[ind], V[ind]  # Sort arrays according to x
             cf[s] = UnivariateSpline(x[:, s], c[:, s])
             nf[s] = UnivariateSpline(x[:, s], n[:, s])
             Vf[s] = UnivariateSpline(x[:, s], V[:, s])
@@ -49,7 +51,7 @@ class RecursiveAllocation:
         # Now iterate on bellman equation
         T = BellmanEquation(model, xgrid, policies)
         diff = 1
-        while diff > 1e-5:
+        while diff > 1e-7:
             PF = T(Vf)
             Vfnew, policies = self.fit_policy_function(PF)
             diff = 0
@@ -230,10 +232,14 @@ class BellmanEquation:
             return np.hstack([x - Uc(c, n) * c - Un(c, n) * n - β * π[s] @ xprime,
                               (Θ * n - c - G)[s]])
 
-        out, fx, _, imode, smode = fmin_slsqp(objf, self.z0[x, s], f_eqcons=cons,
+        out, fx, _, imode, smode = fmin_slsqp(objf, 
+                                              self.z0[x, s], 
+                                              f_eqcons=cons,
                                               bounds=[(0, 100), (0, 100)] +
                                               [self.xbar] * S,
-                                              full_output=True, iprint=0)
+                                              full_output=True, 
+                                              iprint=0, 
+                                              acc=1e-10)
 
         if imode > 0:
             raise Exception(smode)
@@ -266,7 +272,7 @@ class BellmanEquation:
         out, fx, _, imode, smode = fmin_slsqp(objf, self.zFB[s0], f_eqcons=cons,
                                               bounds=[(0, 100), (0, 100)] +
                                               [self.xbar] * S,
-                                              full_output=True, iprint=0)
+                                              full_output=True, iprint=0, acc=1e-10)
 
         if imode > 0:
             raise Exception(smode)

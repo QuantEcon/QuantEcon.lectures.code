@@ -1,6 +1,3 @@
-using Plots
-pyplot()
-using LaTeXStrings
 using StatPlots     # needed for box plot support
 
 n = 500
