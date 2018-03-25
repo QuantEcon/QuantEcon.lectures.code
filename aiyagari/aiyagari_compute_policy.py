@@ -1,9 +1,3 @@
-"""
-
-@authors: John Stachurski, Thomas Sargent
-
-"""
-import numpy as np
 import quantecon as qe
 import matplotlib.pyplot as plt
 from quantecon.markov import DiscreteDP
@@ -12,7 +6,7 @@ from quantecon.markov import DiscreteDP
 r = 0.03
 w = 0.956
 
-# Create an instance of Household 
+# Create an instance of Household
 am = Household(a_max=20, r=r, w=w)
 
 # Use the instance to build a discrete dynamic program
@@ -34,9 +28,9 @@ for s_i in range(n):
     a_star[z_i, a_i] = a_vals[results.sigma[s_i]]
 
 fig, ax = plt.subplots(figsize=(9, 9))
-ax.plot(a_vals, a_vals, 'k--')# 45 degrees
+ax.plot(a_vals, a_vals, 'k--')  # 45 degrees
 for i in range(z_size):
-    lb = r'$z = {}$'.format(z_vals[i], '.2f')
+    lb = f'$z = {z_vals[i]:.2}$'
     ax.plot(a_vals, a_star[i, :], lw=2, alpha=0.6, label=lb)
     ax.set_xlabel('current assets')
     ax.set_ylabel('next period assets')

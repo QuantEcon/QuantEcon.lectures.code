@@ -1,9 +1,3 @@
-"""
-
-@authors: John Stachurski, Thomas Sargent
-
-"""
-
 import numpy as np
 from numba import jit
 
@@ -17,9 +11,9 @@ class Household:
     Comments on indexing: We need to enumerate the state space S as a sequence
     S = {0, ..., n}.  To this end, (a_i, z_i) index pairs are mapped to s_i
     indices according to the rule
-    
+
         s_i = a_i * z_size + z_i 
-        
+
     To invert this map, use
     
         a_i = s_i // z_size  (integer division)
@@ -29,23 +23,23 @@ class Household:
 
 
     def __init__(self,
-                r=0.01,       # interest rate
-                w=1.0,        # wages
-                β=0.96,       # discount factor
-                a_min=1e-10,
-                Π = [[0.9, 0.1], [0.1, 0.9]],  # Markov chain
-                z_vals=[0.1, 1.0],             # exogenous states
-                a_max=18,
-                a_size=200):
-        
+                 r=0.01,                      # interest rate
+                 w=1.0,                       # wages
+                 β=0.96,                      # discount factor
+                 a_min=1e-10,
+                 Π=[[0.9, 0.1], [0.1, 0.9]],  # Markov chain
+                 z_vals=[0.1, 1.0],           # exogenous states
+                 a_max=18,
+                 a_size=200):
+
         # Store values, set up grids over a and z
         self.r, self.w, self.β = r, w, β
         self.a_min, self.a_max, self.a_size = a_min, a_max, a_size
-    
+
         self.Π = np.asarray(Π)
         self.z_vals = np.asarray(z_vals)
         self.z_size = len(z_vals)
-        
+
         self.a_vals = np.linspace(a_min, a_max, a_size)
         self.n = a_size * self.z_size
 
@@ -59,10 +53,10 @@ class Household:
 
     def set_prices(self, r, w):
         """
-        Use this method to reset prices.  Calling the method will trigger a 
+        Use this method to reset prices.  Calling the method will trigger a
         re-build of R.
         """
-        self.r, self.w = r, w 
+        self.r, self.w = r, w
         self.build_R()
 
     def build_Q(self):

@@ -3,7 +3,6 @@
 @authors: Chase Coleman, Thomas Sargent, John Stachurski
 
 """
-from __future__ import division
 import numpy as np
 import quantecon as qe
 

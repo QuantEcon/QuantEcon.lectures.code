@@ -1,10 +1,7 @@
-
-import quantecon as qe
-import numpy as np
-
 B, M, α, β = 10, 5, 0.5, 0.9
 n = B + M + 1
 m = M + 1
+
 def u(c):
     return c**α
 

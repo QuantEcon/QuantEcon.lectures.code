@@ -3,7 +3,6 @@
 Authors: Chase Coleman, John Stachurski
 
 """
-from __future__ import division
 import numpy as np
 import random
 import quantecon as qe
@@ -41,17 +40,17 @@ class Arellano_Economy:
         Maximum number of iterations
     """
 
-    def __init__(self, 
-            β=.953,         # time discount rate
-            γ=2.,           # risk aversion
-            r=0.017,        # international interest rate
-            ρ=.945,         # persistence in output 
-            η=0.025,        # st dev of output shock
-            θ=0.282,        # prob of regaining access 
-            ny=21,          # number of points in y grid
-            nB=251,         # number of points in B grid
-            tol=1e-8,       # error tolerance in iteration
-            maxit=10000):
+    def __init__(self,
+                 β=.953,         # time discount rate
+                 γ=2.,           # risk aversion
+                 r=0.017,        # international interest rate
+                 ρ=.945,         # persistence in output
+                 η=0.025,        # st dev of output shock
+                 θ=0.282,        # prob of regaining access
+                 ny=21,          # number of points in y grid
+                 nB=251,         # number of points in B grid
+                 tol=1e-8,       # error tolerance in iteration
+                 maxit=10000):
 
         # Save parameters
         self.β, self.γ, self.r = β, γ, r
@@ -73,13 +72,12 @@ class Arellano_Economy:
         self.Vc = np.zeros((ny, nB))
         self.V = np.zeros((ny, nB))
         self.Q = np.ones((ny, nB)) * .95  # Initial guess for prices
-        self.default_prob = np.empty((ny, nB)) 
+        self.default_prob = np.empty((ny, nB))
 
-        # Compute the value functions, prices, and default prob 
+        # Compute the value functions, prices, and default prob
         self.solve(tol=tol, maxit=maxit)
         # Compute the optimal savings policy conditional on no default
         self.compute_savings_policy()
-
 
     def solve(self, tol=1e-8, maxit=10000):
         # Iteration Stuff
@@ -96,13 +94,14 @@ class Arellano_Economy:
             Vs = self.V, self.Vd, self.Vc
             EV, EVd, EVc = (np.dot(self.Py, v) for v in Vs)
 
-            # Run inner loop to update value functions Vc and Vd. 
+            # Run inner loop to update value functions Vc and Vd.
             # Note that Vc and Vd are updated in place.  Other objects
             # are not modified.
-            _inner_loop(self.ygrid, self.def_y, self.Bgrid, self.Vd, self.Vc, 
-                    EVc, EVd, EV, self.Q, 
-                    self.β, self.θ, self.γ)
-                                 
+            _inner_loop(self.ygrid, self.def_y,
+                        self.Bgrid, self.Vd, self.Vc,
+                        EVc, EVd, EV, self.Q,
+                        self.β, self.θ, self.γ)
+
             # Update prices
             Vd_compat = np.repeat(self.Vd, self.nB).reshape(self.ny, self.nB)
             default_states = Vd_compat > self.Vc
@@ -116,28 +115,26 @@ class Arellano_Economy:
 
             it += 1
             if it % 25 == 0:
-                print("Running iteration {} with dist of {}".format(it, dist))
+                print(f"Running iteration {it} with dist of {dist}")
 
         return None
-
 
     def compute_savings_policy(self):
         """
         Compute optimal savings B' conditional on not defaulting.
         The policy is recorded as an index value in Bgrid.
         """
-        
+
         # Allocate memory
         self.next_B_index = np.empty((self.ny, self.nB))
-        EV = np.dot(self.Py, self.V) 
+        EV = np.dot(self.Py, self.V)
 
         _compute_savings_policy(self.ygrid, self.Bgrid, self.Q, EV,
-                self.γ, self.β, self.next_B_index)
-
+                                self.γ, self.β, self.next_B_index)
 
     def simulate(self, T, y_init=None, B_init=None):
         """
-        Simulate time series for output, consumption, B'.  
+        Simulate time series for output, consumption, B'.
         """
         # Find index i such that Bgrid[i] is near 0
         zero_B_index = np.searchsorted(self.Bgrid, 0)
@@ -173,12 +170,12 @@ class Arellano_Economy:
             B_sim_indices[t+1] = Bi_next
             q_sim[t] = self.Q[yi, int(Bi_next)]
 
-        q_sim[-1] = q_sim[-2] # Extrapolate for the last price
-        return_vecs = (self.ygrid[y_sim_indices], 
-                      self.Bgrid[B_sim_indices], 
-                      q_sim,
-                      in_default_series)
-                
+        q_sim[-1] = q_sim[-2]  # Extrapolate for the last price
+        return_vecs = (self.ygrid[y_sim_indices],
+                       self.Bgrid[B_sim_indices],
+                       q_sim,
+                       in_default_series)
+
         return return_vecs
 
 
@@ -188,8 +185,8 @@ def u(c, γ):
 
 
 @jit(nopython=True)
-def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc, 
-                         EVd, EV, qq, β, θ, γ):
+def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc,
+                EVd, EV, qq, β, θ, γ):
     """
     This is a numba version of the inner loop of the solve in the
     Arellano class. It updates Vd and Vc in place.
@@ -205,7 +202,7 @@ def _inner_loop(ygrid, def_y, Bgrid, Vd, Vc, EVc,
 
         # Compute Vc
         for ib in range(nB):
-            B = Bgrid[ib] # Pull out current B
+            B = Bgrid[ib]  # Pull out current B
 
             current_max = -1e14
             for ib_next in range(nB):
@@ -235,4 +232,3 @@ def _compute_savings_policy(ygrid, Bgrid, Q, EV, γ, β, next_B_index):
                     current_max_index = ib_next
             next_B_index[iy, ib] = current_max_index
     return None
-

@@ -1,16 +1,3 @@
-"""
-
-@authors: John Stachurski, Thomas Sargent
-
-"""
-
-import numpy as np
-import quantecon as qe
-import matplotlib.pyplot as plt
-from numba import jit
-from quantecon.markov import DiscreteDP
-
-
 A = 1.0
 N = 1.0
 α = 0.33
@@ -54,10 +41,10 @@ def prices_to_capital_stock(am, r):
     # Extract the marginal distribution for assets
     asset_probs = asset_marginal(stationary_probs, am.a_size, am.z_size)
     # Return K
-    return np.sum(asset_probs * am.a_vals)  
+    return np.sum(asset_probs * am.a_vals)
 
 
-# Create an instance of Household 
+# Create an instance of Household
 am = Household(a_max=20)
 
 # Use the instance to build a discrete dynamic program
