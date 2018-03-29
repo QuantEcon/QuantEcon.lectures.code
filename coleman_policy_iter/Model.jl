@@ -41,12 +41,12 @@ function Model(; α::Real=0.65,                      # Productivity parameter
                  f_prime::Function = k -> α*k^(α-1) # f'
                  )
 
-    grid=collect(linspace(grid_min, grid_max, grid_size))
+    grid = collect(linspace(grid_min, grid_max, grid_size))
 
-    if γ == 1   # when γ==1, log utility is assigned
+    if γ == 1                                       # when γ==1, log utility is assigned
         u_log(c) = log(c)
         m = Model(α, β, γ, μ, s, grid_min, grid_max,
-                grid_size, u_log, u_prime, f, f_prime, grid)
+                  grid_size, u_log, u_prime, f, f_prime, grid)
     else
         m = Model(α, β, γ, μ, s, grid_min, grid_max,
                   grid_size, u, u_prime, f, f_prime, grid)

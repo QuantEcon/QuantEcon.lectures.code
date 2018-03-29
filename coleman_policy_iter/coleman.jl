@@ -28,15 +28,15 @@ function coleman_operator!(g::AbstractVector,
     # This function requires the container of the output value as argument Kg
 
     # Construct linear interpolation object #
-    g_func=LinInterp(grid, g)
+    g_func = LinInterp(grid, g)
 
     # solve for updated consumption value #
-    for (i,y) in enumerate(grid)
+    for (i, y) in enumerate(grid)
         function h(c)
-            vals = u_prime.(g_func.(f(y - c)*shocks)).*f_prime(y - c).*shocks
+            vals = u_prime.(g_func.(f(y - c) * shocks)) .* f_prime(y - c) .* shocks
             return u_prime(c) - β * mean(vals)
         end
-        Kg[i] = brent(h, 1e-10, y-1e-10)
+        Kg[i] = brent(h, 1e-10, y - 1e-10)
     end
     return Kg
 end

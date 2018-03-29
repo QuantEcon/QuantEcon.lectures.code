@@ -4,8 +4,6 @@ Authors: Shunsuke Hori
 
 =#
 
-using QuantEcon
-
 """
 The approximate Coleman operator, updated using the endogenous grid
 method.
@@ -54,6 +52,6 @@ function coleman_egm(g::Function,
 
     # Update policy function and return
     Kg = LinInterp(y,c)
-    Kg_f(x)=Kg(x)
+    Kg_f(x) = Kg(x)
     return Kg_f
 end

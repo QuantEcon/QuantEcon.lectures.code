@@ -13,10 +13,10 @@ end
 # default wage vector with probabilities
 
 const n = 60                                   # n possible outcomes for wage
-const default_w_vec = linspace(10, 20, n)   # wages between 10 and 20
+const default_w_vec = linspace(10, 20, n)      # wages between 10 and 20
 const a, b = 600, 400                          # shape parameters
 const dist = BetaBinomial(n-1, a, b)
-const default_p_vec = pdf(dist)
+const default_p_vec = pdf.(dist, support(dist))
 
 mutable struct McCallModel{TF <: AbstractFloat,
                            TAV <: AbstractVector{TF},

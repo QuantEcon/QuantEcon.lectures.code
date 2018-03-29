@@ -87,7 +87,7 @@ function find_first_best(model::Model, S::Integer, version::Integer)
 end
 
 """
-Computes optimal allocation for time ``t\geq 1`` for a given ``\mu``
+Computes optimal allocation for time t≧ 1 for a given μ
 """
 function time1_allocation(pas::SequentialAllocation, μ::Real)
     model, S = pas.model, pas.S
@@ -122,10 +122,10 @@ Finds the optimal allocation given initial government debt `B_` and state `s_0`
 function time0_allocation(pas::SequentialAllocation,
                           B_::AbstractFloat, s_0::Integer)
     model = pas.model
-    Π, Θ, G, β =
-        model.Π, model.Θ, model.G, model.β
+    Π, Θ, G, β = model.Π, model.Θ, model.G, model.β
     Uc, Ucc, Un, Unn =
         model.Uc, model.Ucc, model.Un, model.Unn
+
     # First order conditions of planner's problem
     function FOC!(out, z)
         μ, c, n, Ξ = z[1], z[2], z[3], z[4]
@@ -137,6 +137,7 @@ function time0_allocation(pas::SequentialAllocation,
         (Θ .* n - c - G)[s_0]
         )
     end
+    
     # Find root
     res = nlsolve(FOC!, [0.0, pas.cFB[s_0], pas.nFB[s_0], pas.ΞFB[s_0]])
     if res.f_converged == false
@@ -146,7 +147,7 @@ function time0_allocation(pas::SequentialAllocation,
 end
 
 """
-Find the value associated with multiplier `μ`
+Find the value associated with multiplier μ
 """
 function time1_value(pas::SequentialAllocation, μ::Real)
     model = pas.model
@@ -168,10 +169,13 @@ end
 Simulates planners policies for `T` periods
 """
 function simulate(pas::SequentialAllocation,
-                  B_::AbstractFloat, s_0::Integer, T::Integer,
+                  B_::AbstractFloat, s_0::Integer,
+                  T::Integer,
                   sHist::Union{Vector, Void}=nothing)
+
     model = pas.model
     Π, β, Uc = model.Π, model.β, model.Uc
+    
     if sHist == nothing
         sHist = QuantEcon.simulate(pas.mc, T, init=s_0)
     end
@@ -181,7 +185,7 @@ function simulate(pas::SequentialAllocation,
     ΤHist = zeros(T)
     μHist = zeros(T)
     RHist = zeros(T-1)
-    # time 0
+    # time 0 
     μ, cHist[1], nHist[1], _  = time0_allocation(pas, B_, s_0)
     ΤHist[1] = Τ(pas.model, cHist[1], nHist[1])[s_0]
     Bhist[1] = B_
@@ -223,7 +227,7 @@ end
 Initializes the {{ class_word }} from the calibration `model`
 """
 function BellmanEquation(model::Model, xgrid::AbstractVector, policies0::Vector)
-    S = size(model.Π, 1) # Number of states
+    S = size(model.Π, 1)                     # Number of states
     xbar = [minimum(xgrid), maximum(xgrid)]
     time_0 = false
     cf, nf, xprimef = policies0

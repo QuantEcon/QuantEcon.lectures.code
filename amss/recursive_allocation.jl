@@ -1,6 +1,3 @@
-using QuantEcon
-using NLopt
-using NLsolve
 using Dierckx
 
 """
@@ -22,8 +19,10 @@ end
 Compute the planner's allocation by solving Bellman
 equation.
 """
-struct RecursiveAllocation{TP <: Model, TI <: Integer,
-                                   TVg <: AbstractVector, TT <: Tuple}
+struct RecursiveAllocation{TP <: Model,
+                           TI <: Integer,
+                           TVg <: AbstractVector,
+                           TT <: Tuple}
     model::TP
     mc::MarkovChain
     S::TI
@@ -59,15 +58,18 @@ function solve_time1_bellman{TR <: Real}(model::Model{TR}, μgrid::AbstractArray
     PP = SequentialAllocation(model)
 
     function incomplete_allocation(PP::SequentialAllocation,
-                                   μ_::AbstractFloat, s_::Integer)
+                                   μ_::AbstractFloat,
+                                   s_::Integer)
         c, n, x, V = time1_value(PP, μ_)
         return c, n, dot(Π[s_, :], x), dot(Π[s_, :], V)
     end
+
     cf = Array{Function}(S, S)
     nf = Array{Function}(S, S)
     xprimef = Array{Function}(S, S)
     Vf = Vector{Function}(S)
     xgrid = Array{TR}(S, length(μgrid))
+
     for s_ in 1:S
         c = Array{TR}(length(μgrid), S)
         n = Array{TR}(length(μgrid), S)
@@ -124,7 +126,8 @@ end
 Fits the policy functions
 """
 function fit_policy_function{TF<:AbstractFloat}(T::BellmanEquation_Recursive,
-                                                PF::Function, xgrid::AbstractVector{TF})
+                                                PF::Function,
+						xgrid::AbstractVector{TF})
     S = T.S
     # preallocation
     PFvec = Array{TF}(4S + 1, length(xgrid))
@@ -160,20 +163,19 @@ end
 Computes Tau given c,n
 """
 function Tau(pab::RecursiveAllocation,
-             c::AbstractArray, n::AbstractArray)
+             c::AbstractArray,
+	     n::AbstractArray)
     model = pab.model
     Uc, Un = model.Uc(c, n), model.Un(c, n)
     return 1 + Un ./ (model.Θ .* Uc)
 end
 
-Tau(pab::RecursiveAllocation, c::Real, n::Real) =
-    Tau(pab, [c], [n])
+Tau(pab::RecursiveAllocation, c::Real, n::Real) = Tau(pab, [c], [n])
 
 """
 Finds the optimal allocation given initial government debt B_ and state s_0
 """
-function time0_allocation(pab::RecursiveAllocation,
-                          B_::Real, s0::Integer)
+function time0_allocation(pab::RecursiveAllocation, B_::Real, s0::Integer)
     T, Vf = pab.T, pab.Vf
     xbar = T.xbar
     z0 = get_policies_time0(T, B_, s0, Vf, xbar)
@@ -185,10 +187,9 @@ end
 """
 Simulates planners policies for `T` periods
 """
-function simulate{TF <: AbstractFloat}(
-                   pab::RecursiveAllocation,
-                   B_::TF, s_0::Integer, T::Integer,
-                   sHist::Vector=simulate(pab.mc, T, init=s_0))
+function simulate{TF <: AbstractFloat}(pab::RecursiveAllocation,
+                                       B_::TF, s_0::Integer, T::Integer,
+                                       sHist::Vector=simulate(pab.mc, T, init=s_0))
     model, mc, Vf, S = pab.model, pab.mc, pab.Vf, pab.S
     Π, Uc = model.Π, model.Uc
     cf, nf, xprimef, TTf = pab.policies
@@ -236,8 +237,10 @@ end
 Initializes the class from the calibration Model
 """
 function BellmanEquation_Recursive{TF <: AbstractFloat}(model::Model{TF},
-                                   xgrid::AbstractVector{TF},policies0::Array)
-    S = size(model.Π, 1) # number of states
+                                                        xgrid::AbstractVector{TF},
+                                                        policies0::Array)
+
+    S = size(model.Π, 1)                                # number of states
     xbar = [minimum(xgrid), maximum(xgrid)]
     time_0 = false
     z0 = Array{Array}(length(xgrid), S)
@@ -262,7 +265,11 @@ end
 Finds the optimal policies
 """
 function get_policies_time1(T::BellmanEquation_Recursive,
-        i_x::Integer, x::Real, s_::Integer, Vf::AbstractArray{Function}, xbar::AbstractVector)
+                            i_x::Integer, 
+                            x::Real, 
+                            s_::Integer, 
+                            Vf::AbstractArray{Function}, 
+                            xbar::AbstractVector)
     model, S = T.model, T.S
     β, Θ, G, Π = model.β, model.Θ, model.G, model.Π
     U,Uc,Un = model.U, model.Uc, model.Un
@@ -354,7 +361,10 @@ end
 Finds the optimal policies
 """
 function get_policies_time0(T::BellmanEquation_Recursive,
-        B_::Real, s0::Integer, Vf::AbstractArray{Function}, xbar::AbstractVector)
+                            B_::Real, 
+                            s0::Integer, 
+                            Vf::AbstractArray{Function}, 
+                            xbar::AbstractVector)
     model = T.model
     β, Θ, G = model.β, model.Θ, model.G
     U, Uc, Un = model.U, model.Uc, model.Un
