@@ -17,13 +17,14 @@ s_path = mc.simulate(T, init=1)
 s_bar_e = s_path.cumsum() / range(1, T+1)
 s_bar_u = 1 - s_bar_e
 
-axes[0].plot(s_bar_u, '-b', lw=2, alpha=0.5)
-axes[0].hlines(xbar[0], 0, T, 'r', '--')
-axes[0].set_title('Percent of time unemployed')
+to_plot = [s_bar_u, s_bar_e]
+titles = ['Percent of time unemployed', 'Percent of time employed']
 
-axes[1].plot(s_bar_e, '-b', lw=2, alpha=0.5)
-axes[1].hlines(xbar[1], 0, T, 'r', '--')
-axes[1].set_title('Percent of time employed')
+for i, plot in enumerate(to_plot):
+    axes[i].plot(plot, lw=2, alpha=0.5)
+    axes[i].hlines(xbar[i], 0, T, 'r', '--')
+    axes[i].set_title(titles[i])
+    axes[i].grid()
 
 plt.tight_layout()
 plt.show()

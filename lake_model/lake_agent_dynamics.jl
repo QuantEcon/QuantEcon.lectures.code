@@ -2,7 +2,7 @@ using QuantEcon
 
 srand(42)
 lm = LakeModel(d=0.0, b=0.0)
-T = 5000     # Simulation length
+T = 5000                        # Simulation length
 
 α, λ = lm.α, lm.λ
 P = [(1 - λ)     λ; 
@@ -24,4 +24,5 @@ for (i, ax) in enumerate(axes)
     ax[:plot](1:T, s_bars[:, i], c="blue", lw=2, alpha=0.5)
     ax[:hlines](xbar[i], 0, T, "r", "--")
     ax[:set](title=titles[i])
+    ax[:grid]("on")
 end

@@ -48,8 +48,11 @@ where
 - `ϵ::AbstractFloat` : A small number, used in optimization routine
 
 """
-struct JvWorker{TR <: Real, TF <: AbstractFloat, TUD <: UnivariateDistribution,
-                TAV <: AbstractVector, TV <: Vector}
+struct JvWorker{TR <: Real,
+                TF <: AbstractFloat,
+                TUD <: UnivariateDistribution,
+                TAV <: AbstractVector,
+                TV <: Vector}
     A::TR
     α::TR
     β::TF
@@ -60,6 +63,7 @@ struct JvWorker{TR <: Real, TF <: AbstractFloat, TUD <: UnivariateDistribution,
     quad_nodes::TV
     quad_weights::TV
     ϵ::TF
+
 end
 
 """
@@ -80,8 +84,12 @@ each parameter
 
 """
 # use key word argument
-function JvWorker(;A::Real=1.4, α::Real=0.6, β::Real=0.96,
-                  grid_size::Integer=50, ϵ::AbstractFloat=1e-4)
+function JvWorker(;A::Real=1.4,
+                   α::Real=0.6,
+                   β::Real=0.96,
+                   grid_size::Integer=50,
+                   ϵ::AbstractFloat=1e-4)
+
     G(x, ϕ) = A .* (x .* ϕ).^α
     π_func = sqrt
     F = Beta(2, 2)
@@ -184,7 +192,8 @@ Currently, only the brute-force approach is available.
 We are waiting on a simple constrained optimizer to be written in pure Julia
 
 """
-function bellman_operator!(jv::JvWorker, V::AbstractVector,
+function bellman_operator!(jv::JvWorker,
+                           V::AbstractVector,
                            out::Tuple{AbstractVector, AbstractVector})
 
     # simplify notation

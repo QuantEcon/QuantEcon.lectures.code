@@ -1,9 +1,3 @@
-"""
-
-Authors: Thomas Sargent, John Stachurski
-
-"""
-import numpy as np
 from quantecon.distributions import BetaBinomial
 
 
@@ -62,7 +56,6 @@ class CareerWorkerProblem:
         self._F_a, self._F_b = F_a, F_b
         self._G_a, self._G_b = G_a, G_b
 
-
     def bellman_operator(self, v):
         """
         The Bellman operator for the career / job choice model of Neal.
@@ -91,7 +84,7 @@ class CareerWorkerProblem:
 
                 # new life
                 v3 = (self.G_mean + self.F_mean + self.β *
-                      np.dot(self.F_probs, np.dot(v, self.G_probs)))
+                      self.F_probs @ v @ self.G_probs)
                 new_v[i, j] = max(v1, v2, v3)
         return new_v
 
@@ -123,7 +116,7 @@ class CareerWorkerProblem:
                 v2 = (self.θ[i] + self.G_mean + self.β *
                       np.dot(v[i, :], self.G_probs))
                 v3 = (self.G_mean + self.F_mean + self.β *
-                      np.dot(self.F_probs, np.dot(v, self.G_probs)))
+                      self.F_probs @ v @ self.G_probs)
                 if v1 > max(v2, v3):
                     action = 1
                 elif v2 > max(v1, v3):

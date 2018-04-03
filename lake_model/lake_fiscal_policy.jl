@@ -1,6 +1,6 @@
 # Some global variables that will stay constant
 α = 0.013
-α_q = (1-(1-α)^3)
+α_q = (1 - (1 - α)^3)
 b_param = 0.0124
 d_param = 0.00822
 β = 0.98
@@ -27,7 +27,7 @@ function compute_optimal_quantities(c::AbstractFloat, τ::AbstractFloat)
                       γ,
                       c-τ,                # post-tax compensation
                       σ,
-                      collect(w_vec-τ),  # post-tax wages
+                      collect(w_vec-τ),   # post-tax wages
                       p_vec)
 
 
@@ -93,12 +93,13 @@ end
 
 fig, axes = subplots(2, 2, figsize=(15, 10))
 
-plots = [unempl_vec, empl_vec, tax_vec, welfare_vec]
-titles = ["Unemployment", "Employment", "Tax", "Welfare"]
+plots = [unempl_vec, tax_vec, empl_vec, welfare_vec]
+titles = ["Unemployment", "Tax", "Employment", "Welfare"]
 
 for (ax, plot, title) in zip(axes, plots, titles)
-    ax[:plot](c_vec, plot, "b-", lw=2, alpha=0.7)
-    ax[:set](title=title)
+     ax[:plot](c_vec, plot, "b-", lw=2, alpha=0.7)
+     ax[:set](title=title)
+     ax[:grid]("on")
 end
 
 fig[:tight_layout]()

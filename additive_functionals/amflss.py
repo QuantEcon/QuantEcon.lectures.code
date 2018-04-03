@@ -13,7 +13,7 @@ from scipy.stats import norm, lognorm
 
 class AMF_LSS_VAR:
     """
-    This class transforms an additive (multipilcative)
+    This class transforms an additive (multiplicative)
     functional into a QuantEcon linear state space system.
     """
 
@@ -118,7 +118,7 @@ class AMF_LSS_VAR:
         """
         Return values for the martingale decomposition 
             - ν         : unconditional mean difference in Y
-            - H         : coefficient for the (linear) martingale component (kappa_a)
+            - H         : coefficient for the (linear) martingale component (κ_a)
             - g         : coefficient for the stationary component g(x)
             - Y_0       : it should be the function of X_0 (for now set it to 0.0)
         """
@@ -205,11 +205,11 @@ class AMF_LSS_VAR:
         for ii in range(nm):
             li, ui = npaths*(ii), npaths*(ii+1)
             LI, UI = 2*(ii), 2*(ii+1)
-            add_figs.append(self.plot_given_paths(T, ypath[li:ui,:], mpath[li:ui,:], spath[li:ui,:], 
-                                                  tpath[li:ui,:], mbounds[LI:UI,:], sbounds[LI:UI,:], 
+            add_figs.append(self.plot_given_paths(T, ypath[li:ui,:], mpath[li:ui,:], spath[li:ui,:],
+                                                  tpath[li:ui,:], mbounds[LI:UI,:], sbounds[LI:UI,:],
                                                   show_trend=show_trend))
 
-            add_figs[ii].suptitle( r'Additive decomposition of $y_{%s}$' % str(ii+1), fontsize=14 )
+            add_figs[ii].suptitle(f'Additive decomposition of $y_{ii+1}$', fontsize=14)
 
         return add_figs
 
@@ -235,7 +235,7 @@ class AMF_LSS_VAR:
         # Simulate for as long as we wanted
         moment_generator = self.lss.moment_sequence()
         # Pull out population moments
-        for t in range (T):
+        for t in range(T):
             tmoms = next(moment_generator)
             ymeans = tmoms[1]
             yvar = tmoms[3]
@@ -270,7 +270,7 @@ class AMF_LSS_VAR:
                                                    spath_mult[li:ui,:], tpath_mult[li:ui,:], 
                                                    mbounds_mult[LI:UI,:], sbounds_mult[LI:UI,:], 1, 
                                                    show_trend=show_trend))
-            mult_figs[ii].suptitle( r'Multiplicative decomposition of $y_{%s}$' % str(ii+1), fontsize=14)
+            mult_figs[ii].suptitle(f'Multiplicative decomposition of $y_{ii+1}$', fontsize=14)
 
         return mult_figs
 
@@ -312,15 +312,16 @@ class AMF_LSS_VAR:
         for ii in range(nm):
             li, ui = npaths*(ii), npaths*(ii+1)
             LI, UI = 2*(ii), 2*(ii+1)
-            mart_figs.append(self.plot_martingale_paths(T, mpath_mult[li:ui,:], 
-                                                        mbounds_mult[LI:UI,:], horline=1))
-            mart_figs[ii].suptitle(r'Martingale components for many paths of $y_{%s}$' % str(ii+1), 
-                                   fontsize=14)
+            mart_figs.append(self.plot_martingale_paths(T, mpath_mult[li:ui, :],
+                                                        mbounds_mult[LI:UI, :],
+                                                        horline=1))
+            mart_figs[ii].suptitle(f'Martingale components for many paths of $y_{ii+1}$', fontsize=14)
 
         return mart_figs
 
 
-    def plot_given_paths(self, T, ypath, mpath, spath, tpath, mbounds, sbounds, horline=0, show_trend = True):
+    def plot_given_paths(self, T, ypath, mpath, spath, tpath,
+                         mbounds, sbounds, horline=0, show_trend=True):
 
         # Allocate space
         trange = np.arange(T)
@@ -329,12 +330,12 @@ class AMF_LSS_VAR:
         fig, ax = plt.subplots(2, 2, sharey=True, figsize=(15, 8))
 
         # Plot all paths together
-        ax[0, 0].plot(trange, ypath[0, :], label=r"$y_t$", color="k")
-        ax[0, 0].plot(trange, mpath[0, :], label=r"$m_t$", color="m")
-        ax[0, 0].plot(trange, spath[0, :], label=r"$s_t$", color="g")
+        ax[0, 0].plot(trange, ypath[0, :], label="$y_t$", color="k")
+        ax[0, 0].plot(trange, mpath[0, :], label="$m_t$", color="m")
+        ax[0, 0].plot(trange, spath[0, :], label="$s_t$", color="g")
         if show_trend:
-            ax[0, 0].plot(trange, tpath[0, :], label=r"$t_t$", color="r")
-        ax[0, 0].axhline(horline, color="k", linestyle = "-.")
+            ax[0, 0].plot(trange, tpath[0, :], label="$t_t$", color="r")
+        ax[0, 0].axhline(horline, color="k", linestyle="-.")
         ax[0, 0].set_title("One Path of All Variables")
         ax[0, 0].legend(loc="upper left")
 
@@ -345,7 +346,7 @@ class AMF_LSS_VAR:
         lb = mbounds[0, :]
         ax[0, 1].fill_between(trange, lb, ub, alpha=0.25, color="m")
         ax[0, 1].set_title("Martingale Components for Many Paths")
-        ax[0, 1].axhline(horline, color="k", linestyle = "-.")
+        ax[0, 1].axhline(horline, color="k", linestyle="-.")
 
         # Plot Stationary Component
         ax[1, 0].plot(spath[0, :], color="g")
@@ -353,29 +354,30 @@ class AMF_LSS_VAR:
         ub = sbounds[1, :]
         lb = sbounds[0, :]
         ax[1, 0].fill_between(trange, lb, ub, alpha=0.25, color="g")
-        ax[1, 0].axhline(horline, color="k", linestyle = "-.")
+        ax[1, 0].axhline(horline, color="k", linestyle="-.")
         ax[1, 0].set_title("Stationary Components for Many Paths")
 
         # Plot Trend Component
         if show_trend:
             ax[1, 1].plot(tpath.T, color="r")
         ax[1, 1].set_title("Trend Components for Many Paths")
-        ax[1, 1].axhline(horline, color="k", linestyle = "-.")
+        ax[1, 1].axhline(horline, color="k", linestyle="-.")
 
         return fig
 
-    def plot_martingale_paths(self, T, mpath, mbounds, horline=1, show_trend = False):
+    def plot_martingale_paths(self, T, mpath, mbounds,
+                              horline=1, show_trend=False):
         # Allocate space
         trange = np.arange(T)
 
         # Create figure
-        fig, ax = plt.subplots(1,1, figsize=(10,6))
+        fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 
         # Plot Martingale Component
         ub = mbounds[1, :]
         lb = mbounds[0, :]
         ax.fill_between(trange, lb, ub, color="#ffccff")
-        ax.axhline(horline, color="k", linestyle = "-.")
+        ax.axhline(horline, color="k", linestyle="-.")
         ax.plot(trange, mpath.T, linewidth=0.25, color="#4c4c4c")
 
         return fig

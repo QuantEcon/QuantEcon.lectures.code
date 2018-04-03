@@ -96,8 +96,9 @@ plots = [unempl_vec, empl_vec, tax_vec, welfare_vec]
 titles = ['Unemployment', 'Employment', 'Tax', 'Welfare']
 
 for ax, plot, title in zip(axes.flatten(), plots, titles):
-    ax.plot(c_vec, plot, 'b-', lw=2, alpha=0.7)
+    ax.plot(c_vec, plot, lw=2, alpha=0.7)
     ax.set_title(title)
+    ax.grid()
 
 plt.tight_layout()
 plt.show()

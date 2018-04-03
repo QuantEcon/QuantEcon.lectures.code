@@ -33,9 +33,9 @@ income = vec(σ * wp[1, 2:end] + μ)   # y_t
 
 # == Plot results == #
 p=plot(Vector[assets, c, zeros(T + 1), income, cumsum(income - μ)],
-  lab = ["assets" "consumption" "" "non-financial income" "cumulative unanticipated income"],
-  color = [:blue :green :black :orange :red],
-  width = 3, xaxis = ("Time"), layout = (2, 1),
-  bottom_margin = 20mm, size = (600, 600), show = false)
+  lab=["assets" "consumption" "" "non-financial income" "cumulative unanticipated income"],
+  color=[:blue :green :black :orange :red],
+  xaxis=("Time"), layout=(2, 1),
+  bottom_margin = 20mm, size=(600, 600))
 
 

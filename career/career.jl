@@ -1,6 +1,3 @@
-using Distributions
-
-
 """
 Career/job choice model of Derek Neal (1999)
 
@@ -18,8 +15,10 @@ Career/job choice model of Derek Neal (1999)
 
 """
 
-struct CareerWorkerProblem{TF<:AbstractFloat, TI<:Integer,
-                           TAV<:AbstractVector{TF}, TAV2<:AbstractVector{TF}}
+struct CareerWorkerProblem{TF<:AbstractFloat,
+                           TI<:Integer,
+                           TAV<:AbstractVector{TF},
+                           TAV2<:AbstractVector{TF}}
     β::TF
     N::TI
     B::TF
@@ -49,18 +48,22 @@ There is also a version of this function that accepts keyword arguments for
 each parameter
 """
 # use key word argument
-function CareerWorkerProblem{TF<:AbstractFloat}(;
-                             β::TF=0.95, B::TF=5.0, N::Integer=50,
-                             F_a::TF=1.0, F_b::TF=1.0, G_a::TF=1.0,
-                             G_b::TF=1.0)
+function CareerWorkerProblem{TF<:AbstractFloat}(;β::TF=0.95,
+                                                 B::TF=5.0,
+                                                 N::Integer=50,
+                                                 F_a::TF=1.0,
+                                                 F_b::TF=1.0,
+                                                 G_a::TF=1.0,
+                                                 G_b::TF=1.0)
     θ = linspace(0, B, N)
     ϵ = copy(θ)
-    F_probs = pdf(BetaBinomial(N-1, F_a, F_b))
-    G_probs = pdf(BetaBinomial(N-1, G_a, G_b))
+    dist_F = BetaBinomial(N-1, F_a, F_b)
+    dist_G = BetaBinomial(N-1, G_a, G_b)
+    F_probs = pdf.(dist_F, support(dist_F))
+    G_probs = pdf.(dist_G, support(dist_G))
     F_mean = sum(θ .* F_probs)
     G_mean = sum(ϵ .* G_probs)
-    CareerWorkerProblem(β, N, B, θ, ϵ, F_probs, G_probs,
-                        F_mean, G_mean)
+    CareerWorkerProblem(β, N, B, θ, ϵ, F_probs, G_probs, F_mean, G_mean)
 end
 
 
@@ -80,12 +83,15 @@ None, `out` is updated in place. If `ret_policy == true` out is filled with the
 policy function, otherwise the value function is stored in `out`.
 
 """
-function update_bellman!(cp::CareerWorkerProblem, v::Array, out::Array;
-                           ret_policy::Bool=false)
+function update_bellman!(cp::CareerWorkerProblem,
+                         v::Array,
+                         out::Array;
+                         ret_policy::Bool=false)
+
     # new life. This is a function of the distribution parameters and is
     # always constant. No need to recompute it in the loop
     v3 = (cp.G_mean + cp.F_mean + cp.β .*
-          cp.F_probs' * v * cp.G_probs)[1]  # don't need 1 element array
+          cp.F_probs' * v * cp.G_probs)[1]        # don't need 1 element array
 
     for j=1:cp.N
         for i=1:cp.N
@@ -94,7 +100,7 @@ function update_bellman!(cp::CareerWorkerProblem, v::Array, out::Array;
 
             # new job
             v2 = (cp.θ[i] .+ cp.G_mean .+ cp.β .*
-                  v[i, :]'*cp.G_probs)[1]  # don't need a single element array
+                  v[i, :]' * cp.G_probs)[1]       # don't need a single element array
 
             if ret_policy
                 if v1 > max(v2, v3)

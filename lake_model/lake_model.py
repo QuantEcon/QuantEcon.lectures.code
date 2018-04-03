@@ -1,10 +1,10 @@
 import numpy as np
 
 class LakeModel:
-    r"""
+    """
     Solves the lake model and computes dynamics of unemployment stocks and
     rates.
-    
+
     Parameters:
     ------------
     λ : scalar
@@ -15,7 +15,7 @@ class LakeModel:
         Entry rate into the labor force
     d : scalar
         Exit rate from the labor force
-    
+
     """
     def __init__(self, λ=0.283, α=0.013, b=0.0124, d=0.00822):
         self._λ, self._α, self._b, self._d = λ, α, b, d
@@ -30,7 +30,7 @@ class LakeModel:
                             [        (1-d) * λ,   (1 - d) * (1 - α)]])
 
         self._A_hat = self._A / (1 + self._g)
-        
+
     @property
     def g(self):
         return self._g
@@ -78,12 +78,12 @@ class LakeModel:
     def d(self, new_value):
         self._d = new_value
         self.compute_derived_values()
-        
+
 
     def rate_steady_state(self, tol=1e-6):
-        r"""
+        """
         Finds the steady state of the system :math:`x_{t+1} = \hat A x_{t}`
-        
+
         Returns
         --------
         xbar : steady state vector of employment and unemployment rates
@@ -95,21 +95,21 @@ class LakeModel:
             error = np.max(np.abs(new_x - x))
             x = new_x
         return x
-        
+
     def simulate_stock_path(self, X0, T):
-        r"""
+        """
         Simulates the the sequence of Employment and Unemployent stocks
-        
+
         Parameters
         ------------
-        X0 : array 
+        X0 : array
             Contains initial values (E0, U0)
         T : int
             Number of periods to simulate
-        
+
         Returns
-        --------- 
-        X : iterator 
+        ---------
+        X : iterator
             Contains sequence of employment and unemployment stocks
         """
 
@@ -117,21 +117,21 @@ class LakeModel:
         for t in range(T):
             yield X
             X = self.A @ X
-            
+
     def simulate_rate_path(self, x0, T):
-        r"""
+        """
         Simulates the the sequence of employment and unemployent rates.
-        
+
         Parameters
         ------------
-        x0 : array 
+        x0 : array
             Contains initial values (e0,u0)
         T : int
             Number of periods to simulate
-        
+
         Returns
         ---------
-        x : iterator 
+        x : iterator
             Contains sequence of employment and unemployment rates
 
         """
@@ -139,4 +139,4 @@ class LakeModel:
         for t in range(T):
             yield x
             x = self.A_hat @ x
-        
+

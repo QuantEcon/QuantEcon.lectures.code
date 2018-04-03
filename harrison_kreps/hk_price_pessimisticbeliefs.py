@@ -10,8 +10,7 @@ def price_pessimistic_beliefs(transitions, dividend_payoff, β=.75,
     # We know this is a contraction mapping, so we can iterate to conv
     for i in range(max_iter):
         p_old = p_new
-        p_new = β * np.min([np.dot(q, p_old) + np.dot(q, dividend_payoff)
-                               for q in transitions], 1)
+        p_new = β * np.min([q @ p_old + q @ dividend_payoff for q in transitions], 1)
 
         # If we succed in converging, break out of for loop
         if np.max(np.sqrt((p_new - p_old)**2)) < 1e-12:

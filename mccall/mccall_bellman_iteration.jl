@@ -21,13 +21,13 @@ const default_p_vec = pdf.(dist, support(dist))
 mutable struct McCallModel{TF <: AbstractFloat,
                            TAV <: AbstractVector{TF},
                            TAV2 <: AbstractVector{TF}}
-    α::TF        # Job separation rate
+    α::TF         # Job separation rate
     β::TF         # Discount rate
-    γ::TF        # Job offer rate
-    c::TF            # Unemployment compensation
-    σ::TF        # Utility parameter
-    w_vec::TAV # Possible wage values
-    p_vec::TAV2 # Probabilities over w_vec
+    γ::TF         # Job offer rate
+    c::TF         # Unemployment compensation
+    σ::TF         # Utility parameter
+    w_vec::TAV    # Possible wage values
+    p_vec::TAV2   # Probabilities over w_vec
 
     McCallModel(α::TF=0.2,
                 β::TF=0.98,
@@ -44,8 +44,10 @@ A function to update the Bellman equations.  Note that V_new is modified in
 place (i.e, modified by this function).  The new value of U is returned.
 
 """
-function update_bellman!(mcm::McCallModel, V::AbstractVector,
-                         V_new::AbstractVector, U::Real)
+function update_bellman!(mcm::McCallModel,
+                         V::AbstractVector,
+                         V_new::AbstractVector,
+                         U::Real)
     # Simplify notation
     α, β, σ, c, γ = mcm.α, mcm.β, mcm.σ, mcm.c, mcm.γ
 
@@ -62,10 +64,11 @@ end
 
 
 function solve_mccall_model(mcm::McCallModel;
-                            tol::AbstractFloat=1e-5, max_iter::Integer=2000)
+                            tol::AbstractFloat=1e-5,
+                            max_iter::Integer=2000)
 
-    V = ones(length(mcm.w_vec))  # Initial guess of V
-    V_new = similar(V)           # To store updates to V
+    V = ones(length(mcm.w_vec))    # Initial guess of V
+    V_new = similar(V)             # To store updates to V
     U = 1.0                        # Initial guess of U
     i = 0
     error = tol + 1

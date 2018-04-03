@@ -81,8 +81,9 @@ Simulates the the sequence of Employment and Unemployent stocks
 
 """
 
-function simulate_stock_path{TF<:AbstractFloat}(
-                    lm::LakeModel, X0::AbstractVector{TF}, T::Integer)
+function simulate_stock_path{TF<:AbstractFloat}(lm::LakeModel,
+                                                X0::AbstractVector{TF},
+                                                T::Integer)
     X_path = Array{TF}(2, T)
     X = copy(X0)
     for t in 1:T
@@ -106,7 +107,8 @@ Simulates the the sequence of employment and unemployent rates.
 
 """
 function simulate_rate_path{TF<:AbstractFloat}(lm::LakeModel,
-                                               x0::Vector{TF}, T::Integer)
+                                               x0::Vector{TF},
+                                               T::Integer)
     x_path = Array{TF}(2, T)
     x = copy(x0)
     for t in 1:T

@@ -15,4 +15,5 @@ for (i, ax) in enumerate(axes)
     ax[:plot](1:T, x_path[i, :], c="blue", lw=2, alpha=0.5)
     ax[:hlines](xbar[i], 0, T, "r", "--")
     ax[:set](title=titles[i])
+    ax[:grid]("on")
 end
