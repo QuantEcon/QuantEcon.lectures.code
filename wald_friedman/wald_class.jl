@@ -42,8 +42,10 @@ f1 : AbstractVector
 m : Integer
     Number of points to use in function approximation
 """
-struct WaldFriedman{TR <: Real, TI <: Integer,
-                    TAV1 <: AbstractVector, TAV2 <: AbstractVector}
+struct WaldFriedman{TR <: Real,
+                    TI <: Integer,
+                    TAV1 <: AbstractVector,
+                    TAV2 <: AbstractVector}
     c::TR
     L0::TR
     L1::TR
@@ -54,8 +56,13 @@ struct WaldFriedman{TR <: Real, TI <: Integer,
     sol::WFSolution
 end
 
-function WaldFriedman(c::Real, L0::Real, L1::Real,
-                      f0::AbstractVector, f1::AbstractVector; m::Integer=25)
+function WaldFriedman(c::Real,
+                      L0::Real,
+                      L1::Real,
+                      f0::AbstractVector,
+                      f1::AbstractVector;
+                      m::Integer=25)
+
     pgrid = linspace(0.0, 1.0, m)
 
     # Renormalize distributions so nothing is "too" small
@@ -75,7 +82,7 @@ This function takes a value for the probability with which
 the correct model is model 0 and returns the mixed
 distribution that corresponds with that belief.
 """
-current_distribution(wf::WaldFriedman, p::Real) = p*wf.f0 + (1-p)*wf.f1
+current_distribution(wf::WaldFriedman, p::Real) = p * wf.f0 + (1 - p) * wf.f1
 
 """
 This function takes a value for p, and a realization of the
@@ -85,7 +92,7 @@ function bayes_update_k(wf::WaldFriedman, p::Real, k::Integer)
     f0_k = wf.f0[k]
     f1_k = wf.f1[k]
 
-    p_tp1 = p*f0_k / (p*f0_k + (1-p)*f1_k)
+    p_tp1 = p * f0_k / (p * f0_k + (1 - p) * f1_k)
 
     return clamp(p_tp1, 0, 1)
 end
@@ -95,17 +102,17 @@ This is similar to `bayes_update_k` except it returns a
 new value for p for each realization of the random variable
 """
 bayes_update_all(wf::WaldFriedman, p::Real) =
-    clamp.(p*wf.f0 ./ (p*wf.f0 + (1-p)*wf.f1), 0, 1)
+    clamp.(p * wf.f0 ./ (p * wf.f0 + (1 - p) * wf.f1), 0, 1)
 
 """
 For a given probability specify the cost of accepting model 0
 """
-payoff_choose_f0(wf::WaldFriedman, p::Real) = (1-p)*wf.L0
+payoff_choose_f0(wf::WaldFriedman, p::Real) = (1 - p) * wf.L0
 
 """
 For a given probability specify the cost of accepting model 1
 """
-payoff_choose_f1(wf::WaldFriedman, p::Real) = p*wf.L1
+payoff_choose_f1(wf::WaldFriedman, p::Real) = p * wf.L1
 
 """
 This function evaluates the expectation of the value function
@@ -232,7 +239,7 @@ function simulate(wf::WaldFriedman, f::AbstractVector; p0::Real=0.5)
         # Maybe should specify which distribution is correct one so that
         # the draws come from the "right" distribution
         k = rand(drv)
-        t = t+1
+        t = t + 1
         p = bayes_update_k(wf, p, k)
         if p < lb
             decision = 1

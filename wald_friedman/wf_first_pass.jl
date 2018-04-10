@@ -1,16 +1,14 @@
-using Distributions
 using QuantEcon.compute_fixed_point, QuantEcon.DiscreteRV, QuantEcon.draw, QuantEcon.LinInterp
-using LaTeXStrings
 
 """
 For a given probability return expected loss of choosing model 0
 """
-expect_loss_choose_0(p::Real, L0::Real) = (1-p)*L0
+expect_loss_choose_0(p::Real, L0::Real) = (1 - p) * L0
 
 """
 For a given probability return expected loss of choosing model 1
 """
-expect_loss_choose_1(p::Real, L1::Real) = p*L1
+expect_loss_choose_1(p::Real, L1::Real) = p * L1
 
 """
 We will need to be able to evaluate the expectation of our Bellman
@@ -19,11 +17,11 @@ that model 0 is correct (p), the distributions (f0, f1), and a
 function that can evaluate the Bellman equation
 """
 function EJ(p::Real, f0::AbstractVector, f1::AbstractVector, J::LinInterp)
-    # Get the current distribution we believe (p*f0 + (1-p)*f1)
-    curr_dist = p*f0 + (1-p)*f1
+    # Get the current distribution we believe (p * f0 + (1 - p) * f1)
+    curr_dist = p * f0 + (1 - p) * f1
 
     # Get tomorrow's expected distribution through Bayes law
-    tp1_dist = clamp.((p*f0) ./ (p*f0 + (1-p)*f1), 0, 1)
+    tp1_dist = clamp.((p * f0) ./ (p * f0 + (1 - p) * f1), 0, 1)
 
     # Evaluate the expectation
     EJ = dot(curr_dist, J.(tp1_dist))
@@ -43,9 +41,13 @@ function; that is, evaluates
 
 Uses linear interpolation between points
 """
-function bellman_operator(pgrid::AbstractVector, c::Real,
-                          f0::AbstractVector, f1::AbstractVector,
-                          L0::Real, L1::Real, J::AbstractVector)
+function bellman_operator(pgrid::AbstractVector,
+                          c::Real,
+                          f0::AbstractVector,
+                          f1::AbstractVector,
+                          L0::Real,
+                          L1::Real,
+                          J::AbstractVector)
     m = length(pgrid)
     @assert m == length(J)
 

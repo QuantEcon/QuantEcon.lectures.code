@@ -1,7 +1,3 @@
-using Plots, LaTeXStrings
-pyplot()
-
-
 grid_size = 25  
 c_vals = linspace(2, 12, grid_size)  
 w_bar_vals = similar(c_vals)

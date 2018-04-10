@@ -1,13 +1,6 @@
-"""
-
-Authors: Thomas Sargent, John Stachurski
-
-"""
 from scipy.interpolate import LinearNDInterpolator
 from scipy.integrate import fixed_quad
-from scipy.stats import beta as β_distribution
 from numpy import maximum as npmax
-import numpy as np
 
 
 class SearchProblem:
@@ -63,10 +56,10 @@ class SearchProblem:
                  w_max=2, w_grid_size=40, π_grid_size=40):
 
         self.β, self.c, self.w_max = β, c, w_max
-        self.F = β_distribution(F_a, F_b, scale=w_max)
-        self.G = β_distribution(G_a, G_b, scale=w_max)
+        self.F = beta(F_a, F_b, scale=w_max)
+        self.G = beta(G_a, G_b, scale=w_max)
         self.f, self.g = self.F.pdf, self.G.pdf    # Density functions
-        self.π_min, self.π_max = 1e-3, 1 - 1e-3  # Avoids instability
+        self.π_min, self.π_max = 1e-3, 1 - 1e-3    # Avoids instability
         self.w_grid = np.linspace(0, w_max, w_grid_size)
         self.π_grid = np.linspace(self.π_min, self.π_max, π_grid_size)
         x, y = np.meshgrid(self.w_grid, self.π_grid)
