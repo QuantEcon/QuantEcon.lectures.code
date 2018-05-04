@@ -46,7 +46,7 @@ class LQFilter:
         ϕ = np.zeros(2 * self.m + 1)
         for i in range(- self.m, self.m + 1):
             ϕ[self.m - i] = np.sum(np.diag(self.d.reshape(self.m + 1, 1) @ \
-                                                  self.d.reshape(1, self.m + 1), k = -i))
+                                                  self.d.reshape(1, self.m + 1), k=-i))
         ϕ[self.m] = ϕ[self.m] + self.h
         self.ϕ = ϕ
 
@@ -100,7 +100,7 @@ class LQFilter:
 
         for j in range(m + 1):
             for k in range(j, m + 1):
-                D_m1[j, k] = d[:j + 1] @ d[k - j : k + 1]
+                D_m1[j, k] = d[:j + 1] @ d[k - j: k + 1]
 
         # Make the matrix symmetric
         D_m1 = D_m1 + D_m1.T - np.diag(np.diag(D_m1))
@@ -110,7 +110,7 @@ class LQFilter:
         for j in range(m):
             for i in range(j + 1, m + 1):
                 M[i, j] = D_m1[i - j - 1, m]
- 
+
         #----------------------------------------------
         # Euler equations for t = 0, 1, ..., N-(m+1)  
         #----------------------------------------------
@@ -179,7 +179,7 @@ class LQFilter:
         λ = self.roots_of_characteristic()[2]
         c_0 = self.coeffs_of_c()[-1]
 
-        A = np.zeros(self.m, dtype = complex)
+        A = np.zeros(self.m, dtype=complex)
         for j in range(self.m):
             denom = 1 - λ/λ[j]
             A[j] = c_0**(-2) / np.prod(denom[np.arange(self.m) != j])
@@ -250,9 +250,9 @@ class LQFilter:
         W, W_m = self.construct_W_and_Wm(N)
 
         L, U = la.lu(W, permute_l=True)
-        D = np.diag(1/np.diag(U))
+        D = np.diag(1 / np.diag(U))
         U = D @ U
-        L = L @ np.diag(1/np.diag(D))
+        L = L @ np.diag(1 / np.diag(D))
 
         J = np.fliplr(np.eye(N + 1))
 

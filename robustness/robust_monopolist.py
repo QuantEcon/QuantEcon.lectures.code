@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 from scipy.linalg import eig
 import matplotlib.pyplot as plt
-
 import quantecon as qe
 
 # == model parameters == #
@@ -56,8 +55,8 @@ def evaluate_policy(θ, F):
     rlq = qe.robustlq.RBLQ(Q, R, A, B, C, β, θ)
     K_F, P_F, d_F, O_F, o_F = rlq.evaluate_F(F)
     x0 = np.array([[1.], [0.], [0.]])
-    value = - x0.T.dot(P_F.dot(x0)) - d_F
-    entropy = x0.T.dot(O_F.dot(x0)) + o_F
+    value = - x0.T @ P_F @ x0 - d_F
+    entropy = x0.T @ O_F @ x0 + o_F
     return list(map(float, (value, entropy)))
 
 
@@ -118,7 +117,7 @@ Fb, Kb, Pb = baseline_robust.robust_rule()
 
 # == Check the positive definiteness of worst-case covariance matrix to == #
 # == ensure that θ exceeds the breakdown point == #
-test_matrix = np.identity(Pb.shape[0]) - np.dot(C.T, Pb.dot(C)) / θ
+test_matrix = np.identity(Pb.shape[0]) - (C.T @ Pb @ C) / θ
 eigenvals, eigenvecs = eig(test_matrix)
 assert (eigenvals >= 0).all(), 'θ below breakdown point.'
 

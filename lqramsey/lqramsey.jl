@@ -84,7 +84,7 @@ end
 
 
 function compute_ν(a0::AbstractFloat, b0::AbstractFloat)
-    disc = a0^2 - 4a0*b0
+    disc = a0^2 - 4a0 * b0
 
     if disc >= 0
         ν = 0.5 *(a0 - sqrt(disc)) / a0
@@ -137,10 +137,10 @@ function compute_paths{TF <: AbstractFloat}(econ::Economy{TF, DiscreteStochProce
     Sc, Sl, c, l, p, τ, rvn = compute_allocation(econ, Sm, ν, x, b)
 
     # compute remaining variables
-    H = ((Sb - Sc)*x_vals) .* ((Sl - Sg)*x_vals) - (Sl*x_vals).^2
-    temp = squeeze(F*H', 2)
+    H = ((Sb - Sc) * x_vals) .* ((Sl - Sg) * x_vals) - (Sl * x_vals).^2
+    temp = squeeze(F * H', 2)
     B = temp[state] ./ p
-    H = squeeze(P[state, :] * ((Sb - Sc)*x_vals)', 2)
+    H = squeeze(P[state, :] * ((Sb - Sc) * x_vals)', 2)
     R = p ./ (β .* H)
     temp = squeeze(P[state, :] *((Sb - Sc) * x_vals)', 2)
     ξ = p[2:end] ./ temp[1:end-1]
@@ -152,9 +152,9 @@ function compute_paths{TF <: AbstractFloat}(econ::Economy{TF, DiscreteStochProce
 end
 
 
-function compute_paths{TF<:AbstractFloat}(
-                econ::Economy{TF, ContStochProcess{TF}}, T::Integer)
-    # simplify notation
+function compute_paths{TF<:AbstractFloat}(econ::Economy{TF, ContStochProcess{TF}}, 
+                                          T::Integer)
+    # Simplify notation
     β, Sg, Sd, Sb, Ss = econ.β, econ.Sg, econ.Sd, econ.Sb, econ.Ss
     A, C = econ.proc.A, econ.proc.C
 
@@ -242,30 +242,17 @@ function gen_fig_1(path::Path)
 end
 
 function gen_fig_2(path::Path)
-    #T = length(path.c)
-
-    # Plot adjustment factor
-    #p1 = plot(scatter(; x = 2:T, y = path.ξ, name = L"$\xi_t$"))
-
-    # Plot adjusted cumulative return
-    #p2 = plot(scatter(; x = 2:T, y = path.Π, name = L"$\Pi_t$"), Layout(; xaxis_title = "Time"))
-
-    #p = [p1; p2]
-    #relayout!(p, height = 600)
-
-    #p
 
     T = length(path.c)
 
-    figure(figsize=(12,7))
-
-    ax1=subplot(2, 1, 1)
-    ax1[:plot](2:T, path.ξ)
-    ax1[:set_xlabel]("Time")
-    ax1[:legend]([L"$\xi_t$"])
-
-    ax2=subplot(2, 1, 2)
-    ax2[:plot](2:T,path.Π)
-    ax2[:set_xlabel]("Time")
-    ax2[:legend]([L"$\Pi_t$"])
+    fig, axes = plt[:subplots](2, 1, figsize=(8, 7))
+    
+    plots = [path.ξ, path.Π]
+    labels = [L"$\xi_t$", L"$\Pi_t$"]
+    
+    for (ax, plot, label) in zip(axes, plots, labels)
+        ax[:plot](2:T, plot, label=label)
+        ax[:set_xlabel]("Time")
+        ax[:legend]
+    end
 end

@@ -1,15 +1,13 @@
-import numpy as np
-import scipy.stats as st
 import scipy.interpolate as interp
 import quantecon as qe
 
 def expect_loss_choose_0(p, L0):
     "For a given probability return expected loss of choosing model 0"
-    return (1-p)*L0
+    return (1 - p) * L0
 
 def expect_loss_choose_1(p, L1):
     "For a given probability return expected loss of choosing model 1"
-    return p*L1
+    return p * L1
 
 def EJ(p, f0, f1, J):
     """
@@ -18,10 +16,10 @@ def EJ(p, f0, f1, J):
     distributions (f0, f1), and the function J.
     """
     # Get the current distribution we believe (p*f0 + (1-p)*f1)
-    curr_dist = p*f0 + (1-p)*f1
+    curr_dist = p * f0 + (1 - p) * f1
     
     # Get tomorrow's expected distribution through Bayes law
-    tp1_dist = np.clip((p*f0) / (p*f0 + (1-p)*f1), 0, 1)
+    tp1_dist = np.clip((p * f0) / (p * f0 + (1 - p) * f1), 0, 1)
     
     # Evaluate the expectation
     EJ = curr_dist @ J(tp1_dist)

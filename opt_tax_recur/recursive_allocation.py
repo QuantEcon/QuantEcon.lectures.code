@@ -29,8 +29,7 @@ class RecursiveAllocation:
 
         # First get initial fit
         PP = SequentialAllocation(model)
-        c, n, x, V = map(np.vstack, zip(
-            *map(lambda μ: PP.time1_value(μ), μgrid0)))
+        c, n, x, V = map(np.vstack, zip(*map(lambda μ: PP.time1_value(μ), μgrid0)))
 
         Vf, cf, nf, xprimef = {}, {}, {}, {}
         for s in range(2):
@@ -266,7 +265,7 @@ class BellmanEquation:
 
         def cons(z):
             c, n, xprime = z[0], z[1], z[2:]
-            return np.hstack([-Uc(c, n) * (c - B_) - Un(c, n) * n - β * π[s0].dot(xprime),
+            return np.hstack([-Uc(c, n) * (c - B_) - Un(c, n) * n - β * π[s0] @ xprime,
                               (Θ * n - c - G)[s0]])
 
         out, fx, _, imode, smode = fmin_slsqp(objf, self.zFB[s0], f_eqcons=cons,

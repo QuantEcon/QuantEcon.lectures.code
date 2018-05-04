@@ -111,7 +111,7 @@ class ChangModel:
             # Corresponding hyperplane levels
             C = np.zeros(N)
             for i in range(N):
-                C[i] = np.dot(Z[:, i], H[i, :])
+                C[i] = Z[:, i] @ H[i, :]
 
             return C, H, Z
 
@@ -192,7 +192,7 @@ class ChangModel:
             for j in range(self.N_a):
                 # Only try if consumption is possible
                 if self.f_vec[j] > 0:
-                
+
                     # COMPETITIVE EQUILIBRIA
                     # If m = mbar, use inequality constraint
                     if self.A[j, 1] == self.mbar:
@@ -234,8 +234,8 @@ class ChangModel:
                                         self.Θ_vec[idx_s]])
 
         for i in range(self.N_g):
-            self.c1_c[i] = np.dot(self.z1_c[:, i], self.H[i, :])
-            self.c1_s[i] = np.dot(self.z1_s[:, i], self.H[i, :])
+            self.c1_c[i] = self.z1_c[:, i] @ self.H[i, :]
+            self.c1_s[i] = self.z1_s[:, i] @ self.H[i, :]
 
     def solve_sustainable(self, tol=1e-5, max_iter=250):
         """
@@ -278,21 +278,22 @@ class ChangModel:
             self.iters = iters
 
         elapsed = time.time() - t
-        print('Convergence achieved after {} iterations and {} seconds'.format(iters, round(elapsed, 2)))
+
+        print(f'Convergence achieved after {iters} iterations and {elapsed:.2)} seconds')
 
     def solve_bellman(self, θ_min, θ_max, order, disp=False, tol=1e-7, maxiters=100):
         """
         Continuous Method to solve the Bellman equation in section 25.3
         """
         mbar = self.mbar
-        
+
         # Utility and production functions
         uc = lambda c: np.log(c)
         uc_p = lambda c: 1 / c
         v = lambda m: 1 / 500 * (mbar * m - 0.5 * m**2)**0.5
         v_p = lambda m: 0.5/500 * (mbar*m - 0.5 * m**2)**(-0.5) * (mbar - m)
         u = lambda h, m: uc(f(h, m)) + v(m)
- 
+
         def f(h, m):
             x = m * (h - 1)
             f = 180 - (0.4 * x)**2
@@ -302,13 +303,13 @@ class ChangModel:
             x = m * (h - 1)
             θ = uc_p(f(h, m)) * (m + x)
             return θ
- 
+
         # Bounds for Maximization
         lb1 = np.array([self.h_min, 0, θ_min])
         ub1 = np.array([self.h_max, self.mbar - 1e-5, θ_max])
         lb2 = np.array([self.h_min, θ_min])
         ub2 = np.array([self.h_max, θ_max])
- 
+
         # Initialize Value Function coefficents
         # Calculate roots of Chebyshev polynomial
         k = np.linspace(order, 1, order)
@@ -318,16 +319,16 @@ class ChangModel:
         # Create basis matrix
         Φ = cheb.chebvander(roots, order - 1)
         c = np.zeros(Φ.shape[0])
- 
+
         # Function to minimize and constraints
         def p_fun(x):
             scale = -1 + 2 * (x[2] - θ_min)/(θ_max - θ_min)
-            p_fun = - (u(x[0], x[1]) + self.β * np.dot(cheb.chebvander(scale, order - 1), c))
+            p_fun = - (u(x[0], x[1]) + self.β * cheb.chebvander(scale, order - 1) @ c)
             return p_fun
  
         def p_fun2(x):
-            scale = -1 + 2*(x[1] - θ_min)/(θ_max - θ_min)
-            p_fun = - (u(x[0],mbar) + self.β * np.dot(cheb.chebvander(scale, order - 1), c))
+            scale = -1 + 2 * (x[1] - θ_min)/(θ_max - θ_min)
+            p_fun = - (u(x[0], mbar) + self.β * cheb.chebvander(scale, order - 1) @ c)
             return p_fun
  
         cons1 = ({'type': 'eq',   'fun': lambda x: uc_p(f(x[0], x[1])) * x[1] * (x[0] - 1) + v_p(x[1]) * x[1] + self.β * x[2] - θ},
@@ -337,7 +338,7 @@ class ChangModel:
  
         bnds1 = np.concatenate([lb1.reshape(3, 1), ub1.reshape(3, 1)], axis=1)
         bnds2 = np.concatenate([lb2.reshape(2, 1), ub2.reshape(2, 1)], axis=1)
- 
+
         # Bellman Iterations
         diff = 1
         iters = 1
@@ -361,26 +362,26 @@ class ChangModel:
                                bounds=bnds2,
                                constraints=cons2,
                                tol=1e-10)
-                if -p_fun2(res.x) > p_iter1[i] and res.success == True:
+                if -p_fun2(res.x) > p_iter1[i] and res.success is True:
                     p_iter1[i] = -p_fun2(res.x)
 
             # 2. Bellman updating of Value Function coefficients
             c1 = np.linalg.solve(Φ, p_iter1)
             # 3. Compute distance and update
             diff = np.linalg.norm(c - c1)
-            if bool(disp == True):
+            if disp is True:
                 print(diff)
             c = np.copy(c1)
             iters = iters + 1
             if iters > maxiters:
-                print('Convergence failed after {} iterations'.format(maxiters))
+                print(f'Convergence failed after {maxiters} iterations')
                 break
 
         self.θ_grid = s
         self.p_iter = p_iter1
         self.Φ = Φ
         self.c = c
-        print('Convergence achieved after {} iterations'.format(iters))
+        print(f'Convergence achieved after {iters} iterations')
 
         # Check residuals
         θ_grid_fine = np.linspace(θ_min, θ_max, 100)
@@ -392,31 +393,31 @@ class ChangModel:
         for i in range(100):
             θ = θ_grid_fine[i]
             res = minimize(p_fun,
-                           lb1 + (ub1-lb1) / 2,
+                           lb1 + (ub1 - lb1) / 2,
                            method='SLSQP',
                            bounds=bnds1,
                            constraints=cons1,
                            tol=1e-10)
-            if res.success == True:
+            if res.success is True:
                 p = -p_fun(res.x)
                 p_grid[i] = p
                 θ_prime_grid[i] = res.x[2]
                 h_grid[i] = res.x[0]
                 m_grid[i] = res.x[1]
             res = minimize(p_fun2,
-                           lb2 + (ub2-lb2)/2,
+                           lb2 + (ub2 - lb2)/2,
                            method='SLSQP',
                            bounds=bnds2,
                            constraints=cons2,
                            tol=1e-10)
-            if -p_fun2(res.x) > p and res.success == True:
+            if -p_fun2(res.x) > p and res.success is True:
                 p = -p_fun2(res.x)
                 p_grid[i] = p
                 θ_prime_grid[i] = res.x[1]
                 h_grid[i] = res.x[0]
                 m_grid[i] = self.mbar
             scale = -1 + 2 * (θ - θ_min)/(θ_max - θ_min)
-            resid_grid[i] = np.dot(cheb.chebvander(scale, order-1), c) - p
+            resid_grid[i] = cheb.chebvander(scale, order-1) @ c - p
 
         self.resid_grid = resid_grid
         self.θ_grid_fine = θ_grid_fine
@@ -434,35 +435,35 @@ class ChangModel:
         # Find initial θ
         def ValFun(x):
             scale = -1 + 2*(x - θ_min)/(θ_max - θ_min)
-            p_fun = np.dot(cheb.chebvander(scale, order - 1), c)
+            p_fun = cheb.chebvander(scale, order - 1) @ c
             return -p_fun
 
         res = minimize(ValFun,
-                      (θ_min + θ_max)/2,
-                      bounds=[(θ_min, θ_max)])
+                       (θ_min + θ_max) / 2,
+                       bounds=[(θ_min, θ_max)])
         θ_series[0] = res.x
 
         # Simulate
         for i in range(30):
             θ = θ_series[i]
             res = minimize(p_fun,
-                           lb1 + (ub1-lb1)/2,
+                           lb1 + (ub1 - lb1) / 2,
                            method='SLSQP',
                            bounds=bnds1,
                            constraints=cons1,
                            tol=1e-10)
-            if res.success == True:
+            if res.success is True:
                 p = -p_fun(res.x)
                 h_series[i] = res.x[0]
                 m_series[i] = res.x[1]
                 θ_series[i+1] = res.x[2]
             res2 = minimize(p_fun2,
-                            lb2 + (ub2-lb2)/2,
+                            lb2 + (ub2 - lb2) / 2,
                             method='SLSQP',
                             bounds=bnds2,
                             constraints=cons2,
                             tol=1e-10)
-            if -p_fun2(res2.x) > p and res2.success == True:
+            if -p_fun2(res2.x) > p and res2.success is True:
                 h_series[i] = res2.x[0]
                 m_series[i] = self.mbar
                 θ_series[i+1] = res2.x[1]

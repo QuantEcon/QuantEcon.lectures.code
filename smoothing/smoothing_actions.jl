@@ -19,12 +19,11 @@ P : 2x2 transition matrix
 y : Array containing the two income levels
 b0 : debt in period 0 (= state_1 debt level)
 """
-function ConsumptionProblem(;
-                 β = 0.96,
-                 y = [2.0, 1.5],
-                 b0 = 3.0,
-                 P = [0.8 0.2;
-                      0.4 0.6])
+function ConsumptionProblem(β = 0.96,
+                            y = [2.0, 1.5],
+                            b0 = 3.0,
+                            P = [0.8 0.2;
+                                 0.4 0.6])
 
     ConsumptionProblem(β, y, b0, P)
 end
@@ -81,7 +80,7 @@ function consumption_incomplete(cp::ConsumptionProblem;
                                 N_simul::Integer=150)
 
     β, P, y, b0 = cp.β, cp.P, cp.y, cp.b0  # Unpack
-    # For the simulation define a quantecon MC {{ class_word }}
+    # For the simulation use the MarkovChain type
     mc = MarkovChain(P)
 
     # Useful variables
@@ -89,7 +88,7 @@ function consumption_incomplete(cp::ConsumptionProblem;
     v = inv(eye(2) - β * P) * y
 
     # Simulat state path
-    s_path = simulate(mc, N_simul, init = 1)
+    s_path = simulate(mc, N_simul, init=1)
 
     # Store consumption and debt path
     b_path, c_path = ones(N_simul + 1), ones(N_simul)

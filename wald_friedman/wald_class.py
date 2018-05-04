@@ -1,8 +1,3 @@
-import numpy as np
-import scipy.stats as st
-import scipy.interpolate as interp
-import quantecon as qe
-
 class WaldFriedman:
     """
     Insert relevant docstrings here
@@ -36,7 +31,7 @@ class WaldFriedman:
         f0_k = self.f0[k]
         f1_k = self.f1[k]
 
-        p_tp1 = p*f0_k / (p*f0_k + (1-p)*f1_k)
+        p_tp1 = p * f0_k / (p * f0_k + (1 - p) * f1_k)
 
         return np.clip(p_tp1, 0, 1)
 
@@ -45,15 +40,15 @@ class WaldFriedman:
         This is similar to `bayes_update_k` except it returns a
         new value for p for each realization of the random variable
         """
-        return np.clip(p*self.f0 / (p*self.f0 + (1-p)*self.f1), 0, 1)
+        return np.clip(p * self.f0 / (p * self.f0 + (1 - p) * self.f1), 0, 1)
 
     def payoff_choose_f0(self, p):
         "For a given probability specify the cost of accepting model 0"
-        return (1-p)*self.L0
+        return (1 - p) * self.L0
 
     def payoff_choose_f1(self, p):
         "For a given probability specify the cost of accepting model 1"
-        return p*self.L1
+        return p * self.L1
 
     def EJ(self, p, J):
         """
@@ -130,8 +125,8 @@ class WaldFriedman:
         return J_out
 
     def solve_model(self):
-        J =  qe.compute_fixed_point(self.bellman_operator, np.zeros(self.m),
-                                    error_tol=1e-7, verbose=False)
+        J = qe.compute_fixed_point(self.bellman_operator, np.zeros(self.m),
+                                   error_tol=1e-7, verbose=False)
 
         self.J = J
         return J
@@ -170,7 +165,6 @@ class WaldFriedman:
         lb, ub = self.find_cutoff_rule(self.J)
         update_p = self.bayes_update_k
         curr_dist = self.current_distribution
-        drv = qe.discrete_rv.DiscreteRV(f)
 
         # Initialize a couple useful variables
         decision_made = False
@@ -180,7 +174,7 @@ class WaldFriedman:
         while decision_made is False:
             # Maybe should specify which distribution is correct one so that
             # the draws come from the "right" distribution
-            k = drv.draw()[0]
+            k = int(qe.random.draw(np.cumsum(f)))
             t = t+1
             p = update_p(p, k)
             if p < lb:
@@ -225,7 +219,7 @@ class WaldFriedman:
         Simulates repeatedly to get distributions of time needed to make a
         decision and how often they are correct.
         """
-        if tdgp=="f0":
+        if tdgp == "f0":
             simfunc = self.simulate_tdgp_f0
         else:
             simfunc = self.simulate_tdgp_f1

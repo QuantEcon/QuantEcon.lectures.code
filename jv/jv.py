@@ -1,26 +1,9 @@
-"""
-
-Authors: Thomas Sargent, John Stachurski
-
-"""
-from textwrap import dedent
-import sys
 import numpy as np
 from scipy.integrate import fixed_quad as integrate
 from scipy.optimize import minimize
 import scipy.stats as stats
 
-# The SLSQP method is faster and more stable, but it didn't give the
-# correct answer in python 3. So, if we are in python 2, use SLSQP, otherwise
-# use the only other option (to handle constraints): COBYLA
-if sys.version_info[0] == 2:
-    method = "SLSQP"
-else:
-    # python 3
-    method = "COBYLA"
-
 ϵ = 1e-4  # A small number, used in the optimization routine
-
 
 class JvWorker:
     r"""
@@ -90,22 +73,6 @@ class JvWorker:
         grid_max = max(A**(1 / (1 - α)), self.F.ppf(1 - ϵ))
         self.x_grid = np.linspace(ϵ, grid_max, grid_size)
 
-    def __repr__(self):
-        m = "JvWorker(A={a:g}, α={al:g}, β={b:g}, grid_size={gs})"
-        return m.format(a=self.A, al=self.α, b=self.β,
-                        gs=self.x_grid.size)
-
-    def __str__(self):
-        m = """\
-        Jovanovic worker (on the job search):
-          - A (parameter in human capital transition function)     : {a:g}
-          - α (parameter in human capital transition function)     : {al:g}
-          - β (parameter in human capital transition function)     : {b:g}
-          - grid_size (number of grid points for human capital)    : {gs}
-          - grid_max (maximum of grid for human capital)           : {gm:g}
-        """
-        return dedent(m.format(a=self.A, al=self.α, b=self.β,
-                               gs=self.x_grid.size, gm=self.x_grid.max()))
 
     def bellman_operator(self, V, brute_force=False, return_policies=False):
         """
@@ -167,8 +134,8 @@ class JvWorker:
             # === either use SciPy solver === #
             if not brute_force:
                 max_s, max_ϕ = minimize(w, guess, constraints=constraints,
-                                          options={"disp": 0},
-                                          method=method)["x"]
+                                        options={"disp": 0},
+                                        method="COBYLA")["x"]
                 max_val = -w((max_s, max_ϕ))
 
             # === or search on a grid === #

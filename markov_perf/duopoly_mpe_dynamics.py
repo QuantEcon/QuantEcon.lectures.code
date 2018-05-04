@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
-AF = A - B1.dot(F1) - B2.dot(F2)
+AF = A - B1 @ F1 - B2 @ F2
 n = 20
 x = np.empty((3, n))
 x[:, 0] = 1, 1, 1
 for t in range(n-1):
-    x[:, t+1] = np.dot(AF, x[:, t])
+    x[:, t+1] = AF @ x[:, t]
 q1 = x[1, :]
 q2 = x[2, :]
 q = q1 + q2       # Total output, MPE

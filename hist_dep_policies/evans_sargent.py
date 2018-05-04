@@ -69,17 +69,17 @@ def computeG(A0, A1, d, Q0, τ0, β, μ):
     P21 = P[3, :3]
     P22 = P[3, 3]
     z0 = np.array([1, Q0, τ0]).reshape(-1, 1)
-    u0 = -P22**(-1) * P21.dot(z0)
+    u0 = -P22**(-1) * P21 @ z0
     y0 = np.vstack([z0, u0])
 
     # Define A_F and S matricies
-    AF = A - B.dot(F)
-    S = np.array([0, 1, 0, 0]).reshape(-1, 1).dot(np.array([[0, 0, 1, 0]]))
+    AF = A - B @ F
+    S = np.array([0, 1, 0, 0]).reshape(-1, 1) @ np.array([[0, 0, 1, 0]])
 
     # Solves equation (25)
-    temp = β * AF.T.dot(S).dot(AF)
+    temp = β * AF.T @ S @ AF
     Ω = solve_discrete_lyapunov(np.sqrt(β) * AF.T, temp)
-    T0 = y0.T.dot(Ω).dot(y0)
+    T0 = y0.T @ Ω @ y0
 
     return T0, A, B, F, P
 
@@ -111,7 +111,7 @@ G0, A, B, F, P = gg(μ0)
 P21 = P[3, :3]
 P22 = P[3, 3]
 z0 = np.array([1, Q0, τ0]).reshape(-1, 1)
-u0 = -P22**(-1) * P21.dot(z0)
+u0 = -P22**(-1) * P21 @ z0
 
 
 # == Initialize vectors == #
@@ -134,7 +134,7 @@ y[:, 0] = np.vstack([z0, u0]).flatten()
 
 for t in range(1, T):
     # Iterate government policy
-    y[:, t] = (A-B.dot(F)).dot(y[:, t-1])
+    y[:, t] = (A - B @ F) @ y[:, t-1]
 
     # update G
     G[t] = (G[t-1] - β * y[1, t] * y[2, t]) / β
@@ -153,9 +153,9 @@ for t in range(1, T):
     # Compute alternative decisions
     P21temp = Ptemp[3, :3]
     P22temp = P[3, 3]
-    uhat[t] = -P22temp**(-1) * P21temp.dot(y[:3, t])
+    uhat[t] = -P22temp**(-1) * P21temp @ y[:3, t]
 
-    yhat = (Atemp-Btemp.dot(Ftemp)).dot(np.hstack([y[0:3, t-1], uhat[t-1]]))
+    yhat = (Atemp - Btemp @ Ftemp) @ np.hstack([y[0:3, t-1], uhat[t-1]])
     τhat[t] = yhat[3]
     τhatdif[t-1] = τhat[t] - y[3, t]
     uhatdif[t] = uhat[t] - y[3, t]

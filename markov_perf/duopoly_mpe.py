@@ -30,11 +30,12 @@ Q1 = Q2 = γ
 S1 = S2 = W1 = W2 = M1 = M2 = 0.0
 
 # == Solve using QE's nnash function == #
-F1, F2, P1, P2 = qe.nnash(A, B1, B2, R1, R2, Q1, Q2, S1, S2, W1, W2, M1, M2,
-                          beta=β)
+F1, F2, P1, P2 = qe.nnash(A, B1, B2, R1, R2, Q1, 
+                          Q2, S1, S2, W1, W2, M1, 
+                          M2, beta=β)
 
 # == Display policies == #
 print("Computed policies for firm 1 and firm 2:\n")
-print("F1 = {}".format(F1))
-print("F2 = {}".format(F2))
+print(f"F1 = {F1}")
+print(f"F2 = {F2}")
 print("\n")

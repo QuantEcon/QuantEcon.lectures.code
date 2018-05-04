@@ -29,7 +29,7 @@ L = 0.175
 
 for ax, truefalse, title in zip(axes, (True, False), titles):
     b, c = time_path(permanent=truefalse)
-    ax.set_title(str('Impulse reponse: ' + title + ' income shock'))
+    ax.set_title(f'Impulse reponse: {title} income shock')
     ax.plot(list(range(T+1)), c, 'g-', label="consumption", **p_args)
     ax.plot(list(range(T+1)), b, 'b-', label="debt", **p_args)
     ax.plot((S, S), (-L, L), 'k-', lw=0.5)
@@ -37,7 +37,6 @@ for ax, truefalse, title in zip(axes, (True, False), titles):
     ax.set(xlabel=r'Time', ylim=(-L, L))
 
 axes[0].legend(loc='lower right')
-
 
 plt.tight_layout()
 plt.show()

@@ -29,11 +29,10 @@ class RecursiveAllocation:
 
         def incomplete_allocation(μ_, s_):
             c, n, x, V = PP.time1_value(μ_)
-            return c, n, π[s_].dot(x), π[s_].dot(V)
+            return c, n, π[s_] @ x, π[s_] @ V
         cf, nf, xgrid, Vf, xprimef = [], [], [], [], []
         for s_ in range(S):
-            c, n, x, V = zip(
-                *map(lambda μ: incomplete_allocation(μ, s_), μgrid0))
+            c, n, x, V = zip(*map(lambda μ: incomplete_allocation(μ, s_), μgrid0))
             c, n = np.vstack(c).T, np.vstack(n).T
             x, V = np.hstack(x), np.hstack(V)
             xprimes = np.vstack([x] * S)
@@ -133,7 +132,7 @@ class RecursiveAllocation:
 
             Τ = self.Τ(c, n)[s]
             u_c = Uc(c, n)
-            Eu_c = π[s_, :].dot(u_c)
+            Eu_c = π[s_, :] @ u_c
 
             μHist[t] = self.Vf[s](xprime[s])
 
@@ -161,8 +160,10 @@ class BellmanEquation:
 
         for s_ in range(self.S):
             for x in xgrid:
-                self.z0[x, s_] = np.hstack(
-                    [cf[s_, :](x), nf[s_, :](x), xprimef[s_, :](x), np.zeros(self.S)])
+                self.z0[x, s_] = np.hstack([cf[s_, :](x),
+                                            nf[s_, :](x),
+                                            xprimef[s_, :](x),
+                                            np.zeros(self.S)])
 
         self.find_first_best()
 
@@ -176,9 +177,8 @@ class BellmanEquation:
         def res(z):
             c = z[:S]
             n = z[S:]
-            return np.hstack(
-                [Θ * Uc(c, n) + Un(c, n), Θ * n - c - G]
-            )
+            return np.hstack([Θ * Uc(c, n) + Un(c, n), Θ * n - c - G])
+
         res = root(res, 0.5 * np.ones(2 * S))
         if not res.success:
             raise Exception('Could not find first best')
@@ -193,7 +193,7 @@ class BellmanEquation:
         self.zFB = {}
         for s in range(S):
             self.zFB[s] = np.hstack(
-                [self.cFB[s], self.nFB[s], self.π[s].dot(self.xFB), 0.])
+                [self.cFB[s], self.nFB[s], self.π[s] @ self.xFB, 0.])
 
     def __call__(self, Vf):
         '''
@@ -220,16 +220,15 @@ class BellmanEquation:
             for s in range(S):
                 Vprime[s] = Vf[s](xprime[s])
 
-            return -π[s_].dot(U(c, n) + β * Vprime)
+            return -π[s_] @ (U(c, n) + β * Vprime)
 
         def cons(z):
             c, n, xprime, T = z[:S], z[S:2 * S], z[2 * S:3 * S], z[3 * S:]
             u_c = Uc(c, n)
-            Eu_c = π[s_].dot(u_c)
+            Eu_c = π[s_] @ u_c
             return np.hstack([
                 x * u_c / Eu_c - u_c * (c - T) - Un(c, n) * n - β * xprime,
-                Θ * n - c - G
-            ])
+                Θ * n - c - G])
 
         if model.transfers:
             bounds = [(0., 100)] * S + [(0., 100)] * S + \

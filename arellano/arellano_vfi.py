@@ -92,7 +92,7 @@ class Arellano_Economy:
 
             # Compute expectations for this iteration
             Vs = self.V, self.Vd, self.Vc
-            EV, EVd, EVc = (np.dot(self.Py, v) for v in Vs)
+            EV, EVd, EVc = (self.Py @ v for v in Vs)
 
             # Run inner loop to update value functions Vc and Vd.
             # Note that Vc and Vd are updated in place.  Other objects
@@ -105,7 +105,7 @@ class Arellano_Economy:
             # Update prices
             Vd_compat = np.repeat(self.Vd, self.nB).reshape(self.ny, self.nB)
             default_states = Vd_compat > self.Vc
-            self.default_prob[:, :] = np.dot(self.Py, default_states)
+            self.default_prob[:, :] = self.Py @ default_states
             self.Q[:, :] = (1 - self.default_prob)/(1 + self.r)
 
             # Update main value function and distance
@@ -127,7 +127,7 @@ class Arellano_Economy:
 
         # Allocate memory
         self.next_B_index = np.empty((self.ny, self.nB))
-        EV = np.dot(self.Py, self.V)
+        EV = self.Py @ self.V
 
         _compute_savings_policy(self.ygrid, self.Bgrid, self.Q, EV,
                                 self.γ, self.β, self.next_B_index)
