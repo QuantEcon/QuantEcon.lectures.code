@@ -279,7 +279,7 @@ class ChangModel:
 
         elapsed = time.time() - t
 
-        print(f'Convergence achieved after {iters} iterations and {elapsed:.2)} seconds')
+        print(f'Convergence achieved after {iters} iterations and {elapsed:.2} seconds')
 
     def solve_bellman(self, θ_min, θ_max, order, disp=False, tol=1e-7, maxiters=100):
         """
