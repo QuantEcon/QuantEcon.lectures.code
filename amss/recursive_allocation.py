@@ -1,13 +1,14 @@
 from scipy.optimize import fmin_slsqp
 
 
-class RecursiveAllocation:
+class RecursiveAllocationAMSS:
 
-    def __init__(self, model, μgrid):
+    def __init__(self, model, μgrid, tol_diff=1e-4, tol=1e-4):
 
         self.β, self.π, self.G = model.β, model.π, model.G
         self.mc, self.S = MarkovChain(self.π), len(model.π)  # Number of states
         self.Θ, self.model, self.μgrid = model.Θ, model, μgrid
+        self.tol_diff, self.tol = tol_diff, tol
 
         # Find the first best allocation
         self.solve_time1_bellman()
@@ -52,9 +53,9 @@ class RecursiveAllocation:
         self.xgrid = xgrid
 
         # Now iterate on Bellman equation
-        T = BellmanEquation(model, xgrid, policies)
+        T = BellmanEquation(model, xgrid, policies, tol=self.tol)
         diff = 1
-        while diff > 1e-4:
+        while diff > self.tol_diff:
             PF = T(Vf)
 
             Vfnew, policies = self.fit_policy_function(PF)
@@ -146,11 +147,12 @@ class BellmanEquation:
     Bellman equation for the continuation of the Lucas-Stokey Problem
     '''
 
-    def __init__(self, model, xgrid, policies0):
+    def __init__(self, model, xgrid, policies0, tol, maxiter=1000):
 
         self.β, self.π, self.G = model.β, model.π, model.G
         self.S = len(model.π)  # Number of states
-        self.Θ, self.model = model.Θ, model
+        self.Θ, self.model, self.tol = model.Θ, model, tol
+        self.maxiter = maxiter
 
         self.xbar = [min(xgrid), max(xgrid)]
         self.time_0 = False
@@ -236,8 +238,10 @@ class BellmanEquation:
         else:
             bounds = [(0., 100)] * S + [(0., 100)] * S + \
                 [self.xbar] * S + [(0., 0.)] * S
-        out, fx, _, imode, smode = fmin_slsqp(objf, self.z0[x, s_], f_eqcons=cons,
-                                              bounds=bounds, full_output=True, iprint=0)
+        out, fx, _, imode, smode = fmin_slsqp(objf, self.z0[x, s_],
+                                              f_eqcons=cons, bounds=bounds,
+                                              full_output=True, iprint=0,
+                                              acc=self.tol, iter=self.maxiter)
 
         if imode > 0:
             raise Exception(smode)
@@ -261,8 +265,7 @@ class BellmanEquation:
             c, n, xprime, T = z
             return np.hstack([
                 -Uc(c, n) * (c - B_ - T) - Un(c, n) * n - β * xprime,
-                (Θ * n - c - G)[s0]
-            ])
+                (Θ * n - c - G)[s0]])
 
         if model.transfers:
             bounds = [(0., 100), (0., 100), self.xbar, (0., 100.)]
